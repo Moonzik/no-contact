@@ -1,0 +1,173 @@
+<view class="yz">
+
+  <!-- view mode: 未启用 -->
+  <block wx:if="{{mode === 'view' && !shadowName}}">
+    <view class="card view-intro">
+      <view class="art">
+        <image class="ava-grey" src="{{agentImg}}" mode="aspectFill" />
+      </view>
+      <view class="h">影子</view>
+      <view class="en">The Shadow</view>
+      <view class="p">
+        实在忍不住想联系的时候，把想说的话说给「影子」——一个根据你们的聊天记录（可从微信直接导入）、模仿ta语气生成的 AI。说完，就放下手机。
+      </view>
+      <view class="ul">
+        <view class="li">单次对话最长 20 分钟，到时自动结束</view>
+        <view class="li">每天最多 3 次，不鼓励常来</view>
+        <view class="li">影子不会说「我也想你」「我们复合吧」</view>
+      </view>
+      <view class="warn">
+        这个功能默认关闭，因为它可能延长戒断期。它是「实在忍不住」时的缓冲垫，不是替代品。用完记得去找小白说说话。
+      </view>
+      <button class="btn btn-primary" bindtap="onStart">我理解了，开启影子</button>
+    </view>
+  </block>
+
+  <!-- view mode: 已启用 -->
+  <block wx:elif="{{mode === 'view' && shadowName}}">
+    <view class="card">
+      <view class="head-row">
+        <image class="ava-grey ava-56" src="{{agentImg}}" mode="aspectFill" />
+        <view>
+          <view class="shadow-name">{{shadowName}} · 影子</view>
+          <view class="shadow-sub">今日已用 {{used}} / {{maxDay}} 次</view>
+        </view>
+      </view>
+      <view wx:if="{{profileText}}">
+        <view class="divider"></view>
+        <view class="profile">{{profileText}}</view>
+      </view>
+      <button class="btn btn-primary" style="margin-top:36rpx;" bindtap="onEnterChat"
+              disabled="{{!canEnter}}">开始一次对话</button>
+      <view wx:if="{{!canEnter}}" class="limit-tip">今天影子时间用完了。想说的话，留给小白吧。</view>
+      <button class="btn btn-ghost" style="margin-top:20rpx;" bindtap="onResetShadow">重新设置 / 关闭影子</button>
+    </view>
+  </block>
+
+  <!-- setup mode -->
+  <block wx:elif="{{mode === 'setup'}}">
+    <view class="card">
+      <view class="h2">设置影子</view>
+      <view class="p">
+        把和ta的聊天记录给我：可以从微信导出的文件直接导入，也可以复制粘贴（每行一条消息）。我会分析ta的说话习惯，生成一个「影子」。它只存在于你的手机里。
+      </view>
+      <view class="field">
+        <label class="field-label">ta 的代号</label>
+        <input class="field-input" value="{{shName}}" placeholder="怎么称呼ta"
+               placeholder-style="color:#b8b1a4" bindinput="onNameInput" />
+      </view>
+      <view class="field">
+        <label class="field-label">聊天记录</label>
+        <view class="file-row">
+          <button class="btn-ghost file-btn" bindtap="onPickFile">从微信导入</button>
+          <text class="file-info">{{shFile || '支持 txt / html，不会上传到任何地方'}}</text>
+        </view>
+        <textarea
+          class="field-textarea"
+          value="{{shLog}}"
+          rows="7"
+          placeholder="从微信导入，或把聊天记录复制进来，每行一条…"
+          placeholder-style="color:#b8b1a4"
+          bindinput="onLogInput"
+        ></textarea>
+        <block wx:if="{{shSpeakers.length > 0}}">
+          <view class="speakers">文件里检测到 {{shSpeakers.length - 1}} 位说话人，分析谁的消息？</view>
+          <view class="speaker-row">
+            <view class="sp {{item === shSel ? 'sp-on' : ''}}"
+                  wx:for="{{shSpeakers}}" wx:key="*this"
+                  data-sp="{{item}}" bindtap="onPickSpeaker">{{item}}</view>
+          </view>
+        </block>
+      </view>
+      <button class="btn btn-primary" bindtap="onGoAnalyze">开始分析</button>
+      <button class="btn btn-ghost" style="margin-top:20rpx;" bindtap="onCancelSetup">先不了</button>
+    </view>
+  </block>
+
+  <!-- analyze mode -->
+  <block wx:elif="{{mode === 'analyze'}}">
+    <view class="card">
+      <view class="spin"></view>
+      <view class="step">{{analyzeSteps[analyzeStep]}}</view>
+    </view>
+  </block>
+
+  <!-- chat mode -->
+  <block wx:elif="{{mode === 'chat'}}">
+    <view class="chat-head">
+      <image class="ava-grey" src="{{agentImg}}" />
+      <view>
+        <view class="n">{{shadowName}}</view>
+        <view class="s">AI 影子 · 非真人</view>
+      </view>
+      <view class="right">
+        本次剩余 <b>{{remain}}</b>
+        <view>今日还剩 {{leftToday}} 次</view>
+      </view>
+    </view>
+
+    <scroll-view class="msgs" scroll-y="true">
+      <block wx:for="{{msgs}}" wx:key="t" wx:for-item="m">
+        <view class="row sys" wx:if="{{m.role === 'sys'}}">
+          <view class="sys-text">{{m.text}}</view>
+        </view>
+        <view class="row ai" wx:elif="{{m.role === 'ai-temp'}}">
+          <image class="ava-grey" src="{{m.avatar}}" />
+          <view class="bubble typing"><view></view><view></view><view></view></view>
+        </view>
+        <view class="row ai" wx:elif="{{m.role === 'ai'}}">
+          <image class="ava-grey" src="{{m.avatar}}" />
+          <view class="col">
+            <view class="bubble">{{m.text}}</view>
+            <view class="tip" wx:if="{{m.tip}}">{{m.tip}}</view>
+          </view>
+        </view>
+        <view class="row me" wx:else>
+          <view class="bubble me-bubble">{{m.text}}</view>
+          <view class="ava me-ava">我</view>
+        </view>
+      </block>
+    </scroll-view>
+
+    <view class="composer">
+      <view class="input-row">
+        <textarea
+          class="ta"
+          value="{{text}}"
+          placeholder="想说的、没说完的，都可以…"
+          placeholder-style="color:#b8b1a4"
+          auto-height
+          maxlength="-1"
+          bindinput="onChatInput"
+          bindconfirm="onChatSend"
+        ></textarea>
+        <button class="send" bindtap="onChatSend" disabled="{{!text}}">
+          <view class="send-arrow"></view>
+        </button>
+      </view>
+    </view>
+  </block>
+
+  <!-- session-end -->
+  <view class="mask" wx:if="{{sessionEnd}}">
+    <view class="modal-session">
+      <view class="h">今天的影子时间结束了</view>
+      <view class="p">
+        深呼吸。刚才和你说话的，是根据聊天记录生成的 AI 影子——<b>不是真的 ta</b>。
+      </view>
+      <view class="breath">跟着圆的节奏<br/>吸气 · 呼气</view>
+      <button class="btn btn-accent" bindtap="onSessionEndToGuardian">把刚才的感受，说给小白听</button>
+      <button class="btn btn-ghost" style="margin-top:20rpx;border:none;" bindtap="onSessionEndChat">先静一静</button>
+    </view>
+  </view>
+
+  <!-- crisis -->
+  <view class="mask" wx:if="{{crisis}}" bindtap="onCloseCrisis">
+    <view class="modal-crisis" catchtap="noop">
+      <view class="h">请让真实的人现在陪着你</view>
+      <view class="crisis-body"><text user-select="true">{{crisisText}}</text></view>
+      <button class="btn btn-primary" bindtap="onCloseCrisis">我知道了</button>
+    </view>
+  </view>
+
+</view>

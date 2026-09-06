@@ -1,0 +1,54 @@
+<view class="ob">
+
+  <!-- Step 0: 欢迎 -->
+  <block wx:if="{{step === 0}}">
+    <view class="ob-logo">
+      <image src="{{appIcon}}" mode="aspectFill" />
+    </view>
+    <view class="ob-title">留白</view>
+    <view class="ob-en">Whitespace</view>
+    <view class="ob-p">
+      把想念留白，把自己找回。戒断期的每一夜，
+      <br />都有一个安静的存在陪你。
+    </view>
+    <button class="btn btn-primary ob-btn" bindtap="onGoStart">开始</button>
+  </block>
+
+  <!-- Step 1: 立起点 -->
+  <block wx:elif="{{step === 1}}">
+    <view class="ob-title ob-title-sm">先立一个起点</view>
+    <view class="ob-p">你决定不再联系，是从哪一天开始的？</view>
+    <view class="field">
+      <label class="field-label">戒断开始日</label>
+      <picker mode="date" value="{{startDate}}" bindchange="onPickDate" class="field-picker">
+        <view class="field-input">{{startDate}}</view>
+      </picker>
+    </view>
+    <view class="field">
+      <label class="field-label">ta 的代号（可选，只存在你的手机里）</label>
+      <input
+        class="field-input"
+        value="{{exName}}"
+        placeholder="比如：H、那个人、不用名字"
+        placeholder-style="color:#b8b1a4"
+        bindinput="onInputEx"
+      />
+    </view>
+    <button class="btn btn-primary ob-btn" bindtap="onConfirmStart">好，就从这里</button>
+  </block>
+
+  <!-- Step 2: 小白介绍 -->
+  <block wx:else>
+    <view class="ob-avatar">
+      <image src="{{agentImg}}" mode="aspectFill" />
+    </view>
+    <view class="ob-title">我是小白</view>
+    <view class="ob-p">
+      一只蜷成一团的黑狐狸。
+      <br />你不用对我坚强，也不用解释什么。
+      <br />想说话的时候来找我，不想说话的时候，我就在。
+    </view>
+    <button class="btn btn-primary ob-btn" bindtap="onEnter">进入留白</button>
+  </block>
+
+</view>

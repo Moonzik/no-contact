@@ -1,0 +1,222 @@
+/* pages/me/me.wxss */
+
+.me {
+  padding: 100rpx 44rpx calc(60rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  min-height: 100vh;
+  position: relative;
+  padding-top: calc(100rpx + env(safe-area-inset-top));
+}
+
+.me-gear {
+  position: fixed;
+  top: calc(32rpx + env(safe-area-inset-top));
+  right: 32rpx;
+  width: 68rpx;
+  height: 68rpx;
+  border-radius: 50%;
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+.gear-icon {
+  width: 32rpx;
+  height: 32rpx;
+  border: 4rpx solid var(--sub);
+  border-radius: 50%;
+  position: relative;
+}
+.gear-icon::before,
+.gear-icon::after {
+  content: '';
+  position: absolute;
+  background: var(--card);
+  border: 4rpx solid var(--sub);
+}
+.gear-icon::before {
+  width: 16rpx; height: 16rpx;
+  border-radius: 50%;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: transparent;
+}
+
+.me-head {
+  display: flex;
+  align-items: center;
+  gap: 28rpx;
+  padding: 8rpx 8rpx 32rpx;
+}
+.me-ava {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background: var(--card);
+  border: 3rpx solid var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--serif);
+  font-size: 44rpx;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+.me-id .name {
+  font-family: var(--serif);
+  font-size: 36rpx;
+  letter-spacing: 8rpx;
+}
+.me-id .sub {
+  font-size: 24rpx;
+  color: var(--faint);
+  margin-top: 8rpx;
+  letter-spacing: 4rpx;
+}
+
+.me-section { margin-bottom: 36rpx; }
+.sec-cap {
+  font-size: 23rpx;
+  color: var(--faint);
+  letter-spacing: 6rpx;
+  margin: 0 8rpx 18rpx;
+}
+
+.me-card {
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  border-radius: 32rpx;
+  padding: 6rpx 32rpx;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24rpx;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid var(--line);
+  min-height: 100rpx;
+}
+.row:last-child { border-bottom: none; }
+.row .l { font-size: 28rpx; }
+.row .l small {
+  display: block;
+  font-size: 23rpx;
+  color: var(--faint);
+  margin-top: 4rpx;
+  letter-spacing: 1rpx;
+}
+.me-input {
+  border: none;
+  background: transparent;
+  text-align: right;
+  outline: none;
+  color: var(--accent);
+  font-size: 28rpx;
+  max-width: 55%;
+}
+.picker-r {
+  border: none;
+  background: transparent;
+}
+.picker-v {
+  color: var(--accent);
+  font-size: 28rpx;
+  padding: 4rpx 0;
+}
+
+.btn-ghost-danger {
+  color: var(--danger) !important;
+  border-color: #e8cfc5 !important;
+}
+
+.persona-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+.pg {
+  width: calc(50% - 8rpx);
+  box-sizing: border-box;
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  border-radius: 28rpx;
+  padding: 22rpx 22rpx;
+  text-align: left;
+}
+.pg-on {
+  border-color: var(--ink);
+  background: #fdfaf3;
+  box-shadow: inset 0 0 0 2rpx var(--ink);
+}
+.pg-b {
+  display: block;
+  font-family: var(--serif);
+  letter-spacing: 4rpx;
+  font-size: 28rpx;
+}
+.pg-s {
+  font-size: 22rpx;
+  color: var(--sub);
+  display: block;
+  margin-top: 6rpx;
+  line-height: 1.5;
+}
+
+.me-foot {
+  text-align: center;
+  color: var(--faint);
+  font-size: 21rpx;
+  letter-spacing: 4rpx;
+  margin-top: 48rpx;
+}
+
+/* 弹层 */
+.mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(38, 35, 30, 0.45);
+  z-index: 80;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-gear {
+  width: 100%;
+  background: var(--bg);
+  border-radius: 32rpx 32rpx 0 0;
+  padding: 48rpx 48rpx calc(56rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(60rpx); opacity: 0.4; }
+  to { transform: none; opacity: 1; }
+}
+.modal-gear .h {
+  font-family: var(--serif);
+  font-size: 36rpx;
+  letter-spacing: 6rpx;
+  margin-bottom: 28rpx;
+}
+.about {
+  font-size: 25rpx;
+  color: var(--sub);
+  line-height: 1.9;
+  margin: 12rpx 0 28rpx;
+}
+.crisis {
+  background: #fbf3ee;
+  border: 1rpx solid #ead8cb;
+  border-radius: 24rpx;
+  padding: 28rpx 32rpx;
+  font-size: 25rpx;
+  color: #9a5d3a;
+  line-height: 1.85;
+  margin-top: 12rpx;
+}
+.crisis b { color: #7a3a1e; }

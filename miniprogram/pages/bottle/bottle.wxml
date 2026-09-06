@@ -1,0 +1,31 @@
+<view class="bottle">
+  <view class="bottle-intro">
+    <view class="bottle-h">留白瓶</view>
+    <view class="bottle-sub">想说没说的话，都可以放进来——它们永远不会被发送。</view>
+  </view>
+
+  <view class="bottle-new">
+    <textarea
+      class="field-textarea"
+      value="{{text}}"
+      placeholder="想对ta说、但不会发出去的话…"
+      placeholder-style="color:#b8b1a4"
+      auto-height
+      maxlength="-1"
+      bindinput="onInput"
+    ></textarea>
+    <button class="btn btn-primary" bindtap="onSave" style="margin-top:24rpx;">存进留白瓶</button>
+  </view>
+
+  <view class="bottle-list">
+    <block wx:if="{{items.length === 0}}">
+      <view class="bottle-empty">瓶子里还是空的。</view>
+    </block>
+    <block wx:else>
+      <view class="bottle-item" wx:for="{{items}}" wx:key="t">
+        <view class="bi-t">{{item.t}}</view>
+        <view class="bi-text">{{item.text}}</view>
+      </view>
+    </block>
+  </view>
+</view>

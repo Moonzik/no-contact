@@ -1,0 +1,119 @@
+/* app.wxss — 全局样式 */
+
+page {
+  --bg: #faf9f4;
+  --card: #ffffff;
+  --ink: #26231e;
+  --sub: #8f887b;
+  --faint: #b8b1a4;
+  --line: #e9e4d8;
+  --accent: #b5623c;
+  --accent-soft: #f5ece6;
+  --danger: #a5432e;
+  --serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  --sans: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 31rpx; /* rpx: 750rpx = 屏幕宽度 */
+  line-height: 1.7;
+}
+
+/* 通用工具类 */
+.serif { font-family: var(--serif); }
+.card {
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  border-radius: 32rpx;
+  padding: 40rpx;
+  margin-bottom: 24rpx;
+}
+.btn {
+  display: block;
+  width: 100%;
+  padding: 28rpx;
+  border-radius: 28rpx;
+  text-align: center;
+  font-size: 32rpx;
+  letter-spacing: 4rpx;
+  box-sizing: border-box;
+  border: none;
+}
+.btn-primary { background: var(--ink); color: #faf9f4; }
+.btn-accent { background: var(--accent); color: #fff; }
+.btn-ghost {
+  border: 1rpx solid var(--line);
+  color: var(--sub);
+  font-size: 28rpx;
+  letter-spacing: 2rpx;
+  padding: 20rpx;
+  border-radius: 24rpx;
+  background: transparent;
+}
+.btn:disabled {
+  background: transparent !important;
+  color: var(--sub);
+  border: 1.5px dashed var(--line);
+}
+.link-sub {
+  color: var(--faint);
+  font-size: 25rpx;
+  text-decoration: underline;
+  text-underline-offset: 6rpx;
+}
+.divider {
+  height: 1rpx;
+  background: var(--line);
+  margin: 36rpx 0;
+}
+.tag {
+  display: inline-block;
+  font-size: 22rpx;
+  color: var(--sub);
+  border: 1rpx solid var(--line);
+  border-radius: 99rpx;
+  padding: 2rpx 20rpx;
+  letter-spacing: 2rpx;
+}
+
+/* 字段 */
+.field { margin: 32rpx 0; }
+.field-label {
+  display: block;
+  font-size: 26rpx;
+  color: var(--sub);
+  margin-bottom: 14rpx;
+  letter-spacing: 2rpx;
+}
+.field-input,
+.field-textarea {
+  width: 100%;
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  border-radius: 24rpx;
+  padding: 24rpx 28rpx;
+  box-sizing: border-box;
+  font-size: 30rpx;
+}
+.field-textarea { resize: none; min-height: 100rpx; }
+
+/* 页面进入动画 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12rpx); }
+  to   { opacity: 1; transform: none; }
+}
+.page { animation: fadeIn 0.28s ease; }
+
+/* 危机卡 */
+.crisis-card {
+  background: #fdf3f0;
+  border: 1rpx solid #e8cfc5;
+  border-radius: 28rpx;
+  padding: 28rpx 32rpx;
+  font-size: 27rpx;
+  color: var(--danger);
+  line-height: 1.85;
+  margin: 16rpx 0;
+}
+.crisis-card b { letter-spacing: 2rpx; }

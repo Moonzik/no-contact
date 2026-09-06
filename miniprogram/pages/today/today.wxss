@@ -1,0 +1,203 @@
+/* pages/today/today.wxss */
+
+.today {
+  padding: 32rpx 44rpx 200rpx;
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding-top: calc(32rpx + env(safe-area-inset-top));
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+.brand {
+  font-family: var(--serif);
+  font-size: 40rpx;
+  letter-spacing: 12rpx;
+  text-indent: 12rpx;
+}
+
+.day-hero {
+  text-align: center;
+  padding: 68rpx 0 52rpx;
+}
+.num {
+  display: block;
+}
+.num-text {
+  font-family: var(--serif);
+  font-size: 176rpx;
+  line-height: 1;
+  font-weight: 600;
+}
+.num-suffix {
+  font-size: 52rpx;
+  color: var(--sub);
+  font-weight: 400;
+}
+.cap {
+  color: var(--sub);
+  font-size: 26rpx;
+  letter-spacing: 6rpx;
+  margin-top: 20rpx;
+}
+.sub {
+  color: var(--faint);
+  font-size: 24rpx;
+  margin-top: 8rpx;
+  letter-spacing: 2rpx;
+}
+
+.fox-bar {
+  display: flex;
+  gap: 28rpx;
+  align-items: flex-start;
+  background: var(--accent-soft);
+}
+.fox-ava {
+  width: 104rpx;
+  height: 104rpx;
+  border-radius: 50%;
+  background: #fff;
+  border: 1rpx solid var(--line);
+}
+.fox-info {
+  flex: 1;
+}
+.fox-who {
+  font-size: 24rpx;
+  color: var(--accent);
+  letter-spacing: 2rpx;
+  margin-bottom: 4rpx;
+}
+.fox-say {
+  font-size: 28rpx;
+  color: var(--ink);
+  line-height: 1.65;
+}
+
+.check-card {
+  text-align: center;
+}
+.check-btn {
+  padding: 30rpx;
+  border-radius: 28rpx;
+  background: var(--ink);
+  color: #faf9f4;
+  font-size: 32rpx;
+  letter-spacing: 8rpx;
+  width: 100%;
+  border: none;
+  transition: 0.15s;
+}
+.check-btn.checked,
+.check-btn[disabled] {
+  background: transparent;
+  color: var(--sub);
+  border: 3rpx dashed var(--line);
+  letter-spacing: 4rpx;
+}
+.relapse {
+  margin-top: 28rpx;
+  display: inline-block;
+  color: var(--faint);
+  font-size: 25rpx;
+  text-decoration: underline;
+  text-underline-offset: 6rpx;
+}
+
+.card .cap {
+  font-size: 26rpx;
+  color: var(--sub);
+  letter-spacing: 4rpx;
+  margin-bottom: 24rpx;
+}
+
+.ms-track {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin: 0 8rpx 16rpx;
+}
+.ms-track::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 10rpx;
+  height: 2rpx;
+  background: var(--line);
+}
+.ms {
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  width: 68rpx;
+}
+.dot {
+  width: 22rpx;
+  height: 22rpx;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 3rpx solid var(--line);
+  margin: 0 auto 10rpx;
+}
+.ms.done .dot {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+.ms.next .dot {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.d {
+  font-size: 21rpx;
+  color: var(--faint);
+  line-height: 1.3;
+}
+.ms.next .d { color: var(--accent); }
+
+.ms-progress {
+  height: 6rpx;
+  background: var(--line);
+  border-radius: 4rpx;
+  overflow: hidden;
+  margin-top: 20rpx;
+}
+.ms-progress-i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.6s ease;
+}
+.ms-next {
+  font-size: 24rpx;
+  color: var(--sub);
+  margin-top: 16rpx;
+  text-align: center;
+}
+
+.acts {
+  display: flex;
+  gap: 24rpx;
+  margin-top: 32rpx;
+}
+.act {
+  flex: 1;
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  border-radius: 32rpx;
+  padding: 32rpx 28rpx;
+  text-align: center;
+}
+.act-t {
+  font-size: 28rpx;
+  margin-top: 12rpx;
+  letter-spacing: 2rpx;
+}
+.act-d {
+  font-size: 22rpx;
+  color: var(--faint);
+  margin-top: 6rpx;
+}

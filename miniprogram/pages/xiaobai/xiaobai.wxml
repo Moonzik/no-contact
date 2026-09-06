@@ -1,0 +1,91 @@
+<view class="xa">
+  <!-- 人格 -->
+  <scroll-view class="persona" scroll-x="true">
+    <view
+      class="pchip {{item.on ? 'on' : ''}}"
+      wx:for="{{personas}}"
+      wx:key="k"
+      data-k="{{item.k}}"
+      bindtap="onPickPersona"
+    >
+      <view class="pchip-b">{{item.name}}</view>
+      <view class="pchip-d">{{item.desc}}</view>
+    </view>
+  </scroll-view>
+
+  <!-- 聊天头 -->
+  <view class="chat-head">
+    <image class="ava" src="{{agentImg}}" mode="aspectFill" />
+    <view>
+      <view class="n">小白</view>
+      <view class="s">{{personaDesc}}</view>
+    </view>
+  </view>
+
+  <!-- 聊天消息流 -->
+  <scroll-view class="msgs" scroll-y="true" scroll-into-view="{{anchor}}" enhanced="true">
+    <block wx:for="{{msgs}}" wx:key="t" wx:for-item="m">
+      <!-- 系统提示 -->
+      <view class="row sys" wx:if="{{m.role === 'sys'}}">
+        <view class="sys-text">{{m.text}}</view>
+      </view>
+
+      <!-- 打字占位 -->
+      <view class="row ai" wx:elif="{{m.role === 'ai-temp'}}">
+        <image class="ava" src="{{m.avatar}}" />
+        <view class="bubble typing"><view></view><view></view><view></view></view>
+      </view>
+
+      <!-- ai 消息 -->
+      <view class="row ai" wx:elif="{{m.role === 'ai'}}">
+        <image class="ava" src="{{m.avatar}}" />
+        <view class="col">
+          <view class="bubble">{{m.text}}</view>
+          <view class="tip" wx:if="{{m.tip}}">{{m.tip}}</view>
+        </view>
+      </view>
+
+      <!-- 我 -->
+      <view class="row me" wx:else>
+        <view class="bubble me-bubble">{{m.text}}</view>
+        <view class="ava me-ava">我</view>
+      </view>
+    </block>
+
+    <view id="anchor" class="anchor"></view>
+  </scroll-view>
+
+  <!-- 危机弹层 -->
+  <view class="crisis-mask" wx:if="{{crisis}}" bindtap="onCloseCrisis">
+    <view class="crisis-modal" catchtap="noop">
+      <view class="crisis-title">请让真实的人现在陪着你</view>
+      <view class="crisis-body">
+        <text user-select="true">{{crisisText}}</text>
+      </view>
+      <button class="btn btn-primary" bindtap="onCloseCrisis">我知道了</button>
+    </view>
+  </view>
+
+  <!-- 快捷语 + 输入 -->
+  <view class="composer">
+    <scroll-view class="chips" scroll-x="true">
+      <view class="chip" wx:for="{{chips}}" wx:key="*this"
+        data-c="{{item}}" bindtap="onTapChip">{{item}}</view>
+    </scroll-view>
+    <view class="input-row">
+      <textarea
+        class="ta"
+        value="{{text}}"
+        placeholder="想说什么都可以…"
+        placeholder-style="color:#b8b1a4"
+        auto-height
+        maxlength="-1"
+        bindinput="onInput"
+        bindconfirm="onSend"
+      ></textarea>
+      <button class="send" bindtap="onSend" disabled="{{!text}}">
+        <view class="send-arrow"></view>
+      </button>
+    </view>
+  </view>
+</view>

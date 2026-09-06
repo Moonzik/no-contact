@@ -1,0 +1,6 @@
+2026/09/06-13:53:05.623 2024 Reusing MANIFEST C:\Users\XIAOMI\Desktop\no contact\no-contact\mvp\_test\_edge_profile\Default\EdgeCoupons/coupons_data.db/MANIFEST-000001
+2026/09/06-13:53:05.625 2024 Recovering log #7
+2026/09/06-13:53:05.626 2024 Reusing old log C:\Users\XIAOMI\Desktop\no contact\no-contact\mvp\_test\_edge_profile\Default\EdgeCoupons/coupons_data.db/000007.log 
+2026/09/06-13:53:05.689 314c Level-0 table #11: started
+2026/09/06-13:53:05.696 314c Level-0 table #11: 683376 bytes OK
+2026/09/06-13:53:05.699 314c Delete type=0 #7

@@ -1,0 +1,110 @@
+<view class="me">
+
+  <button class="me-gear" bindtap="onGear" aria-label="设置">
+    <view class="gear-icon"></view>
+  </button>
+
+  <view class="me-head">
+    <view class="me-ava">{{day}}</view>
+    <view class="me-id">
+      <view class="name">留白中</view>
+      <view class="sub">{{sub}}</view>
+    </view>
+  </view>
+
+  <!-- 性格 -->
+  <view class="me-section">
+    <view class="sec-cap">小白的性格</view>
+    <view class="persona-grid">
+      <view class="pg {{item.on ? 'pg-on' : ''}}"
+            wx:for="{{personas}}" wx:key="k"
+            data-k="{{item.k}}"
+            bindtap="onPickPersona">
+        <view class="pg-b">{{item.name}}</view>
+        <view class="pg-s">{{item.desc}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 戒断 -->
+  <view class="me-section">
+    <view class="sec-cap">戒断</view>
+    <view class="me-card">
+      <view class="row">
+        <view class="l">
+          戒断开始日
+          <small>计数从这天起</small>
+        </view>
+        <picker mode="date" value="{{startDate}}" bindchange="onPickDate" class="picker-r">
+          <view class="picker-v">{{startDate}}</view>
+        </picker>
+      </view>
+      <view class="row">
+        <view class="l">
+          ta 的代号
+          <small>只存在你的手机里</small>
+        </view>
+        <input class="me-input" value="{{exName}}" placeholder="可留空"
+               placeholder-style="color:#b8b1a4"
+               bindblur="onExInput" />
+      </view>
+    </view>
+  </view>
+
+  <!-- 数据 -->
+  <view class="me-section">
+    <view class="sec-cap">你的数据</view>
+    <view class="me-card">
+      <view class="row">
+        <view class="l">
+          导出数据
+          <small>复制为 JSON 备份</small>
+        </view>
+        <button class="btn-ghost" bindtap="onExport" style="margin:0;padding:16rpx 32rpx;font-size:28rpx;">导出</button>
+      </view>
+      <view class="row">
+        <view class="l">
+          清空所有数据
+          <small>不可恢复</small>
+        </view>
+        <button class="btn-ghost btn-ghost-danger" bindtap="onClear" style="margin:0;padding:16rpx 32rpx;font-size:28rpx;">清空</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="me-foot">留白 · Whitespace · v0.1</view>
+
+  <!-- gear 弹层 -->
+  <view class="mask" wx:if="{{showGear}}" bindtap="onCloseGear">
+    <view class="modal-gear" catchtap="noop">
+      <view class="h">关于留白</view>
+      <view class="about">
+        留白 Whitespace · v0.1 原型
+        <view>所有数据仅保存在本机，不上传服务器。</view>
+        <view>对话由本地规则引擎模拟，正式版将接入大模型。</view>
+        <view>本产品不替代专业心理治疗。</view>
+      </view>
+      <view class="crisis">
+        <b>遇到危机时，请让真实的人现在陪着你</b>
+        <view>· 全国 24 小时心理援助热线：400-161-9995</view>
+        <view>· 北京心理危机研究与干预中心：010-82951332</view>
+        <view>· 紧急情况请直接拨打 120 / 110</view>
+      </view>
+      <view class="me-foot" style="margin-top:36rpx;">愿你留一段白，给自己一段生根的时间</view>
+      <button class="btn btn-primary" style="margin-top:32rpx;" bindtap="onCloseGear">关闭</button>
+    </view>
+  </view>
+
+  <!-- 清空确认 -->
+  <view class="mask" wx:if="{{showClear}}" bindtap="onClearCancel">
+    <view class="modal-gear" catchtap="noop">
+      <view class="h">清空所有数据？</view>
+      <view class="about" style="color:var(--danger);">
+        戒断记录、对话、留白瓶、影子设置都会被删除，无法恢复。
+      </view>
+      <button class="btn btn-primary" style="background:var(--danger);margin-bottom:20rpx;" bindtap="onClearConfirm">确认清空</button>
+      <button class="btn btn-ghost" bindtap="onClearCancel">取消</button>
+    </view>
+  </view>
+
+</view>

@@ -1,0 +1,78 @@
+/* pages/onboard/onboard.wxss */
+
+.ob {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 80rpx 68rpx;
+  box-sizing: border-box;
+  text-align: center;
+}
+.ob-logo,
+.ob-avatar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40rpx;
+}
+.ob-logo image {
+  width: 192rpx;
+  height: 192rpx;
+  border-radius: 48rpx;
+  border: 1rpx solid var(--line);
+}
+.ob-avatar image {
+  width: 220rpx;
+  height: 220rpx;
+  border-radius: 50%;
+  border: 1rpx solid var(--line);
+  background: #fff;
+}
+.ob-title {
+  font-family: var(--serif);
+  font-size: 68rpx;
+  letter-spacing: 20rpx;
+  margin: 36rpx 0 20rpx;
+  text-indent: 20rpx;
+}
+.ob-title-sm {
+  font-size: 48rpx;
+  letter-spacing: 8rpx;
+  text-indent: 8rpx;
+  margin-bottom: 40rpx;
+  align-self: flex-start;
+}
+.ob-en {
+  font-size: 24rpx;
+  color: var(--faint);
+  letter-spacing: 10rpx;
+  text-transform: uppercase;
+  margin-bottom: 20rpx;
+}
+.ob-p {
+  color: var(--sub);
+  font-size: 29rpx;
+  margin: 28rpx 0 12rpx;
+  line-height: 1.8;
+}
+.ob-btn {
+  margin-top: 56rpx;
+  width: 100%;
+  max-width: 480rpx;
+}
+.field {
+  align-self: stretch;
+  margin: 32rpx 0;
+  text-align: left;
+}
+.field-picker {
+  display: block;
+}
+.field-input {
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  border-radius: 24rpx;
+  padding: 24rpx 28rpx;
+  font-size: 30rpx;
+}

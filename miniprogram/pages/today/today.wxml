@@ -1,0 +1,56 @@
+<view class="today">
+
+  <view class="head">
+    <view class="brand">留白</view>
+    <view class="tag">{{headTag}}</view>
+  </view>
+
+  <view class="day-hero">
+    <view class="num"><text class="num-text">{{day}}</text><text class="num-suffix"> 天</text></view>
+    <view class="cap">不联系 · 安住今天</view>
+    <view class="sub">{{subText}}</view>
+  </view>
+
+  <view class="fox-bar card">
+    <image class="fox-ava" src="{{agentImg}}" mode="aspectFill" />
+    <view class="fox-info">
+      <view class="fox-who">小白 · 守护者</view>
+      <view class="fox-say">{{foxSay}}</view>
+    </view>
+  </view>
+
+  <view class="check-card card">
+    <button
+      class="check-btn {{checked ? 'checked' : ''}}"
+      bindtap="onCheck"
+      disabled="{{checked}}"
+    >{{ checked ? '今 天 已 安 住' : '今 天 ， 我 没 有 联 系' }}</button>
+    <view class="relapse" bindtap="onRelapse">没忍住，联系了 →</view>
+  </view>
+
+  <view class="card">
+    <view class="cap">戒断刻度</view>
+    <view class="ms-track">
+      <view class="ms {{item.cls}}" wx:for="{{milestones}}" wx:key="d">
+        <view class="dot"></view>
+        <view class="d">{{item.d}}<br/>{{item.n}}</view>
+      </view>
+    </view>
+    <view class="ms-progress">
+      <view class="ms-progress-i" style="width:{{progressPct}}%;"></view>
+    </view>
+    <view class="ms-next">{{nextNote}}</view>
+  </view>
+
+  <view class="acts">
+    <view class="act" bindtap="onShowBottle">
+      <view class="act-t">留白瓶</view>
+      <view class="act-d">{{bottleCount > 0 ? '存着 ' + bottleCount + ' 句没寄出的话' : '还没有存下的话'}}</view>
+    </view>
+    <view class="act" bindtap="onChatXiaoBai">
+      <view class="act-t">找小白聊聊</view>
+      <view class="act-d">难过、想ta、睡不着</view>
+    </view>
+  </view>
+
+</view>

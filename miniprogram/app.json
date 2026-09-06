@@ -1,0 +1,43 @@
+{
+  "pages": [
+    "pages/onboard/onboard",
+    "pages/today/today",
+    "pages/xiaobai/xiaobai",
+    "pages/yingzi/yingzi",
+    "pages/me/me"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#faf9f4",
+    "navigationBarTitleText": "留白",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#faf9f4"
+  },
+  "tabBar": {
+    "color": "#b8b1a4",
+    "selectedColor": "#26231e",
+    "backgroundColor": "rgba(250,249,244,0.94)",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/today/today",
+        "text": "今天"
+      },
+      {
+        "pagePath": "pages/xiaobai/xiaobai",
+        "text": "小白"
+      },
+      {
+        "pagePath": "pages/yingzi/yingzi",
+        "text": "影子"
+      },
+      {
+        "pagePath": "pages/me/me",
+        "text": "我"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}
