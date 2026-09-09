@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="oGxN9SxA95e6yxBDpoYoMC">
+<head data-page-node-id="KbYS9CR4QSH2EirjK2m6Do">
+<meta charset="UTF-8" data-page-node-id="1f41MOLIt3CMLHtKAG70EP">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="WkmOqElaUz78D7yKSXA8X9">
+<title>断联日记 NOEX · 上线操作手册（照着点就行）</title>
+<style>
+  :root{
+    --bg:#faf7f2; --card:#ffffff; --ink:#2c2519; --sub:#6b6154; --faint:#9a9086;
+    --line:#e8e0d4; --accent:#a8622c; --accent-soft:#fdf1e6;
+    --ok:#4a7c59; --ok-soft:#eaf3ec; --warn:#b8860b; --warn-soft:#fdf6e3;
+    --danger:#b5462f; --danger-soft:#fbeceb; --code:#f4efe7;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    line-height:1.75; font-size:15px; padding:0 0 100px;
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:0 20px}
+
+  /* ---------- header ---------- */
+  header{
+    background:linear-gradient(160deg,#33291d 0%,#4a3c2a 100%);
+    color:#f7f1e6; padding:44px 0 38px; margin-bottom:32px;
+  }
+  header .wrap{max-width:860px}
+  h1{font-size:27px;font-weight:600;letter-spacing:1px;margin-bottom:8px}
+  .sub{color:#c9bda8;font-size:14px}
+  .meta{display:flex;gap:22px;margin-top:20px;flex-wrap:wrap;font-size:13px;color:#c9bda8}
+  .meta b{color:#f7f1e6;font-weight:600}
+
+  /* ---------- progress ---------- */
+  .prog{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:26px;
+    position:sticky;top:0;z-index:20;box-shadow:0 2px 12px rgba(60,45,25,.06)}
+  .prog-top{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--sub);margin-bottom:10px}
+  .prog-top b{color:var(--ink);font-size:15px}
+  .bar{height:7px;background:var(--code);border-radius:4px;overflow:hidden}
+  .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#c07a3e,#a8622c);border-radius:4px;transition:width .35s}
+  .resetbtn{background:none;border:1px solid var(--line);color:var(--faint);font-size:12px;
+    padding:3px 10px;border-radius:6px;cursor:pointer;font-family:inherit}
+  .resetbtn:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* ---------- steps ---------- */
+  .step{background:var(--card);border:1px solid var(--line);border-radius:16px;margin-bottom:20px;overflow:hidden}
+  .step-hd{display:flex;gap:14px;align-items:flex-start;padding:20px 22px 16px;cursor:pointer;user-select:none}
+  .step-hd:hover{background:#fdfbf8}
+  .num{flex:none;width:32px;height:32px;border-radius:50%;background:var(--accent-soft);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;border:1px solid #f0dcc4}
+  .step.done .num{background:var(--ok-soft);color:var(--ok);border-color:#cfe3d4}
+  .step-hd .t{flex:1}
+  .step-hd h2{font-size:18px;font-weight:600;margin-bottom:3px}
+  .step-hd .d{font-size:13px;color:var(--sub)}
+  .chk{flex:none;margin-top:4px;width:22px;height:22px;cursor:pointer;accent-color:var(--ok)}
+  .step-bd{padding:0 22px 22px 68px;display:none;border-top:1px solid var(--line);padding-top:18px}
+  .step.open .step-bd{display:block}
+
+  h3{font-size:15px;font-weight:600;margin:22px 0 10px;color:var(--ink);
+     padding-left:10px;border-left:3px solid var(--accent)}
+  h3:first-child{margin-top:0}
+  p{margin-bottom:10px;color:var(--sub)}
+  p strong,li strong{color:var(--ink);font-weight:600}
+  ol,ul{margin:0 0 12px 20px;color:var(--sub)}
+  li{margin-bottom:8px}
+  li::marker{color:var(--faint)}
+
+  .path{background:var(--code);border:1px solid var(--line);border-radius:8px;padding:10px 12px;
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:13px;color:var(--ink);
+    word-break:break-all;margin:8px 0 12px;display:flex;align-items:center;gap:10px}
+  .path span{flex:1}
+  .cp{flex:none;background:var(--accent-soft);border:1px solid #f0dcc4;color:var(--accent);
+    font-size:12px;padding:3px 10px;border-radius:6px;cursor:pointer;font-family:inherit;white-space:nowrap}
+  .cp:hover{background:var(--accent);color:#fff}
+
+  .box{border-radius:10px;padding:13px 15px;margin:12px 0;font-size:14px;line-height:1.7}
+  .box .bt{font-weight:600;margin-bottom:5px;display:block}
+  .box.ok{background:var(--ok-soft);border:1px solid #cfe3d4;color:#3a5c46}
+  .box.warn{background:var(--warn-soft);border:1px solid #ece0b8;color:#7a5c10}
+  .box.danger{background:var(--danger-soft);border:1px solid #f0d3ce;color:#8c3524}
+  .box.info{background:var(--accent-soft);border:1px solid #f0dcc4;color:#7d4b1f}
+
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px}
+  th{background:var(--code);text-align:left;padding:9px 11px;font-weight:600;color:var(--ink);
+     border:1px solid var(--line);font-size:13px}
+  td{padding:9px 11px;border:1px solid var(--line);color:var(--sub);vertical-align:top}
+  td strong{color:var(--ink)}
+
+  .qa{border:1px solid var(--line);border-radius:10px;margin:10px 0;overflow:hidden}
+  .qa summary{padding:11px 15px;cursor:pointer;font-weight:600;font-size:14px;color:var(--ink);
+    background:#fdfbf8;list-style:none}
+  .qa summary::-webkit-details-marker{display:none}
+  .qa summary::before{content:"▸ ";color:var(--accent)}
+  .qa[open] summary::before{content:"▾ "}
+  .qa[open] summary{border-bottom:1px solid var(--line)}
+  .qa .a{padding:13px 15px;color:var(--sub);font-size:14px}
+  .qa .a p:last-child{margin-bottom:0}
+
+  .tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:5px;margin-left:6px;vertical-align:middle}
+  .tag.must{background:var(--danger-soft);color:var(--danger);border:1px solid #f0d3ce}
+  .tag.par{background:var(--ok-soft);color:var(--ok);border:1px solid #cfe3d4}
+  .tag.time{background:var(--code);color:var(--faint);border:1px solid var(--line)}
+
+  .split{height:1px;background:var(--line);margin:26px 0}
+
+  footer{text-align:center;color:var(--faint);font-size:13px;padding:30px 20px 0}
+  footer a{color:var(--accent);text-decoration:none}
+
+  @media(max-width:640px){
+    .step-bd{padding-left:22px}
+    h1{font-size:22px}
+    .wrap{padding:0 14px}
+  }
+</style>
+</head>
+<body data-page-node-id="pSQyUXBJk3kKZXma22uzdk">
+
+<header data-page-node-id="1tYNOgxl0a69v2sPWTpvnf">
+  <div class="wrap" data-page-node-id="pdX7juiUjCU5L4OXFQoSVV">
+    <h1 data-page-node-id="4dJ3qGidlBy1ufku5CS85M">断联日记 NOEX · 上线操作手册</h1>
+    <div class="sub" data-page-node-id="Ve6S1hFyxHyUy2vOAHEFJE">照着点就行 · 每步都标了「卡住了怎么办」 · 进度会自动保存</div>
+    <div class="meta" data-page-node-id="uTbW6aat3yQjqEYn5dsHPu">
+      <div data-page-node-id="bQKr4jbeqI1VdR80DEGsO7">版本 <b data-page-node-id="MqLCpMFWKp72GeovduURRX">v0.4.2</b></div>
+      <div data-page-node-id="NL4xjI2gZrmEc1G6ULCOBd">总耗时 <b data-page-node-id="boyxxSRrkDYJn8R6sapCtn">约 20 分钟 + 等 1-3 天审核</b></div>
+      <div data-page-node-id="RmC8BfbEyekpWFLeqrDNCJ">AppID <b data-page-node-id="JGMls1adUHefCzBb47lXhu">wx583936dd0c951ff5</b>（已配好）</div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap" data-page-node-id="x9lUF872OZJb4STLjc9iIJ">
+
+  <div class="prog" data-page-node-id="bJMypSbgf3h7Osg3zbShmS">
+    <div class="prog-top" data-page-node-id="yakswvmve17nOMNJ3xgZU9">
+      <b data-page-node-id="ACL7ajG4hGcUVPxFl2EVhJ">总进度 <span id="pct" data-page-node-id="FeQF8OGthc4aiFxOiWKDPA">0%</span></b>
+      <span data-page-node-id="Jwrj0TjiF9WTAyfytJY36L"><span id="dn" data-page-node-id="0j2LnSNoWhhN2Ytgnrwkq7">0</span> / <span id="tot" data-page-node-id="vjfkL2dTppzWiIYfXV321P">0</span> 项完成 <button class="resetbtn" onclick="resetAll()" style="margin-left:10px" data-page-node-id="p70CgF6W9PrxQwany8BrVx">重置</button></span>
+    </div>
+    <div class="bar" data-page-node-id="Duj6VyWJBUruDAFxIVlGL3"><i id="bar" data-page-node-id="Rg48a833oCswSDMDjJu1lj"></i></div>
+  </div>
+
+  <!-- ============ STEP 0 ============ -->
+  <div class="step open" data-step="0" data-page-node-id="zNdCNiCxzVbxlliyzypi2L">
+    <div class="step-hd" onclick="tog(this)" data-page-node-id="ZtgHdhAyhZlWtOF9mJ9ePM">
+      <div class="num" data-page-node-id="lbg1RXq0KgCuLncbp8vpzD">0</div>
+      <div class="t" data-page-node-id="ui6IjlgbqA2VxMJRoGpZAC">
+        <h2 data-page-node-id="iOH2GhC5am7oEtOeYZKreS">开工前：确认 3 件事 <span class="tag time" data-page-node-id="XKd0M1cxqymdH4c0N51a3Y">3 分钟</span></h2>
+        <div class="d" data-page-node-id="w3vuVI3M1pkFE9wLUUdcWv">装工具、登录账号。都搞过就直接跳 Step 1</div>
+      </div>
+      <input type="checkbox" class="chk" onchange="tick(this)" data-page-node-id="1vIkugwMjrF6HSXykqYNmx">
+    </div>
+    <div class="step-bd" data-page-node-id="NBbWbtikCgss8T2UceS3zj">
+
+      <h3 data-page-node-id="CVKwosf9qyZyVCcYDcogUm">① 装微信开发者工具（没装才需要）</h3>
+      <p data-page-node-id="oBmNH6mfKe612DF66B8znU">打开官方下载页，选 <strong data-page-node-id="H4XVGE0n3v5cVPNY1Zaktv">Windows 64 → 稳定版 Stable Build</strong>，一路下一步装完。</p>
+      <div class="path" data-page-node-id="9hVywaEJHDFcuLdBAIsrEd"><span data-page-node-id="EgCFbUDfeQVdCMXZpW8ILn">https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html</span>
+        <button class="cp" onclick="cp(this)" data-page-node-id="hEAjLFdv4M8PG6okVsgVLI">复制</button></div>
+
+      <h3 data-page-node-id="iPYInJ3Htb2ASGn24yFJnU">② 打开它，用你的微信扫码登录</h3>
+      <p data-page-node-id="wUgvM01iuYClMFttJwA7d4">工具启动后会弹二维码，<strong data-page-node-id="DtWtnxaP3ELl0qXLU4GEsM">用你注册小程序的那个微信</strong>扫。扫错微信会导致后面看不到你的小程序。</p>
+
+      <h3 data-page-node-id="R9bqTtVOaQxMGtpYpT7NwO">③ 打开 mp 后台（后面 Step 3 要用，现在先登录着）</h3>
+      <div class="path" data-page-node-id="2kHEvXF1XbGxUtImQeQun9"><span data-page-node-id="hLxwKpRErqai69GoFlsM4K">https://mp.weixin.qq.com</span><button class="cp" onclick="cp(this)" data-page-node-id="t5NQLq35fPuix0zp5DVtDZ">复制</button></div>
+      <p data-page-node-id="7RdOecSqfzoa3pkRcuCaQu">用<strong data-page-node-id="WHbEScjpjd2InDf2JnJJX2">同一个微信</strong>扫码登录。登录后你应该能在首页看到「断联日记」或类似名字的小程序。</p>
+
+      <div class="box ok" data-page-node-id="dIgN8dCJnlVBfdTuKp2ZDy">
+        <span class="bt" data-page-node-id="pHySFdhf6Uy77x5px34fqt">✓ 怎么算这一步过了</span>
+        开发者工具打开了、右上角显示你的微信头像；mp 后台能进首页。
+      </div>
+
+      <div class="qa" data-page-node-id="r3lh3aSkaUEJf1cQKZ3Cnf"><summary data-page-node-id="DUTOjzixa4io4HXylWCiK5">卡住：打开 mp 后台提示"该微信未注册小程序"？</summary>
+        <div class="a" data-page-node-id="IbGyngis4DUR4cLdDymEeC"><p data-page-node-id="rDFcHfqH8997qwhmzLkNWE">说明你扫的微信不是注册那个。换微信重新扫。</p>
+        <p data-page-node-id="bI3WOBymGFBgIlam14vOHj">如果确实还没注册：点 mp 首页「立即注册」→ 选「小程序」→ 填邮箱（<strong data-page-node-id="DG6mp125DtBOShjjj9b6UH">必须是没注册过公众号/小程序的全新邮箱</strong>）→ 邮箱激活 → 选「个人」主体 → 填身份证 + 本人微信验证。全程约 20 分钟，个人主体免费。</p>
+        <p data-page-node-id="XtX4Qa8Wt0pn1xW3Ox8ufz">注册完拿到 AppID 后，去 <code data-page-node-id="g5U6G5F12iqYlcqprmeR9N">project.config.json</code> 把第 63 行的 appid 换成新的——不过你现在已经有一个了（wx583936dd0c951ff5），先确认是不是你自己的。</p></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ STEP 1 ============ -->
+  <div class="step" data-step="1" data-page-node-id="WvGEmRR7rWigwyLjTHwkx6">
+    <div class="step-hd" onclick="tog(this)" data-page-node-id="6KeYco97oB9EV59J1z5428">
+      <div class="num" data-page-node-id="iB9KTs0MYE8WKazsgkFHc4">1</div>
+      <div class="t" data-page-node-id="8QtFUctxfnYGbjKwwSpCL5">
+        <h2 data-page-node-id="BopmqE5qR8JWY63jsLPXcP">导入项目（打开代码）<span class="tag time" data-page-node-id="oBotltyXvOEnuAH1Kwm9wi">2 分钟</span></h2>
+        <div class="d" data-page-node-id="QoSMnEC9RIBRvCHZUoY4bJ">我已经帮你解压好了，你只需要选一个文件夹</div>
+      </div>
+      <input type="checkbox" class="chk" onchange="tick(this)" data-page-node-id="L2TrZX2G9qGH0fDqkEd5ST">
+    </div>
+    <div class="step-bd" data-page-node-id="W6q9GUaZ5IWhrT7okoFL0s">
+
+      <div class="box info" data-page-node-id="26A5ns9Omp33rirPXkXGky">
+        <span class="bt" data-page-node-id="YztjcAnYnKlprmegEMZcGm">💡 为什么有个文件夹而不是 zip？</span>
+        微信开发者工具的「导入项目」<strong data-page-node-id="nyJFujRPQSf8wJcIT3hQMd">只能选文件夹，不能选 zip</strong>。我已经把 <code data-page-node-id="6yICJs4PM6clL4DOP540xB">noex-miniprogram-v0.4.2.zip</code> 解压好了，你直接用下面这个路径就行，不用自己解压。
+      </div>
+
+      <h3 data-page-node-id="IP08VREo1ClUAr7GdacM3n">操作步骤</h3>
+      <ol data-page-node-id="6fkyybZAwQVX3itAW9pgNp">
+        <li data-page-node-id="sL1UiUMEWvRCvPGBZtAGbd">打开微信开发者工具，在左侧竖排菜单点 <strong data-page-node-id="R4Js4g9lNp9lDnAowepZw2">「小程序」</strong></li>
+        <li data-page-node-id="WFodiKPa8v9bhKBkh59C7d">右侧会看到项目列表，点右下角/右上角的 <strong data-page-node-id="lY27db2vmYicSsEqprjdxr">「+」</strong> 或 <strong data-page-node-id="y3QjjGfhGtqvS3mHjSdSSD">「导入项目」</strong> 按钮</li>
+        <li data-page-node-id="TYYPYenlx4MoVobmE38wBC">弹窗里 <strong data-page-node-id="TtAekMtXJ0MaTmoNJjjPfD">「目录」</strong> 那一行，点右边的 <strong data-page-node-id="G4QQEqBA4cRCAEikWAYtwy">「选择文件夹」</strong>，粘贴下面这个路径：</li>
+      </ol>
+
+      <div class="path" data-page-node-id="aDToQEJUkrPevWnxxrXSFe"><span data-page-node-id="14Mu3R5nMeUivGJQ3DUQBp">C:\Users\XIAOMI\Desktop\no contact\no-contact\noex-v0.4.2</span>
+        <button class="cp" onclick="cp(this)" data-page-node-id="FCI3ZpW9iGxHmybXALg80a">复制</button></div>
+
+      <div class="box warn" data-page-node-id="2v2ZHi330qCwC8nNHGExgb">
+        <span class="bt" data-page-node-id="5kA33TY9atJpDfx6uO9h5o">⚠️ 粘贴路径的小技巧</span>
+        文件夹选择窗口顶部有个地址栏，<strong data-page-node-id="0VYnHMWC5kqwhLz6q14Cbu">点一下地址栏、把路径粘进去、按回车</strong>，比一层层点快得多。
+      </div>
+
+      <ol start="4" data-page-node-id="OlgnVGUI3iDWvDrhYDTlCB">
+        <li data-page-node-id="3efCuI9M3DQQAGcG9yams9">选完后，「AppID」那栏<strong data-page-node-id="G5gmAo8Qz2bR8o4ndba24Q">应该自动填上了</strong> <code data-page-node-id="AHqI4xp4mM8sekS6GjzmV1">wx583936dd0c951ff5</code>。
+          <br data-page-node-id="UvhT9smHdVlH0lQ71QZtxp">如果没自动填：选下拉里的「使用测试号」也能先跑起来看效果，但<strong data-page-node-id="NarqMagq4lG059HDVYS7JC">不能上传提审</strong>。要提审就得手动把 AppID 粘进去。</li>
+        <li data-page-node-id="feWI0vDcOwLd9NGEtLOZRH">「项目名称」随便填，比如 <code data-page-node-id="bGnmXfkndu7vzks6ydZYms">断联日记 NOEX</code></li>
+        <li data-page-node-id="3yeDeupFAFamIEGDXlZ6GY">「后端服务」选 <strong data-page-node-id="QaxE07IIpyZ9IHPGqGy7qG">不使用云服务</strong>（这个产品纯本地，不需要服务器）</li>
+        <li data-page-node-id="4HOi9bbhHhMS03ov9wh5AU">点 <strong data-page-node-id="e77Gaa2QNjORFWiCCkV1OH">确定</strong></li>
+      </ol>
+
+      <div class="box ok" data-page-node-id="EaKFv4qlDuOWdmpC7tEhiw">
+        <span class="bt" data-page-node-id="XSdn75e3IG8JXVwHSg62v7">✓ 怎么算这一步过了</span>
+        中间的手机模拟器亮起来，显示出小程序的界面。<br data-page-node-id="gz9NTvS0k7Qr46fKzKtGMS">
+        <strong data-page-node-id="i0yRa978oCBf1Aic2E6Jxw">第一次进来会看到</strong>：onboarding 引导页（Hero 大字 + 「开始」按钮）——这是正常的，因为本地没数据。点一下就进主页了。
+      </div>
+
+      <div class="box danger" data-page-node-id="XIksDNVOk7q24KEw2zv3G5">
+        <span class="bt" data-page-node-id="RY0464Nio1wWG8We8XRW7C">🔴 如果模拟器一片红 / 报错</span>
+        先看底部「调试器 → Console」的红字。<strong data-page-node-id="FtKnGSW3NlwWtQTXW8V7tF">把红字截给我</strong>，我直接改。
+        <br data-page-node-id="5RZOQNAHrgRyUWFOkFjuab">最常见的是 <code data-page-node-id="Vcyot210DSwJvMmME1UHHT">appid 无效</code>（AppID 不是你的）或 <code data-page-node-id="WT4Ld2K8gfHZbNhFzj3eV6">project.config.json 解析失败</code>（文件损坏）。
+      </div>
+
+      <div class="qa" data-page-node-id="OtGS7576Yzksb002ARIYIt"><summary data-page-node-id="G5ZGzWaD95nMwXgxbDIpZ6">卡住：提示"目录已存在项目"或"不是小程序项目"？</summary>
+        <div class="a" data-page-node-id="btmDGKe44LwSjR7jfSWOTo">
+          <p data-page-node-id="nfAW7afVVbT9loMdy7SBQ6">说明你选的文件夹层级不对。正确的那一层里<strong data-page-node-id="fhzmVJ5OxEAmQNd77BcAJ6">直接就能看到 app.js、app.json、pages 文件夹</strong>。</p>
+          <p data-page-node-id="npwJMjiZ9OCDGbpWWMRCUl">如果你选进去看到的是一个叫 <code data-page-node-id="gBkCYOMKbGOT574TIUGJWV">noex-v0.4.2</code> 的文件夹，就再往里进一层。</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ STEP 2 ============ -->
+  <div class="step" data-step="2" data-page-node-id="ufBeaBa7UU9dkYUeX48qcy">
+    <div class="step-hd" onclick="tog(this)" data-page-node-id="bGWLPriKSL2nQmZ2yMUFBh">
+      <div class="num" data-page-node-id="RieQBHKFrmtjJM11xT5Foj">2</div>
+      <div class="t" data-page-node-id="DXAzcvYYeQHW6RQpCAPXp0">
+        <h2 data-page-node-id="Ki8BFBxmh32cyK0oicA1Ky">真机跑一遍自查 <span class="tag time" data-page-node-id="FaRsikvLdVp4YSXkZMzVCY">10 分钟</span><span class="tag par" data-page-node-id="HEyF64p4FxefMkahCSelC7">可与 Step 3 并行</span></h2>
+        <div class="d" data-page-node-id="RKtxKuYYoDeE5UkX4dXMXT">第 1 条是重点——留白瓶页面从没在真机上跑过</div>
+      </div>
+      <input type="checkbox" class="chk" onchange="tick(this)" data-page-node-id="dPf8EkM1CITQROy2ObZLt5">
+    </div>
+    <div class="step-bd" data-page-node-id="t8bDTmRztBakdl83vABZpt">
+
+      <div class="box warn" data-page-node-id="IEX3v79JkwYIlib9hOrGrJ">
+        <span class="bt" data-page-node-id="dCHDMgznccpG4MiBKhCBAa">⚠️ 这一步和 Step 3 可以一起做</span>
+        Step 3 提交完隐私指引要等 1-3 天审核。<strong data-page-node-id="qALxCWdt5EN8D1xIiCFBP2">先把 Step 3 提交了，再回来慢慢跑这一步</strong>，别傻等。
+      </div>
+
+      <h3 data-page-node-id="jHjVfjnYfvuc6wroAHII7c">怎么在手机上看</h3>
+      <ol data-page-node-id="WKwoVk2qna99lRTMBdNqzk">
+        <li data-page-node-id="MknjQVmIa4o6nTZAOOH9C6">开发者工具顶部工具栏，点 <strong data-page-node-id="G5U7wotZ4DNcesIIZ1Rx7a">「预览」</strong>（不是「编译」）</li>
+        <li data-page-node-id="czl7f1CJGWRWVqZDaI44I8">会生成一个二维码，<strong data-page-node-id="SE3rCYqR26F5v6w2iLeSHO">用手机微信扫</strong></li>
+        <li data-page-node-id="LTKxPgd9YBizHROAazmkr4">小程序就在你手机上打开了，可以正常点、正常用</li>
+        <li data-page-node-id="fisHTZJCvxhxhE28eQr1o1">想看报错日志就点 <strong data-page-node-id="98537rxXSGlgQtDDpubDnq">「真机调试」</strong>，手机上会出现一个悬浮球</li>
+      </ol>
+
+      <h3 data-page-node-id="uniQyxTG2OTNOKpIqGdnar">10 条自查清单（按风险从高到低）</h3>
+      <table data-page-node-id="jUzbjp8opHfuQT3CGZXWLE">
+        <tr data-page-node-id="48ACJHWsRaphoSnhZ93WUc"><th style="width:32px" data-page-node-id="MXRfAaZ5DCzVf9HCUvTjiT">#</th><th data-page-node-id="x0R5Dg2ONMl8pDXGDJDLqg">检查什么</th><th data-page-node-id="OCloPZTDz76TC25UeVxUnA">怎么操作</th><th data-page-node-id="5f60hAj1gU37eDHIh5puWl">期望看到</th></tr>
+        <tr data-page-node-id="L4zrwedlbjavKkF15qPV8j">
+          <td data-page-node-id="nH70UWlvvUl2nWwQUHL5jv"><strong data-page-node-id="YJhO2Gh53AIMsh9ZCXaJxq">1</strong></td>
+          <td data-page-node-id="HKz0l6bf3znA45BgTMcwWH"><strong data-page-node-id="0pHfgtJwM0HHNL4CjAjyMg">留白瓶页面</strong><br data-page-node-id="do3pFMLehJFvK1B2c8CCty"><span style="color:var(--danger);font-size:12px" data-page-node-id="Wppo54H3uyvMGXRunvr0Iq">最高风险</span></td>
+          <td data-page-node-id="HsIpWsPBi5SGAdnxd1uHGW">今天页 → 点「留白瓶」<br data-page-node-id="xab9UB2DFY32TY8EDRg7ET">再试试：影子洞察面板 → 「写进留白瓶」</td>
+          <td data-page-node-id="n79v4OLn6J56Ew9hf0jsJ4">页面能打开、写一条后返回，内容还在。<br data-page-node-id="L21XAcH2Vae0wi1Dll128i"><strong data-page-node-id="oA2ybBAt1keQNNoGpi78ja">这个页面上一轮才发现没注册，从未真机跑过</strong></td>
+        </tr>
+        <tr data-page-node-id="hMyzPqVXN14V7LTZXOug7A"><td data-page-node-id="5sNzCrn7297tiBamD02UXw">2</td><td data-page-node-id="mbDi9qXyULrFJexPiGRw2P">聊天页键盘</td><td data-page-node-id="1tAMpR7UE4yNYQnIAeyo9X">小白页 → 点输入框，连发 3 条</td><td data-page-node-id="AP6G2hoq1Q1aQ3UszBpunZ">iOS 上输入框不被键盘挡住、消息自动滚到底、底部不被小黑条压住</td></tr>
+        <tr data-page-node-id="E8VlzAuwytfjvk2Bin5jg6"><td data-page-node-id="0Q3ZyCa86rO1vGmDpdF96S">3</td><td data-page-node-id="lTF3U7P9ENe45dZrxZUk2K">毒舌长文案</td><td data-page-node-id="BT4HeobmR6DhaKs1UEQ1PA">设置成 sharp 人格，发「睡不着」</td><td data-page-node-id="nSm0U87NEVxhJChkSgIler">最长那条 67 字，气泡不溢出、不截断</td></tr>
+        <tr data-page-node-id="p4ACa6JfGDCaxCBbs7gLio"><td data-page-node-id="mrZQuvA5e9cYrQumhrJn5g">4</td><td data-page-node-id="1lYsrRF6AsdFbCGmdvcVpq">tabBar 图标</td><td data-page-node-id="uYBt7P9nVHsJ0hV7lAyxkI">底部 4 个 tab 来回切</td><td data-page-node-id="2w1koV2Ett38Z2x2M4NYQk">选中/未选中状态有区别，图片不糊</td></tr>
+        <tr data-page-node-id="8hAaj3X9xpiHNl8Oewdm85"><td data-page-node-id="7bEM1teQiKfcLHGYiOTORz">5</td><td data-page-node-id="JhNTOf0geqClBEGLuPi9zy">顶部导航栏</td><td data-page-node-id="rKtYaJ0XF9AeZH5zirRa8H">看每个页面顶部</td><td data-page-node-id="clJSgdokGbUbbjPv2PnjLX">标题居中、不被手机刘海/灵动岛挡住</td></tr>
+        <tr><td><strong>6</strong></td>
+<td>影子导入<br><span style="font-size:12px;color:var(--faint)">（可跳过）</span></td>
+<td>影子页 → 「从微信选文件」</td>
+<td>需要自己先准备好 txt 文件并发到微信里（见下方黄框）。<br><strong style="color:var(--danger)">这个按钮不能自动读取聊天记录</strong>——微信不允许任何小程序这么做。<br>选不了也<strong>不影响使用</strong>，用上面的输入框粘贴就行，效果一样。</td></tr>
+        <tr data-page-node-id="HIN0V1ClXgefIbYGTMakjQ"><td data-page-node-id="20YAX3iub4QE5Vz57lk8iK">7</td><td data-page-node-id="6JYHMYRpQlzNeAAyGF8Gfp">导出数据</td><td data-page-node-id="yaTZ0zhH25bFTlfBkVNJ2l">我 → 导出数据</td><td data-page-node-id="5CrbXcxTWFNPiKcImIIRwm">弹隐私授权窗 → 同意 → 提示已复制</td></tr>
+        <tr data-page-node-id="v34N6ngkYRMR4EfVtCsZFL"><td data-page-node-id="8nwSsocSLgZO5CovelafBH">8</td><td data-page-node-id="3YTBqg63fTzhdtioFrP6eQ">危机词兜底</td><td data-page-node-id="8nO2sIPxGuEDG8SFoLEpdu">跟小白发「不想活了」</td><td data-page-node-id="qMmrX81wHUs7lnzdk8z33R">弹出援助热线弹窗（400-161-9995）</td></tr>
+        <tr data-page-node-id="5vjCI38Oev5ZA3eC6CrqKZ"><td data-page-node-id="fIVcM8xHpCXjw15eeBsrhz">9</td><td data-page-node-id="6Q30wKYtwLnZzAD8AqK3pJ">留白瓶隔天</td><td data-page-node-id="A3ffDuvLd9LqBTkmLZMOxq">写一条，改手机系统时间到明天，重开</td><td data-page-node-id="NIRoQJC9ZzCL8aDNLsm7Qd">能解锁昨天写的内容</td></tr>
+        <tr data-page-node-id="WsbHof7PtC92zTNdZGtK27"><td data-page-node-id="i6uHyB4l7xs2KWkhPFjvI9">10</td><td data-page-node-id="9gEaM10O1s3VHYhoHErBKV">清空数据</td><td data-page-node-id="CA5FljaeTawU7pA8twwTc9">我 → 清空数据 → 确认</td><td data-page-node-id="eUBUdAb7ODFoktYrCAuLPX">回到 onboarding，数据归零</td></tr>
+      </table>
+
+      <div class="box danger" data-page-node-id="U0HibW9S61lcKZxypx5bns">
+        <span class="bt" data-page-node-id="Vs0VAKhjIupRkSHFjfVLdv">🔴 发现任何一条不对</span>
+        直接把现象告诉我，比如「第 1 条：点留白瓶没反应」。<strong data-page-node-id="LsPlxtQDBbm8DhTdBlcXBN">不要自己改代码</strong>——我改完你重新导入就行。
+      </div>
+
+      <div class="qa" data-page-node-id="3NW9se8TtReGQtIGVWJGKb"><summary data-page-node-id="oC8K0YiLeKTeJYyoOgvbvX">卡住：扫了预览二维码，手机没反应？</summary>
+        <div class="a" data-page-node-id="mbJFey5hiLDoUEPYrKuBSZ">
+          <p data-page-node-id="xSz8tJsszVpWX9Jvx2NUO9">三个常见原因：</p>
+          <p data-page-node-id="GMX41RcEL0K3ASAeRGrSPq">① 你用的不是<strong data-page-node-id="uJGuzgplXg4A0TwL0EFJYu">注册小程序的那个微信</strong>扫的 → 换微信。</p>
+          <p data-page-node-id="EnE08TOzOQfE9wYTKmrIjW">② 二维码<strong data-page-node-id="98Z89GeUhR9pgk8Y7qUohz">过期了</strong>（有效期 5 分钟）→ 回工具重新点「预览」。</p>
+          <p data-page-node-id="t7KJSewHMFZbrFxLBPVtEh">③ 项目用的是测试号 → 只能用<strong data-page-node-id="XQFyZ6XPv4AuFqq5J2LWMk">开发者本人的微信</strong>扫，别人扫不了。</p>
+        </div>
+      </div>
+
+      <div class="qa" data-page-node-id="tD9e4vxD7sSkjje6uIAB5s"><summary data-page-node-id="ENZlCv8btRNfQfXWifTGXU">卡住：第 6/7 条点导入或导出，直接报错？</summary>
+        <div class="a" data-page-node-id="PCuNLIFkljFCFkLl6JIBGc">
+          <p data-page-node-id="f4c9tzy4sWNEhdvTMQfMUG"><strong data-page-node-id="0xL32IVkOoQEy9HSsP96IM">大概率是 Step 3 的隐私指引还没配或还没过审</strong>。这是正常的——先把 Step 3 做了，等它过审了再回来测这两条。</p>
+          <p data-page-node-id="BzCDGSixUS31xrUmYb3sw4">如果 Step 3 已经过审还报错，那就把报错原文发我。</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ STEP 3 ============ -->
+  <div class="step" data-step="3" data-page-node-id="PLlBheeqIHSfB4TFVMdijx">
+    <div class="step-hd" onclick="tog(this)" data-page-node-id="G6QZma2MUZ6xbgnAmJO34U">
+      <div class="num" data-page-node-id="48YAbPrrAmTdbPW0wIAYhq">3</div>
+      <div class="t" data-page-node-id="cgDBexAhaYAHqT0Mjem9YH">
+        <h2 data-page-node-id="IUkEtx95KqWEnfBArUUlBn">mp 后台配隐私指引 <span class="tag must" data-page-node-id="LEe8NvpVG46wB3KLRKBX8O">必须先做</span><span class="tag time" data-page-node-id="4wJNu4ss5GpKKRK94GzPUZ">5 分钟 + 等 1-3 天</span></h2>
+        <div class="d" data-page-node-id="haoEOQkkoAnPiCQRQMyP82">顺序错了会白等一周——这一步必须早于提审</div>
+      </div>
+      <input type="checkbox" class="chk" onchange="tick(this)" data-page-node-id="ZVzSOGBOswKbNHJPJdFAdD">
+    </div>
+    <div class="step-bd" data-page-node-id="kQm9C2Ovd73dQABNd6S3rj">
+
+      <div class="box danger" data-page-node-id="xg1uPTqkxncv11Is4j3HWU">
+        <span class="bt" data-page-node-id="NnlPDOF8opnZgrFHa0ATEj">🔴 为什么必须现在做</span>
+        2023 年起微信强制要求：用了隐私接口的小程序，<strong data-page-node-id="DYbTqFDdmcLevKe6BUawU5">必须先在后台声明</strong>。<br data-page-node-id="lwQYsA7GeyhmOKbQJNV8mC">
+        你要是先把代码提审、隐私指引还没过，审核员一测「导入聊天记录」就报错 → <strong data-page-node-id="u22OQtLvHFBmaCC7GYZ9jb">直接拒审，白等一周</strong>。<br data-page-node-id="ROarUqHyLsfkFuMpToZpDh">
+        而隐私指引自己也要 1-3 天过审，所以<strong data-page-node-id="Oc3HZBwOd9QKW0sUU6tCk4">它必须是第一个提交的东西</strong>。
+      </div>
+
+      <h3 data-page-node-id="ycDCMkKFdyFJH2TurqexhA">操作步骤</h3>
+      <ol data-page-node-id="tcK1k3bgiKVXoF32kl3Aax">
+        <li data-page-node-id="QD8cgS8xlGu276yGUoVQtm">打开 <strong data-page-node-id="08lBCmromMaRAinD13uIQZ">mp.weixin.qq.com</strong> 并登录</li>
+        <li data-page-node-id="hFNPDpINqyTevGYfCtXqEa">左侧菜单最下面，点 <strong data-page-node-id="RgEED40N8KdJarvW1ddZKG">「设置」</strong>（齿轮图标）</li>
+        <li data-page-node-id="87FznozVvjBySsHavG56PE">找 <strong data-page-node-id="Un7rj3nuyafHLQ6QaRhuVm">「服务内容声明」</strong> → 点 <strong data-page-node-id="Ckq2f9CxUrDVpVeRSRoEZE">「用户隐私保护指引」</strong></li>
+        <li data-page-node-id="XMnwrDaeH59kB6GhERZhCa">点 <strong data-page-node-id="DqzPvObORHmLP2MO0swgG9">「更新」</strong>（或「去完善」）</li>
+        <li data-page-node-id="NvfE7sZY3QQwpRfsRImfiY">逐项勾选下面表格里的内容 —— <strong data-page-node-id="bFAWF0Bax0ih8Nsw3gLiFc">只勾这 3 项</strong></li>
+      </ol>
+
+      <div class="box warn" data-page-node-id="Ez5eaQilf3lJtdORtMLOO9">
+        <span class="bt" data-page-node-id="dqA5byTAs8gCjDjjV2KDQE">⚠️ 千万别多勾</span>
+        多勾 = 自我举报。位置、相册、摄像头、麦克风、通讯录、手机号、好友列表、微信运动、订单、身份信息 —— <strong data-page-node-id="cuIED1cKKSbJ4L6SLppT9J">一个都别勾</strong>。
+      </div>
+
+      <table data-page-node-id="BYvMYXa42tM85oRUBNDqFO">
+        <tr data-page-node-id="oHAa0fZY4MDVlnlowWdQiM"><th style="width:130px" data-page-node-id="SIBhPaodf9OgfsXVvBmLfj">要勾的信息类型</th><th data-page-node-id="ZnMzoyA6bD6GCEIp2N0CNa">用途说明（点右边复制，粘进框里）</th><th style="width:60px" data-page-node-id="56uu5GNCvETwfy5YUYkvkH"></th></tr>
+        <tr data-page-node-id="NEWrowAvatar01">
+          <td data-page-node-id="NEWrowAvatar02"><strong data-page-node-id="NEWrowAvatar03">用户信息<br>（微信头像、昵称）</strong></td>
+          <td data-page-node-id="NEWrowAvatar04"><span id="c0" data-page-node-id="NEWrowAvatar05">用户在个人主页主动点击登录，自行选择头像、填写昵称，用于在本机展示个人资料。头像文件保存在小程序本地目录，昵称保存在本地存储中，不上传服务器、不用于识别用户身份、不向第三方共享。用户可随时在「我 → 编辑资料 → 退出登录」中删除。</span></td>
+          <td data-page-node-id="NEWrowAvatar06"><button class="cp" onclick="cpId('c0',this)" data-page-node-id="NEWrowAvatar07">复制</button></td>
+        </tr>
+        <tr data-page-node-id="rQG3SoUPrkSOvhpaD7ga0G">
+          <td data-page-node-id="UsyZiEDAaBEQxuUSqSKBd9"><strong data-page-node-id="1d31NIbUZNg4rW8MSEvoMM">剪贴板</strong></td>
+          <td data-page-node-id="gzcBHjSLC3BaFAcIzjeFF3"><span id="c1" data-page-node-id="GkdWm2zPlrvrH7MVV2GUwd">在用户主动点击「导出数据」时，将本地记录以文本形式写入剪贴板，方便用户自行粘贴保存到别处。本小程序不会读取剪贴板内容，也不会在用户无感知的情况下调用。</span></td>
+          <td data-page-node-id="xQujjHuzggI6a5ueqMdyzW"><button class="cp" onclick="cpId('c1',this)" data-page-node-id="zAdO2yK6lCTyUFAL3xuoA4">复制</button></td>
+        </tr>
+        <tr data-page-node-id="WQYxzUBfQl0oQbyQKczpf1">
+          <td data-page-node-id="VxsfVVzNMb4KlQURFSzfwP"><strong data-page-node-id="JfJ1HZgvm3FgBhOqZ3JjtY">用户选择的文件</strong></td>
+          <td data-page-node-id="xD7Aw2QPo0f2SXuvakSaVz"><span id="c2" data-page-node-id="mBUzhMiZtF31Fww6uFPoGe">在用户主动点击「导入聊天记录」时，读取用户自行选择的文件（txt/htm/html/log/csv），在本机解析出聊天对象的说话特征，用于生成「影子」功能。文件仅在本机内存中解析，不上传服务器、不留存原始文件、不用于任何其他用途。</span></td>
+          <td data-page-node-id="WY91IsvFlR5jPJQv9xbm5Y"><button class="cp" onclick="cpId('c2',this)" data-page-node-id="hDzC0wCCSqi94OElSXjLe8">复制</button></td>
+        </tr>
+      </table>
+
+      <ol start="6" data-page-node-id="5Qx4tpukjpqa99xSkrtMrJ">
+        <li data-page-node-id="wANQi0VlWXqrgecA3jhyvm">勾完、填完，拉到最底下点 <strong data-page-node-id="WlKUyoreAiCqQncOqefaNQ">「提交」</strong> 或 <strong data-page-node-id="z2HqUS5GNhxXEoDEWk61YY">「确定并生成」</strong></li>
+        <li data-page-node-id="vBS05YCf1xgat0wXIeS7gA">会进入微信审核，<strong data-page-node-id="qnJ85u2SxWs0euNIKaFbgc">等 1-3 个工作日</strong></li>
+      </ol>
+
+      <div class="box ok" data-page-node-id="DmHAD8ZpwIsFeT7fN15Qk8">
+        <span class="bt" data-page-node-id="D5QBksQwOeGquNA9cUXpaE">✓ 怎么算这一步过了</span>
+        页面状态变成 <strong data-page-node-id="d6Rw6YPvgrJaVEVoLJEsIf">「已通过」</strong> 或 <strong data-page-node-id="LaydaA2QpWxdzygZlNAA75">「审核中」</strong>。<br data-page-node-id="jmwEuWfgpwKHPWVG4DDgGi">
+        <strong data-page-node-id="X8aD3hnhufzySXa32Lql2D">「审核中」就够了</strong>——你可以继续做 Step 4，不用干等。只是要确认提审代码时它至少已经在审了。
+      </div>
+
+      <div class="qa" data-page-node-id="eCAJ11lZCcC8WmaExnJpR4"><summary data-page-node-id="8TiXoTmLVXxq5Sq9pXcJjA">卡住：找不到「服务内容声明」在哪？</summary>
+        <div class="a" data-page-node-id="XLAIWKsUeD9nv6bSg345SF">
+          <p data-page-node-id="tbzqOoCXfkOBKoNh8sT01a">微信后台界面会调整。如果左侧「设置」里没有，试试：</p>
+          <p data-page-node-id="1DN3BXMseqk1Dd0FTFGTGQ">① 顶部搜索框搜「隐私」</p>
+          <p data-page-node-id="nji4vRmEq4HrZ5qszCk0Gc">② 或者看 <strong data-page-node-id="0y1r9dhNzipyp357NbyEk2">「设置 → 基本设置」</strong> 页面里有没有「用户隐私保护指引」的入口</p>
+          <p data-page-node-id="jGutVzE5HqI20Iwx9LpUpZ">③ 再不行看 <strong data-page-node-id="kVPWK5GD4r2dqEVnVBafCt">「管理 → 版本管理」</strong> 页面，提审时也会强制引导你去配</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ STEP 4 ============ -->
+  <div class="step" data-step="4" data-page-node-id="UqM6oGTxuHGztLAqR6gGfr">
+    <div class="step-hd" onclick="tog(this)" data-page-node-id="kxdqsivA8Bo8Xx5qzxYvyy">
+      <div class="num" data-page-node-id="KNrRGUg5xH0efritfk0Q7G">4</div>
+      <div class="t" data-page-node-id="qme1kQwVAGx80EyWykn3D6">
+        <h2 data-page-node-id="aNClr1llBnZjPdeBYUXy6z">上传代码 + 提交审核 <span class="tag time" data-page-node-id="wkCKwhreB8Q3k9LkBDFEef">10 分钟</span></h2>
+        <div class="d" data-page-node-id="XxXcjy7AMNmSL09dpGiMny">分两半：先在工具里上传，再去后台点提审</div>
+      </div>
+      <input type="checkbox" class="chk" onchange="tick(this)" data-page-node-id="mJiHO4PNEhTJHG076WGkpX">
+    </div>
+    <div class="step-bd" data-page-node-id="RBA2SygzCdLXpFwwB7JmUl">
+
+      <h3 data-page-node-id="bF6IVqY9XRP2WZpTZAKW9f">4A · 在开发者工具里上传</h3>
+      <ol data-page-node-id="dQdQpk9uYvEJ5CRhVzZJGV">
+        <li data-page-node-id="APOHMqS70BknCWzgdLu9JH">回到微信开发者工具，点右上角 <strong data-page-node-id="DnH8Fyp1wml86Dx5irKuo5">「上传」</strong> 按钮</li>
+        <li data-page-node-id="RxnAftBKO6ZhJ3RHZD5C5k">弹窗里填：
+          <table style="margin-top:8px" data-page-node-id="SCRiqtTEe8e0b8chf0PQ4X">
+            <tr data-page-node-id="YFp8pcKlE0Xy8TaOikkbMH"><th style="width:110px" data-page-node-id="h9Q22wqRtpFhk5VrKBHu12">字段</th><th data-page-node-id="tSq2ZaUDyeM9asjJNGdeT8">填什么</th></tr>
+            <tr data-page-node-id="B9zffqv7BjJsF1Qp23TtH7"><td data-page-node-id="fKW7ePFS5s71f40pO644EV">版本号</td><td data-page-node-id="noPHjgsETpHgL4lp5XPF38"><code data-page-node-id="GZBdV9YnGlBHPVi8UCdsoR">1.0.0</code>（第一次提审就填这个，别填 0.x）</td></tr>
+            <tr data-page-node-id="15UgXZlrjffefEMie8KYrU"><td data-page-node-id="hA7FblTiQdSjpOfq61tCZ2">项目备注</td><td data-page-node-id="4L6moQ3ClT3EkkHCJWSFQS"><code data-page-node-id="IGO7G7Rmzr4dSqbhq8dAn0">首发版本</code> 或 <code data-page-node-id="VYcUby4gjrQc7rbtLs2GCM">断联日记 NOEX 首个正式版</code></td></tr>
+          </table>
+        </li>
+        <li data-page-node-id="SHIynDlBoi1oB5lu2DaoOA">点 <strong data-page-node-id="eonBmZkzPHFg1tbYHkdhHU">「上传」</strong></li>
+        <li data-page-node-id="yHq6JFwlcG1zN2OiUKjxiQ">看到 <strong data-page-node-id="c5ludbxKESe0US9vdbrmuE">「上传成功」</strong> 提示就 OK 了</li>
+      </ol>
+
+      <div class="box danger" data-page-node-id="ax6j6DdmFKTSB7qYXHPcbh">
+        <span class="bt" data-page-node-id="N9lXBtRGHbbIJNtWnC7gKn">🔴 如果上传失败，报「主包超过 2MB」</span>
+        不应该发生——我已经把包从 1.8 MB 压到 171 KB 了。<br data-page-node-id="DLbHKvsDn1eF2qw66KM5RV">
+        如果真报了，说明 <code data-page-node-id="BTkJKLRgagbdyT5slOQ58Z">images/_orig_backup/</code> 被算进去了。把那个文件夹<strong data-page-node-id="0V9djszJ0BBVEMEf9hxEDy">整个删掉</strong>再传（原图不要了，压缩版是肉眼无损的）。
+      </div>
+
+      <div class="split" data-page-node-id="9QCbiJsHpkme63Bob3Rn2x"></div>
+
+      <h3 data-page-node-id="HIvOromGJi9nTFAxrSzI6b">4B · 在 mp 后台提交审核</h3>
+      <ol data-page-node-id="5zYViV0pNXHPAlLYmFYCwe">
+        <li data-page-node-id="i9b75VNBq87HFiZDU8yUKE">回到 <strong data-page-node-id="dW1Bs0cka6cLH50GFryzhb">mp.weixin.qq.com</strong></li>
+        <li data-page-node-id="jT3rn3jbFDhrxh19XueIiz">左侧 <strong data-page-node-id="FC0Mg2mX4Hn6yGjb6fHlPR">「管理」→「版本管理」</strong></li>
+        <li data-page-node-id="UvOMzBRzjWA0lloK9tH9LQ">会看到「开发版本」里刚传的那条，右边点 <strong data-page-node-id="PY5tqC6G51vmMZmFlPIxbP">「提交审核」</strong></li>
+        <li data-page-node-id="vMN70fZsc6JPTh737Luo2i">填审核表单，往下看每一栏怎么填 ↓</li>
+      </ol>
+
+      <table data-page-node-id="83sTp3in6RF1WAmWk99azR">
+        <tr data-page-node-id="THxwxhz31fMaqUrqviRjxC"><th style="width:120px" data-page-node-id="FAYp9eIAGv9s6pE1aRK0yW">表单项</th><th data-page-node-id="KBROwZgEIFgG0vmbypbvv5">怎么填</th></tr>
+        <tr data-page-node-id="OiTN1VtDssVK5HyqOs1T9W">
+          <td data-page-node-id="d6cRFsoN027p3MSSzv1qgQ"><strong data-page-node-id="4od0oos83hxCR1ijDafOM2">测试账号</strong></td>
+          <td data-page-node-id="q68keHFqGbh0xc9zQbyr8B">选 <strong data-page-node-id="TNS9rTuADaig0KdYvAkIRH">不需要</strong>（这产品没有登录系统）</td>
+        </tr>
+        <tr data-page-node-id="nSc2CtRRI8tXP2FOm33aVi">
+          <td data-page-node-id="acFeSttPSJFDZdjSc5KXvG"><strong data-page-node-id="kj9KjH74PGPkcKhE62p2l3">服务类目</strong></td>
+          <td data-page-node-id="3jp5luKUZzANuecoVuyFNS">选 <strong data-page-node-id="KFWFD5dfyetIfQM5VW5f7M">工具 → 效率</strong><br data-page-node-id="pSWDihGRSAMB59kVGJApx0">
+            <span style="color:var(--danger);font-size:12px" data-page-node-id="vDPENbPE5ZBIES0ONvEEgz">别选游戏；也别选医疗/心理（要资质）</span></td>
+        </tr>
+        <tr data-page-node-id="Jhj6QamHybzNSs0KEH8UPS">
+          <td data-page-node-id="LKHj6Ad4gyT6ShOE31BRQR"><strong data-page-node-id="RECePvsgVtiuFpGSrAja5k">小程序简介</strong></td>
+          <td data-page-node-id="oQgqXvCCb2G24peXkC0Wx4">复制下面这段 ↓（120 字内）<br data-page-node-id="zxyjhKGwojC7wZOHpMGRsx">
+            <span id="c3" style="display:block;background:var(--code);padding:8px 10px;border-radius:6px;margin-top:6px;font-size:13px" data-page-node-id="Ug0wDt7KAsSFBh5Syud7kc">断联日记 NOEX 是一款减手机依赖的效率工具。和「小白」聊天吐槽、解锁断联记录、用留白瓶缓冲冲动——把零碎时间还给自己。无游戏、无积分、无排行榜。</span>
+            <button class="cp" onclick="cpId('c3',this)" style="margin-top:6px" data-page-node-id="JdJH0BFC2l6i3C6y0Vg8U1">复制简介</button>
+          </td>
+        </tr>
+        <tr data-page-node-id="ERc8qWuUiAIl9E0WNTRTCv">
+          <td data-page-node-id="0TKLp0R0gCMhNziMDBTLKl"><strong data-page-node-id="o37Kc5ZDwxNX4g5mkNfSHU">补充说明</strong><br data-page-node-id="i9oogKFEpZU7TyX8xIAr08"><span style="font-size:12px;color:var(--accent)" data-page-node-id="yKau9BqLxqtgHCFGzcgq6h">这项很重要</span></td>
+          <td data-page-node-id="XhHHEMTlqNaRxkZ6oz8zrB">复制下面这段 ↓，主动交代最容易挨质疑的那点<br data-page-node-id="8udHdP9Ts4gGbswVDG584U">
+            <span id="c4" style="display:block;background:var(--code);padding:8px 10px;border-radius:6px;margin-top:6px;font-size:13px" data-page-node-id="95TGagOuui5njuwttcQ2of">本小程序为纯本地效率工具，无服务器、无用户系统、无内容传播。影子功能的聊天记录导入，由用户在自己的微信会话中主动选择文件、逐次授权，文件在本机内存中解析，仅提取说话特征（平均句长、高频语气词、反问率），不上传服务器、不留存原始文本、不读取用户未选择的内容、不涉及他人账号。小程序内含危机情绪安全兜底机制，识别到危机倾向时展示心理援助热线，不提供任何诊断或治疗服务。</span>
+            <button class="cp" onclick="cpId('c4',this)" style="margin-top:6px" data-page-node-id="ekJFzhTE0EHCugsOSMPfoO">复制补充说明</button>
+          </td>
+        </tr>
+        <tr data-page-node-id="TyywaMZyjdE8fzMPEcxO9B">
+          <td data-page-node-id="EozIfIVclKJM0q0TQrW6Q8"><strong data-page-node-id="tp3ACl1J0tuakwFHZAG9Ny">小程序图标</strong></td>
+          <td data-page-node-id="epmtZQhJ9iPQ9HJyAM0DVM">用项目里的 <code data-page-node-id="JJOLoGslQEsGRVI9VfWIY0">images/appicon.png</code>（如果需要手动上传的话）</td>
+        </tr>
+      </ol>
+
+      <ol start="5" data-page-node-id="lpHDFah9C3jxPBXE55NBfr">
+        <li data-page-node-id="3u4CpYu9dZTBbYIdJzEvzA">确认无误，点 <strong data-page-node-id="D0v9DcvwoNnkEGZR4TPR31">「提交审核」</strong></li>
+      </ol>
+
+      <div class="box ok" data-page-node-id="6HEnu2vNL4LIcAEQdtjfip">
+        <span class="bt" data-page-node-id="o9CiADZ8rHWNB2sTtm8BFg">✓ 怎么算这一步过了</span>
+        页面显示 <strong data-page-node-id="kBl34qUYjbWwIK5j4AfJSM">「审核中」</strong>。接下来就是等，一般 1-3 个工作日，快的当天过。
+      </div>
+
+      <div class="box info" data-page-node-id="XlTIIGGXRiOA9VapbtUkzo">
+        <span class="bt" data-page-node-id="fOKHw3FvD2YMfxjxiFLuGG">💡 为什么要主动写补充说明</span>
+        「导入聊天记录」这个功能审核员一定会多看两眼。你<strong data-page-node-id="YXKcHXcM33pb6QvjbrJ5Aq">主动说清楚</strong>，比被他问了再解释，通过率高非常多。
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ STEP 5 ============ -->
+  <div class="step" data-step="5" data-page-node-id="Z9UCXj5nQ7ff0qjeZSGFQl">
+    <div class="step-hd" onclick="tog(this)" data-page-node-id="CmuQeLwnNzdiVqfvNth4hZ">
+      <div class="num" data-page-node-id="sEB0yYEzQOjjiFOOwmlbFK">5</div>
+      <div class="t" data-page-node-id="DKZXqPRDq7qp34FNOkWR6g">
+        <h2 data-page-node-id="BTCyFQosQrQglHOJDT4jeg">审核结果：通过就发布，被拒就找我 <span class="tag time" data-page-node-id="xEqZ5TRXUgwj72K79EiREL">1-3 天</span></h2>
+        <div class="d" data-page-node-id="RJDAw0Bw2FceYuUMOF7vaU">最后一步，也是唯一需要我帮忙改的一步</div>
+      </div>
+      <input type="checkbox" class="chk" onchange="tick(this)" data-page-node-id="TiAhZvo3WDUSVrBVihuJEn">
+    </div>
+    <div class="step-bd" data-page-node-id="LH0UPRRPwHgymf8D0L247M">
+
+      <h3 data-page-node-id="1UvBAOtFv4MEl7S18QngFZ">如果通过了 ✅</h3>
+      <ol data-page-node-id="YITmkQdY1Ds0IybCX0eE0F">
+        <li data-page-node-id="Aco9K87zQ8dRMIpIMM3vr4">mp 后台会发通知，也可以去 <strong data-page-node-id="mI2YILI9UX32mFsSGDlyVP">「管理 → 版本管理」</strong> 看</li>
+        <li data-page-node-id="WSqtbLwnRBiXaFRl5hqZ9o">「审核版本」那条右边，点 <strong data-page-node-id="NrIp9uMclhesxeXKEYrFWo">「发布」</strong></li>
+        <li data-page-node-id="KCjAkSXxNHXTJ30kzs6sNm">等几分钟，微信里搜 <strong data-page-node-id="v6CGH0pRyDCjpRoAfRAJxX">「断联日记 NOEX」</strong> 就能搜到了</li>
+      </ol>
+      <div class="box ok" data-page-node-id="eeQEbAbLPZKBg1Tam7DNb6">
+        <span class="bt" data-page-node-id="h2ObBQx16WdDy4jsRB1Ter">🎉 到这儿就上线了</span>
+        搜到、能打开、能用 —— 完事。
+      </div>
+
+      <div class="split" data-page-node-id="nttMRDSyjA5vCd1oi6qBZh"></div>
+
+      <h3 data-page-node-id="V3MMOBOy6hUhhWe8N6Jd84">如果被拒了 ❌</h3>
+      <p data-page-node-id="ZALxijrn6W7LZgjxFGzgtw"><strong data-page-node-id="E55L1UXWoikwZOPFSBJPuw">别慌，也别自己瞎改。</strong>把驳回理由<strong data-page-node-id="nBkeCuMf0HlDKTSUoaPh3z">原文截图发我</strong>，我按理由改完你重新导入上传就行。</p>
+
+      <p data-page-node-id="XJwyQYtveJBhDEhVI8W2Ul">常见驳回理由和我的应对（心里有个数）：</p>
+      <table data-page-node-id="oVyDDuaEOpDy4EUfBRnUsi">
+        <tr data-page-node-id="HxTn4EQDDACAuTwuETcDDP"><th style="width:180px" data-page-node-id="L19oIQB0YrS9QUx4SSZv9H">驳回理由</th><th data-page-node-id="IrqrdG7zGXiQHXiO1dXO2h">怎么解</th></tr>
+        <tr data-page-node-id="1nY69twrII6p5L70ixS9OV"><td data-page-node-id="4RwVczvQ9MAnU4gY3kvdDL">类目与内容不符</td><td data-page-node-id="RGmmIDme8kSpu0nc0QhBDW">改类目为「工具 → 效率」，或补充说明</td></tr>
+        <tr data-page-node-id="4Kp9OLLvSVI2FE4QvJw02Y"><td data-page-node-id="UALDJA5COzwVDXUPDdx23K">涉及医疗/心理</td><td data-page-node-id="6iRstUY2Y97u8wnBzp29yE">强调免责声明 + 说明是安全兜底不是诊疗</td></tr>
+        <tr data-page-node-id="DNuljLAylS9r9N0oRnIlpx"><td data-page-node-id="lHXmVE3ik1QiieDoIhfLom">隐私指引未配置</td><td data-page-node-id="h67UMlv1VCPoJDgetyvSg0">回 Step 3，等它过审再提</td></tr>
+        <tr data-page-node-id="fmgHQGcBVwpScbb9Ao8R1g"><td data-page-node-id="MYF7F9q3EOBMuzkSDqlA7g">功能不完整/是原型</td><td data-page-node-id="I86SOE3cE2zBATDlabM4TN">关于页那句「原型」我已经删了，不该再出现</td></tr>
+        <tr data-page-node-id="rMYOjgZB8RkU74ruRX1ARf"><td data-page-node-id="WPBmuUeGlNEynKtHo3SGgH">内容不文明</td><td data-page-node-id="91PxZFNgrpOM2gZBXIFARQ">毒舌人格的话术我审查过，不骂脏字不打脸；真被判就把 sharp 池调温和</td></tr>
+      </table>
+
+      <div class="box info" data-page-node-id="9CHVNBoFxFFHn5DtFaYz21">
+        <span class="bt" data-page-node-id="81Ndvx0vGsHydi6ER4hjP7">💡 只想给朋友看，不想走审核？</span>
+        开发者工具里点 <strong data-page-node-id="hC1HAGIATa1Kz8NfAiGdSg">「预览」</strong> 生成的二维码，朋友扫了也能用（有效期 5 分钟）。<br data-page-node-id="wybnWbEuR2jjFEHZCKRWFH">
+        或者用 <strong data-page-node-id="IKQ7KlHBhhmWRJGuvwZHg7">「体验版」</strong>：后台「版本管理 → 开发版本」设为体验版，把体验成员加上，就能长期用了，不需要审核。
+      </div>
+
+    </div>
+  </div>
+
+  <footer data-page-node-id="fmevNmvnCCeCMra9QSQfAL">
+    断联日记 NOEX v0.4.2 · 操作手册<br data-page-node-id="LHyfE8DBoeg7pzbEDfQTIY">
+    卡在任何一步，直接把现象或报错截给我就行
+  </footer>
+
+</div>
+
+<script>
+  /* ---- 展开/收起 ---- */
+  function tog(el){
+    var s = el.parentElement;
+    if(event.target.tagName === 'INPUT') return;
+    s.classList.toggle('open');
+  }
+
+  /* ---- 勾选 ---- */
+  function tick(box){
+    var s = box.closest('.step');
+    s.classList.toggle('done', box.checked);
+    save();
+  }
+
+  /* ---- 进度 ---- */
+  var boxes = document.querySelectorAll('.chk');
+  document.getElementById('tot').textContent = boxes.length;
+
+  function save(){
+    var done = 0, arr = [];
+    boxes.forEach(function(b,i){
+      if(b.checked){ done++; arr.push('1'); } else arr.push('0');
+      b.closest('.step').classList.toggle('done', b.checked);
+    });
+    document.getElementById('dn').textContent = done;
+    document.getElementById('pct').textContent = Math.round(done/boxes.length*100) + '%';
+    document.getElementById('bar').style.width = (done/boxes.length*100) + '%';
+    try{ localStorage.setItem('noex_guide', arr.join('')); }catch(e){}
+  }
+
+  function load(){
+    var v;
+    try{ v = localStorage.getItem('noex_guide'); }catch(e){}
+    if(!v) return;
+    boxes.forEach(function(b,i){ if(v[i]==='1') b.checked = true; });
+    save();
+  }
+
+  function resetAll(){
+    boxes.forEach(function(b){ b.checked = false; });
+    save();
+  }
+
+  /* ---- 复制 ---- */
+  function cp(btn){
+    var txt = btn.parentElement.querySelector('span').textContent;
+    doCopy(txt, btn);
+  }
+  function cpId(id, btn){
+    doCopy(document.getElementById(id).textContent, btn);
+  }
+  function doCopy(txt, btn){
+    var ok = function(){
+      var o = btn.textContent;
+      btn.textContent = '已复制 ✓';
+      setTimeout(function(){ btn.textContent = o; }, 1500);
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(ok, function(){ fallback(txt, ok); });
+    } else fallback(txt, ok);
+  }
+  function fallback(txt, cb){
+    var ta = document.createElement('textarea');
+    ta.value = txt; ta.style.position='fixed'; ta.style.left='-9999px';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); cb(); }catch(e){}
+    document.body.removeChild(ta);
+  }
+
+  load();
+</script>
+
+</body>
+</html>

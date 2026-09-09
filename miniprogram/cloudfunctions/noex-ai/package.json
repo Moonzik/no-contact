@@ -1,0 +1,7 @@
+{
+  "name": "noex-ai",
+  "version": "1.0.0",
+  "description": "断联日记 NOEX · 小白与影子的 AI 回复中转（零第三方依赖）",
+  "main": "index.js",
+  "dependencies": {}
+}

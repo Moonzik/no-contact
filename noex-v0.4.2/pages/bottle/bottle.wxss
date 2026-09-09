@@ -1,0 +1,53 @@
+/* pages/bottle/bottle.wxss */
+
+.bottle {
+  padding: 40rpx 44rpx 200rpx;
+  box-sizing: border-box;
+  min-height: 100vh;
+}
+.bottle-intro {
+  margin-bottom: 36rpx;
+}
+.bottle-h {
+  font-family: var(--serif);
+  font-size: 44rpx;
+  letter-spacing: 6rpx;
+  margin-bottom: 8rpx;
+}
+.bottle-sub {
+  color: var(--sub);
+  font-size: 26rpx;
+  line-height: 1.7;
+}
+.bottle-new {
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  border-radius: 28rpx;
+  padding: 28rpx 30rpx;
+  box-sizing: border-box;
+  margin-bottom: 32rpx;
+}
+.bottle-list {
+  margin-top: 12rpx;
+}
+.bottle-empty {
+  text-align: center;
+  color: var(--faint);
+  font-size: 28rpx;
+  padding: 80rpx 0;
+}
+.bottle-item {
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  border-radius: 24rpx;
+  padding: 24rpx 28rpx;
+  margin-bottom: 20rpx;
+  font-size: 28rpx;
+  line-height: 1.7;
+}
+.bi-t {
+  font-size: 22rpx;
+  color: var(--faint);
+  letter-spacing: 2rpx;
+  margin-bottom: 8rpx;
+}

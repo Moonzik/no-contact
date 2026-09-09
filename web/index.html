@@ -1,0 +1,1792 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#faf9f4" />
+<title>断联日记 NOEX · Web Demo</title>
+<style>
+/* === 全局 === */
+*,*::before,*::after { box-sizing: border-box; }
+html,body { margin:0; padding:0; height:100%; }
+body {
+  background: #efece4;
+  color: #26231e;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 设计 token (1rpx ≈ 0.5px, 以 iPhone 12 mini 375px 宽为基准) */
+:root {
+  --bg:        #faf9f4;
+  --card:      #ffffff;
+  --ink:       #26231e;
+  --sub:       #8f887b;
+  --faint:     #b8b1a4;
+  --line:      #e9e4d8;
+  --accent:    #b5623c;
+  --accent-soft:#f5ece6;
+  --danger:    #a5432e;
+}
+
+button { font: inherit; color: inherit; cursor: pointer; }
+
+/* 移动端设备外框——桌面居中 */
+#app {
+  position: relative;
+  width: 100%;
+  max-width: 375px;
+  min-height: 100vh;
+  margin: 0 auto;
+  background: var(--bg);
+  overflow: hidden;
+  box-shadow: 0 0 60px rgba(0,0,0,.06);
+}
+
+@media (min-width: 480px) {
+  #app { margin-top: 20px; margin-bottom: 20px; min-height: calc(100vh - 40px); border-radius: 28px; }
+}
+
+/* === 通用工具类 === */
+.serif { font-family: "Songti SC", "STSong", "Source Han Serif SC", serif; }
+.card {
+  background: var(--card);
+  border: 0.5px solid var(--line);
+  border-radius: 16px;
+  padding: 20px;
+  margin: 0 16px 12px;
+}
+.btn {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 14px 16px;
+  padding: 14px;
+  border-radius: 14px;
+  text-align: center;
+  font-size: 15px;
+  letter-spacing: 2px;
+  background: var(--ink);
+  color: var(--bg);
+  border: none;
+}
+.btn-ghost {
+  background: transparent;
+  border: 0.5px solid var(--line);
+  color: var(--sub);
+  font-size: 14px;
+  letter-spacing: 1px;
+  padding: 10px;
+  border-radius: 12px;
+}
+.btn-danger { background: var(--danger); color: #fff; }
+.tag {
+  display: inline-block;
+  font-size: 11px;
+  color: var(--sub);
+  border: 0.5px solid var(--line);
+  border-radius: 99px;
+  padding: 2px 10px;
+  letter-spacing: 1px;
+}
+.divider { height: 0.5px; background: var(--line); margin: 18px 0; }
+.field-label { display:block; font-size:12px; color:var(--sub); margin-bottom:6px; letter-spacing:1px; }
+.field-input,
+.field-textarea {
+  width: 100%; background: var(--card); border: 0.5px solid var(--line);
+  border-radius: 12px; padding: 12px 14px; font-size: 15px;
+  font-family: inherit; resize: none; min-height: 44px;
+}
+
+/* === 页面进入动画 === */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+.page { animation: fadeIn 0.28s ease; }
+
+/* ============================================================
+   Tab 容器 / 路由
+   ============================================================ */
+.tab-pages { padding-bottom: 64px; min-height: 100vh; }
+.page-pane { display: none; }
+.page-pane.active { display: block; }
+
+/* ============================================================
+   TabBar 底部导航 (固定)
+   ============================================================ */
+.tabbar {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  max-width: 375px;
+  margin: 0 auto;
+  height: 56px;
+  background: var(--bg);
+  border-top: 0.5px solid var(--line);
+  display: flex;
+  z-index: 50;
+}
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--faint);
+  font-size: 11px;
+  letter-spacing: 1px;
+  border: none;
+  background: transparent;
+  padding: 6px 0;
+  transition: color .2s;
+}
+.tab.on { color: var(--ink); }
+.tab .ti { width: 22px; height: 22px; margin-bottom: 2px; }
+.tab svg { fill: currentColor; }
+
+/* ============================================================
+   Onboard
+   ============================================================ */
+.ob { padding: 60px 24px 32px; text-align: center; min-height: 100vh; }
+.ob-logo { width: 80px; height: 80px; margin: 30px auto 26px; background: linear-gradient(160deg,#a5896f 0%,#3b322a 100%); border-radius: 22px; box-shadow: 0 8px 24px rgba(0,0,0,.12); position: relative; overflow: hidden; display:flex; align-items:center; justify-content:center; }
+.ob-logo::before { content:""; position:absolute; width:18px; height:12px; background: var(--bg); border-radius: 50%; top: 26px; left: 18px; box-shadow: 28px 0 0 var(--bg), 0 0 0 2px rgba(0,0,0,.4); }
+.ob-logo::after  { content:""; position:absolute; width:8px; height:8px; background:#26231e; border-radius: 50%; top: 28px; left: 24px; box-shadow: 28px 0 0 #26231e; }
+.ob-title { font-size: 26px; letter-spacing: 6px; font-weight: 500; }
+.ob-en    { font-size: 13px; letter-spacing: 8px; color: var(--faint); margin-top: 4px; }
+.ob-p     { font-size: 14px; color: var(--sub); margin: 28px 8px 40px; line-height: 1.9; letter-spacing: 1px; }
+.ob-title-sm { font-size: 22px; letter-spacing: 4px; margin-bottom: 10px; }
+.ob-avatar { width: 110px; height: 110px; margin: 30px auto 18px; background: #2b2520; border-radius: 50%; position: relative; overflow: hidden; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+.ob-avatar::before { content:""; position:absolute; top:18px; left:24px; width:16px; height:14px; background:#fff; border-radius:50%; box-shadow: 38px 0 0 #fff; }
+.ob-avatar::after { content:""; position:absolute; top:24px; left:28px; width:8px; height:8px; background:#26231e; border-radius:50%; box-shadow: 38px 0 0 #26231e; }
+.ob-btn { width: calc(100% - 48px); margin: 32px 24px 0; }
+.ob .field { text-align: left; }
+
+/* ============================================================
+   Today
+   ============================================================ */
+.today { padding: 18px 0 32px; }
+.head { display:flex; justify-content: space-between; align-items: center; padding: 4px 24px 14px; }
+.brand { font-size: 16px; letter-spacing: 4px; }
+.day-hero { text-align: center; padding: 16px 0 24px; }
+.num-text { font-size: 92px; font-weight: 200; line-height: 1; letter-spacing: -4px; font-family: "Songti SC", "Source Han Serif SC", serif; }
+.num-suffix { font-size: 22px; letter-spacing: 4px; color: var(--sub); margin-left: 4px; }
+.cap { font-size: 14px; letter-spacing: 4px; color: var(--ink); margin-top: 8px; }
+.sub  { font-size: 12px; color: var(--faint); margin-top: 6px; letter-spacing: 1px; }
+.fox-bar { display: flex; align-items: center; gap: 14px; }
+.fox-ava { width: 44px; height: 44px; border-radius: 50%; background:#fff; border:1px solid var(--line); flex: none; overflow:hidden; position:relative; }
+.fox-ava::before { content:""; position:absolute; top:18px; left:12px; width:5px; height:5px; background:#8f887b; border-radius:50%; box-shadow: 15px 0 0 #8f887b; }
+.fox-info { flex: 1; min-width: 0; }
+.fox-who { font-size: 13px; letter-spacing: 1px; color: var(--ink); }
+.fox-say { font-size: 13px; color: var(--sub); line-height: 1.6; margin-top: 2px; }
+
+.check-card { padding: 16px; }
+.check-btn {
+  width: 100%; padding: 16px; background: var(--ink); color: var(--bg);
+  border: none; border-radius: 14px; font-size: 14px; letter-spacing: 4px;
+  cursor: pointer; transition: opacity .2s;
+}
+.check-btn.checked, .check-btn:disabled { background: var(--line); color: var(--sub); cursor: default; }
+.relapse-btn {
+  display: block; width: 100%; margin-top: 14px; background: transparent;
+  border: none; color: var(--faint); font-size: 13px; padding: 4px 0;
+  text-decoration: underline; text-underline-offset: 4px; letter-spacing: 1px;
+}
+.check-card { text-align: center; }
+
+.ms-track {
+  display: flex; justify-content: space-between; margin: 18px 0 8px; gap: 2px;
+}
+.ms { flex: 1; text-align: center; }
+.ms .dot { width: 6px; height: 6px; background: var(--line); border-radius: 50%; margin: 0 auto 4px; }
+.ms .d { font-size: 10px; color: var(--faint); line-height: 1.2; }
+.ms.done .dot { background: var(--accent); }
+.ms.done .d { color: var(--accent); }
+.ms-progress { height: 3px; background: var(--line); border-radius: 99px; margin: 8px 0 6px; overflow: hidden; }
+.ms-progress-i { height: 100%; background: var(--accent); border-radius: 99px; transition: width .4s; }
+.ms-next { font-size: 12px; color: var(--sub); letter-spacing: 1px; margin-top: 6px; }
+
+.acts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 16px; }
+.act {
+  background: var(--card); border: 0.5px solid var(--line); border-radius: 16px;
+  padding: 16px; text-align: center;
+}
+.act-t { font-size: 14px; letter-spacing: 2px; }
+.act-d { font-size: 12px; color: var(--sub); margin-top: 4px; letter-spacing: 1px; }
+
+/* ============================================================
+   Xiaobai 聊天
+   ============================================================ */
+.xa { display: flex; flex-direction: column; height: 100vh; padding-bottom: 0; }
+.persona {
+  display: flex; gap: 8px; padding: 12px 16px; overflow-x: auto;
+  scrollbar-width: none;
+}
+.persona::-webkit-scrollbar { display: none; }
+.pchip {
+  flex: none; padding: 8px 14px; border: 0.5px solid var(--line); border-radius: 14px;
+  background: var(--card); min-width: 96px; cursor: pointer;
+}
+.pchip.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.pchip-b { font-size: 13px; letter-spacing: 2px; }
+.pchip-d { font-size: 10px; opacity: .8; margin-top: 2px; }
+.chat-head {
+  display: flex; align-items: center; gap: 12px; padding: 12px 18px;
+  border-bottom: 0.5px solid var(--line);
+}
+.chat-head .n { font-size: 14px; letter-spacing: 2px; }
+.chat-head .s { font-size: 11px; color: var(--sub); margin-top: 2px; letter-spacing: 1px; }
+.ava { width: 36px; height: 36px; border-radius: 50%; background:#2b2520; position:relative; overflow:hidden; flex: none; }
+.ava::before { content:""; position:absolute; top:6px; left:8px; width:5px; height:5px; background:#fff; border-radius:50%; box-shadow: 16px 0 0 #fff; }
+.ava::after  { content:""; position:absolute; top:9px; left:10px; width:4px; height:4px; background:#26231e; border-radius:50%; box-shadow: 16px 0 0 #26231e; }
+
+.msgs {
+  flex: 1; overflow-y: auto; padding: 16px;
+  display: flex; flex-direction: column; gap: 12px;
+  background: var(--bg);
+  -webkit-overflow-scrolling: touch;
+}
+.row { display: flex; gap: 8px; align-items: flex-end; max-width: 100%; }
+.row.ai { align-self: flex-start; }
+.row.me { align-self: flex-end; flex-direction: row-reverse; }
+.row.sys { align-self: center; }
+.bubble {
+  background: var(--card); padding: 10px 14px;
+  border-radius: 14px 14px 14px 4px; max-width: 70%;
+  font-size: 14px; line-height: 1.7; letter-spacing: .5px; white-space: pre-wrap; word-break: break-word;
+  border: 0.5px solid var(--line);
+}
+.me-bubble {
+  background: var(--accent-soft); color: var(--ink);
+  border: 0.5px solid #ead5c5; border-radius: 14px 14px 4px 14px;
+}
+.me-ava { background:#3a4a3a; color:#fff; font-size:11px; display:flex; align-items:center; justify-content:center; }
+.me-ava::before, .me-ava::after { display:none; }
+.tip { font-size: 11px; color: var(--faint); margin-top: 4px; letter-spacing: 1px; }
+.sys-text {
+  background: var(--line); padding: 6px 12px; border-radius: 8px;
+  font-size: 12px; color: var(--sub); letter-spacing: 1px; max-width: 80%; text-align: center;
+}
+
+.bubble.typing { display: flex; gap: 3px; padding: 14px 12px; }
+.bubble.typing span {
+  width: 6px; height: 6px; background: var(--sub); border-radius: 50%;
+  animation: bounce 1.2s infinite ease-in-out;
+}
+.bubble.typing span:nth-child(2) { animation-delay: .2s; }
+.bubble.typing span:nth-child(3) { animation-delay: .4s; }
+@keyframes bounce { 0%,80%,100% { opacity:.3; transform: translateY(0);} 40%{opacity:1; transform: translateY(-3px);} }
+
+/* 输入区 */
+.composer {
+  border-top: 0.5px solid var(--line);
+  background: var(--bg);
+  padding: 8px 12px 12px;
+}
+.chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
+.chips::-webkit-scrollbar { display:none; }
+.chip {
+  flex: none; padding: 6px 12px; background: var(--card); border: 0.5px solid var(--line);
+  border-radius: 99px; font-size: 12px; color: var(--sub); cursor: pointer;
+}
+.input-row { display: flex; align-items: center; gap: 8px; }
+.ta {
+  flex: 1;
+  background: var(--card);
+  border: 0.5px solid var(--line);
+  border-radius: 18px;
+  padding: 8px 14px;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: none;
+  min-height: 36px;
+  max-height: 100px;
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+}
+.ta:focus { border-color: var(--accent); }
+.send-btn {
+  /* 模拟小程序 send-round-v2：严格圆形 32x32 */
+  width: 32px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 50% !important;
+  border: none !important;
+  background: var(--ink) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 0 !important;
+  flex: none;
+}
+.send-btn::after { content: ""; display: none; }
+.send-arrow {
+  width: 0; height: 0;
+  border-left: 7px solid var(--bg);
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  margin-left: 2px;
+}
+
+/* 危机弹层 */
+.crisis-mask {
+  position: fixed; inset: 0; background: rgba(0,0,0,.55);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200;
+  max-width: 375px; margin: 0 auto;
+}
+.crisis-modal {
+  background: var(--bg); border-radius: 18px; padding: 24px; width: calc(100% - 48px);
+  max-width: 280px; animation: fadeIn .3s;
+}
+.crisis-title { font-size: 16px; letter-spacing: 2px; color: var(--danger); margin-bottom: 12px; }
+.crisis-body  { font-size: 13px; line-height: 1.9; color: var(--sub); margin-bottom: 18px; white-space: pre-wrap; }
+.crisis-modal .btn { margin: 0; }
+
+/* 留白瓶浮层 (在 today 内点开后浮) */
+.modal-mask {
+  position: fixed; inset: 0; background: rgba(0,0,0,.4);
+  display: flex; align-items: flex-end; justify-content: center;
+  z-index: 200; max-width: 375px; margin: 0 auto;
+}
+.modal-card {
+  width: 100%; max-height: 80vh; background: var(--bg);
+  border-radius: 20px 20px 0 0; padding: 18px 16px;
+  display: flex; flex-direction: column; animation: slideUp .3s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-head { display:flex; justify-content: space-between; align-items:center; padding-bottom:10px; }
+.modal-h { font-size: 16px; letter-spacing: 4px; }
+.modal-close { background: transparent; border: none; color: var(--sub); font-size: 20px; padding: 0 4px; }
+.modal-body { flex: 1; overflow-y: auto; padding: 8px 0 12px; }
+
+/* ============================================================
+   Yingzi 影子
+   ============================================================ */
+.yz { padding: 18px 0 32px; }
+.view-intro { text-align: center; padding: 24px 22px; }
+.art { width: 80px; height: 80px; margin: 0 auto 14px; background:#2b2520; border-radius: 50%; position:relative; overflow:hidden; }
+.art .ava-grey { width: 100%; height: 100%; }
+.art::before { content:""; position:absolute; top:18px; left:20px; width:14px; height:12px; background:#fff; border-radius:50%; box-shadow: 28px 0 0 #fff; opacity: .55; }
+.view-intro .h { font-size: 22px; letter-spacing: 6px; }
+.view-intro .en { font-size: 12px; color: var(--faint); letter-spacing: 4px; margin-top: 4px; }
+.view-intro .p { font-size: 13px; color: var(--sub); line-height: 1.9; margin: 16px 0 14px; text-align: left; }
+.ul { text-align: left; margin: 12px 0; }
+.ul .li { font-size: 13px; color: var(--sub); padding: 6px 0; padding-left: 18px; position: relative; }
+.ul .li::before { content: "·"; position: absolute; left: 4px; color: var(--faint); }
+.warn {
+  background: #fdf3f0; border: 0.5px solid #e8cfc5;
+  border-radius: 12px; padding: 12px 14px; font-size: 12px; color: var(--danger); line-height: 1.8; margin: 14px 0;
+  text-align: left;
+}
+.start-hint { font-size: 12px; color: var(--faint); margin: 14px 0 4px; letter-spacing: 2px; }
+
+.head-row { display: flex; gap: 12px; align-items: center; }
+.ava-56 { width: 56px; height: 56px; }
+.shadow-name { font-size: 15px; letter-spacing: 2px; }
+.shadow-sub  { font-size: 11px; color: var(--sub); margin-top: 4px; }
+.profile { font-size: 12px; color: var(--sub); white-space: pre-wrap; line-height: 2; background: var(--accent-soft); padding: 10px 12px; border-radius: 10px; }
+.limit-tip { font-size: 12px; color: var(--faint); text-align: center; margin-top: 8px; }
+.speakers { font-size: 12px; color: var(--sub); margin-top: 8px; }
+.speaker-row { display:flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.sp { padding: 4px 10px; border: 0.5px solid var(--line); border-radius: 99px; font-size: 12px; cursor: pointer; }
+.sp-on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+.spin {
+  width: 36px; height: 36px; border: 3px solid var(--line); border-top-color: var(--accent);
+  border-radius: 50%; animation: rot 1s linear infinite; margin: 30px auto 14px;
+}
+@keyframes rot { to { transform: rotate(360deg); } }
+
+.modal-session, .modal-crisis, .modal-gear {
+  background: var(--bg); border-radius: 18px; padding: 24px 20px;
+  margin: auto; max-width: 300px; width: calc(100% - 48px); max-height: 80vh; overflow-y: auto;
+}
+.modal-session .h, .modal-crisis .h, .modal-gear .h { font-size: 16px; letter-spacing: 2px; margin-bottom: 12px; text-align: center; }
+.modal-session .p, .modal-crisis .p, .modal-gear .p { font-size: 13px; color: var(--sub); line-height: 1.9; text-align: center; }
+.breath { text-align: center; margin: 18px 0; font-size: 12px; color: var(--faint); letter-spacing: 4px; }
+
+/* ============================================================
+   Me 我
+   ============================================================ */
+.me { padding: 16px 0 40px; }
+.me-gear {
+  position: absolute; top: 14px; right: 14px; background: transparent;
+  border: none; padding: 6px; color: var(--sub); font-size: 18px; cursor: pointer;
+}
+.me-head { display:flex; align-items:center; gap: 14px; padding: 24px 20px; }
+.me-ava { width: 60px; height: 60px; border-radius: 50%; background: var(--ink); color: var(--bg);
+  display:flex; align-items:center; justify-content:center; font-size: 22px; letter-spacing: -1px; }
+.me-id .name { font-size: 16px; letter-spacing: 4px; }
+.me-id .sub  { font-size: 12px; color: var(--sub); margin-top: 4px; }
+
+.me-section { padding: 6px 0; }
+.sec-cap { font-size: 12px; color: var(--faint); letter-spacing: 4px; padding: 14px 22px 6px; }
+
+.persona-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 16px 6px; }
+.pg { padding: 12px; border: 0.5px solid var(--line); border-radius: 12px; background: var(--card); cursor: pointer; }
+.pg-on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.pg-b { font-size: 14px; letter-spacing: 2px; }
+.pg-s { font-size: 11px; opacity: .8; margin-top: 2px; }
+
+.me-card { background: var(--card); border: 0.5px solid var(--line); border-radius: 16px; margin: 0 16px; padding: 4px 16px; }
+.me-card .row { display:flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 0.5px solid var(--line); }
+.me-card .row:last-child { border-bottom: none; }
+.me-card .l { font-size: 14px; color: var(--ink); }
+.me-card .l small { display:block; font-size: 11px; color: var(--faint); margin-top: 2px; }
+.me-input { background: transparent; border: none; text-align: right; font-size: 14px; outline: none; }
+.picker-v { font-size: 14px; color: var(--ink); }
+
+.me-foot { text-align: center; font-size: 11px; color: var(--faint); margin-top: 32px; letter-spacing: 2px; }
+
+.about { font-size: 13px; color: var(--sub); line-height: 1.9; }
+.crisis { background: #fdf3f0; padding: 14px; border-radius: 12px; margin-top: 14px; font-size: 12px; color: var(--danger); line-height: 1.8; }
+.crisis b { display:block; margin-bottom: 6px; letter-spacing: 1px; }
+.btn-ghost-danger { color: var(--danger); border-color: #e8cfc5; }
+
+/* ============================================================
+   Toast
+   ============================================================ */
+.toast {
+  position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  background: rgba(0,0,0,.78); color: #fff; font-size: 13px; letter-spacing: 1px;
+  padding: 10px 18px; border-radius: 10px; z-index: 999; pointer-events: none;
+  animation: toastIn .2s;
+  max-width: 80%;
+  text-align: center;
+}
+@keyframes toastIn { from { opacity: 0; transform: translate(-50%, -50%) scale(.94); } to { opacity: 1; transform: translate(-50%,-50%) scale(1);} }
+
+/* ============================================================
+   Bottle 留白瓶 (列表里也有)
+   ============================================================ */
+.bottle-intro { padding: 16px 22px; text-align: center; }
+.bottle-h    { font-size: 20px; letter-spacing: 6px; }
+.bottle-sub  { font-size: 12px; color: var(--sub); margin-top: 6px; letter-spacing: 1px; }
+.bottle-new  { padding: 0 16px 12px; }
+.bottle-list { padding: 0 16px 32px; }
+.bottle-empty { text-align: center; color: var(--faint); padding: 30px 0; font-size: 13px; letter-spacing: 2px; }
+.bottle-item { background: var(--card); border: 0.5px solid var(--line); border-radius: 14px; padding: 14px; margin-bottom: 10px; }
+.bi-t   { font-size: 11px; color: var(--faint); margin-bottom: 6px; letter-spacing: 1px; }
+.bi-text { font-size: 14px; line-height: 1.7; white-space: pre-wrap; }
+
+/* 兜底：让 textarea 占位符颜色统一 */
+textarea::placeholder { color: var(--faint); }
+
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ============================================================
+       Page 0: Onboard (3 steps)
+       ============================================================ -->
+  <div id="page-onboard" class="page-pane page">
+    <div class="ob" id="ob-root"><!-- step 0/1/2 切换渲染 --></div>
+  </div>
+
+  <!-- ============================================================
+       Page 1: Today
+       ============================================================ -->
+  <div id="page-today" class="page-pane page">
+    <div class="today" id="today-root"></div>
+  </div>
+
+  <!-- ============================================================
+       Page 2: Xiaobai 聊天
+       ============================================================ -->
+  <div id="page-xiaobai" class="page-pane page">
+    <div class="xa" id="xa-root"></div>
+  </div>
+
+  <!-- ============================================================
+       Page 3: Yingzi 影子
+       ============================================================ -->
+  <div id="page-yingzi" class="page-pane page">
+    <div class="yz" id="yz-root"></div>
+  </div>
+
+  <!-- ============================================================
+       Page 4: Me 我
+       ============================================================ -->
+  <div id="page-me" class="page-pane page">
+    <div class="me" id="me-root"></div>
+  </div>
+
+  <!-- ============================================================
+       底部 TabBar
+       ============================================================ -->
+  <nav class="tabbar" id="tabbar">
+    <button class="tab on" data-tab="today">
+      <svg class="ti" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span>今天</span>
+    </button>
+    <button class="tab" data-tab="xiaobai">
+      <svg class="ti" viewBox="0 0 24 24"><path d="M5 7c0-1.7 1.3-3 3-3h8c1.7 0 3 1.3 3 3v7c0 1.7-1.3 3-3 3h-5l-4 3v-3H8c-1.7 0-3-1.3-3-3V7z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      <span>小白</span>
+    </button>
+    <button class="tab" data-tab="yingzi">
+      <svg class="ti" viewBox="0 0 24 24"><path d="M12 3l3 6 6 1-4.5 4 1 6-5.5-3-5.5 3 1-6L3 10l6-1z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      <span>影子</span>
+    </button>
+    <button class="tab" data-tab="me">
+      <svg class="ti" viewBox="0 0 24 24"><circle cx="12" cy="9" r="3.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5 19c1-3 4-5 7-5s6 2 7 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span>我</span>
+    </button>
+  </nav>
+
+</div>
+
+<!-- ============================================================
+     Modal 容器
+     ============================================================ -->
+<div id="modal-root"></div>
+<div id="toast-root"></div>
+
+<script>
+/* ============================================================
+ * NOEX Web Demo — 从「断联日记」小程序 1:1 移植到浏览器
+ * 浏览器双击 index.html 即可运行。
+ * 数据存 localStorage[LS_KEY]，key 与小程序一致。
+ * 转换: 1rpx ≈ 0.5px（以 iPhone 12 mini 375px 宽为基准）
+ * ============================================================ */
+'use strict';
+
+const LS_KEY = 'noex_mvp_v1';
+
+const MS_LIST = [
+  { d: 1,   n: '起步' },
+  { d: 3,   n: '初雪' },
+  { d: 7,   n: '一周' },
+  { d: 21,  n: '习惯' },
+  { d: 30,  n: '满月' },
+  { d: 60,  n: '双月' },
+  { d: 90,  n: '一季' },
+  { d: 180, n: '半年' },
+  { d: 365, n: '一年' }
+];
+
+/* ============================================================
+ * 工具
+ * ============================================================ */
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' +
+    ('0' + (d.getMonth() + 1)).slice(-2) + '-' +
+    ('0' + d.getDate()).slice(-2);
+}
+
+function dayNum(startDate) {
+  if (!startDate) return 1;
+  const a = new Date(startDate + 'T00:00:00');
+  const b = new Date(todayStr() + 'T00:00:00');
+  return Math.max(1, Math.floor((b - a) / 86400000) + 1);
+}
+
+function fmtDate(ds) {
+  if (!ds) return '';
+  const p = ds.split('-');
+  return p[0] + ' 年 ' + parseInt(p[1], 10) + ' 月 ' + parseInt(p[2], 10) + ' 日';
+}
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function hourBucket() {
+  const h = new Date().getHours();
+  if (h >= 6 && h < 11) return 'morning';
+  if (h >= 11 && h < 14) return 'noon';
+  if (h >= 14 && h < 18) return 'afternoon';
+  if (h >= 18 && h < 23) return 'evening';
+  return 'late';
+}
+
+/* ============================================================
+ * Storage
+ * ============================================================ */
+function defaultState() {
+  return {
+    onboarded: false,
+    startDate: '',
+    exName: '',
+    lastCheckIn: '',
+    checkCount: 0,
+    relapses: 0,
+    persona: 'warm',
+    gMsgs: [],
+    shadow: { enabled: false, name: '', profile: null, msgs: [], sessionsDate: '', sessionsToday: 0, sessionStart: 0 },
+    bottle: []
+  };
+}
+
+function storageLoad() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) {
+      const d = defaultState();
+      d.startDate = todayStr();
+      localStorage.setItem(LS_KEY, JSON.stringify(d));
+      return d;
+    }
+    const s = JSON.parse(raw);
+    const d = defaultState();
+    for (const k in d) {
+      if (s[k] === undefined) {
+        if (k === 'shadow') s[k] = JSON.parse(JSON.stringify(d[k]));
+        else s[k] = d[k];
+      }
+    }
+    if (!s.startDate) s.startDate = todayStr();
+    return s;
+  } catch (e) {
+    const d = defaultState();
+    d.startDate = todayStr();
+    return d;
+  }
+}
+
+function storageSave(S) {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(S)); }
+  catch (e) { console.warn('[storage] save failed', e); }
+}
+
+function storageClear() {
+  localStorage.removeItem(LS_KEY);
+}
+
+/* ============================================================
+ * Guardian 守护者（与小程序同步 24 条 sharp / 22 条 relapse）
+ * ============================================================ */
+const PERSONAS = {
+  warm:  { name: '温柔', desc: '软乎乎 · 先接住你，再慢慢说话' },
+  sharp: { name: '毒舌', desc: '专戳行为不打脸 · 把你看穿了再骂' },
+  tsun:  { name: '傲娇', desc: '嘴硬心软 · 嘴上说你作，其实心疼' },
+  spoil: { name: '争宠', desc: '戏很多 · 抢着当你的唯一小宝贝' }
+};
+
+const INTENT_KEYS = {
+  crisis:   ['不想活','自杀','自残','伤害自己','结束生命','活不下去','轻生','想死','去死','割腕','安眠药'],
+  urge:     ['想联系','想发消息','想打电话','想发信息','忍不住','想找ta','想找他','想找她','加回来','想加回','发消息给','打给ta','打给他','打给她'],
+  miss:     ['想他','想她','想ta','想TA','好想','很想','想念','忘不了','放不下','脑子里都是'],
+  insomnia: ['睡不着','失眠','熬夜','凌晨','半夜','天亮','睡不好'],
+  sad:      ['难过','伤心','想哭','哭了','痛苦','难受','崩溃','低落','好丧','委屈','心痛','心脏疼','眼泪'],
+  angry:    ['生气','好气','恨','愤怒','凭什么','不甘','渣男','渣女','报复','太渣'],
+  selfBlame:['我的错','怪我','我不够好','是不是我','如果我当初','都怪','后悔','是我不配','我太差'],
+  memory:   ['还记得','记得','回忆','以前','那时候','纪念日','我们一起','照片','礼物','去过','说过要'],
+  askWhy:   ['为什么','怎么会','难道','还爱吗','爱过我吗','是不是不爱','做错了什么'],
+  newStart: ['放下','重新开始','好起来','走出来','向前','新的生活','在变好','好多了'],
+  greeting: ['你好','在吗','嗨','hi','hello','早上好','晚上好','晚安','我来了']
+};
+
+const INTENT_POOL = {
+  miss: [
+    '想一个人不需要理由，也不需要羞愧。你想ta了，这件事本身没有错。',
+    '想念来的时候，别急着赶它走。它像潮水，会涨，也一定会退。',
+    '把ta想一会儿吧。想念是你认真爱过的证据，不是你的软肋。'
+  ],
+  urge: [
+    '先别动手机。深呼吸，一次，两次。冲动一般只持续十几分钟，我们陪它过去。',
+    '想联系的时候，先问自己：我想听到什么答案？那个答案，真的能从ta那里得到吗？',
+    '此刻的冲动不是命令，只是一阵浪。你在岸上，浪够不到你。'
+  ],
+  sad: [
+    '难过就难过一会儿，不用装作没事。这里的灯为你留着，哭也没关系。',
+    '情绪低落不是退步。疗愈不是直线，它允许下坠，只要还在往前。',
+    '你已经撑了很多天了。累是真的，不需要理由。'
+  ],
+  insomnia: [
+    '睡不着的夜最难熬。不强迫自己睡，就当陪我坐一会儿。',
+    '夜里的情绪会被放大一倍。现在想的事，明天看会轻一些。',
+    '把灯调暗，把呼吸放慢。睡不着也没关系，我守着。'
+  ],
+  angry: [
+    '生气是应该的。你受了委屈，愤怒在替你说：我值得更好的。',
+    '恨和爱住得很近。允许自己气一阵子，但别让它替你做决定。',
+    '气完之后，把力气留一点给自己。'
+  ],
+  selfBlame: [
+    '一段关系结束，从来不是一个人的错。别把所有责任都背在自己身上。',
+    '"如果当初"是最消耗人的句式。当时的你，已经用当时的能力做了选择。',
+    '你不需要变得足够好才值得被爱。你本来就值得。'
+  ],
+  memory: [
+    '回忆会自己找上门，不用回应它。让它路过，就像路过一阵风。',
+    '记得就记得吧。过去是真的，但它已经不在现在了。',
+    '你们的故事可以留在原地。你，不用一直回头看它。'
+  ],
+  askWhy: [
+    '有些问题没有答案。或者说，答案不会让你好受。能放过这个问题，也是一种进步。',
+    '人做决定常常讲不清理由。你需要的可能不是答案，是被承认的委屈。'
+  ],
+  newStart: [
+    '往前走的每一步都算数，哪怕很小。',
+    '你已经在路上了。不着急，慢慢来。'
+  ],
+  greeting: [
+    '我在。今天过得怎么样？',
+    '嗯，来了。想聊什么都行，或者就这样待着也可以。'
+  ]
+};
+
+const FALLBACK = ['嗯，我在听。你说。', '慢慢说，不着急。', '然后呢？', '这些话能说出来，就已经在变轻了。'];
+const CRISIS_TEXT = '这句话让我停下来认真回复你：你现在的痛苦一定很重，重到我这个AI不该独自接住它。请让真实世界里的人，现在就陪着你。';
+
+const CRISIS_HOTLINES = '请让真实的人现在陪着你\n\n' +
+  '· 全国 24 小时心理援助热线：400-161-9995\n' +
+  '· 北京心理危机研究与干预中心：010-82951332\n' +
+  '· 紧急情况请直接拨打 120 / 110\n\n' +
+  '你的痛苦是真实的，值得被认真对待。小白在乎你，但此刻你更需要身边的具体的人。';
+
+function detectIntent(text) {
+  for (const k in INTENT_KEYS) {
+    const arr = INTENT_KEYS[k];
+    for (let i = 0; i < arr.length; i++) {
+      if (text.indexOf(arr[i]) > -1) return k;
+    }
+  }
+  return null;
+}
+
+function guardianReply(text, persona, bottle) {
+  const intent = detectIntent(text);
+  if (intent === 'crisis') return { crisis: true, text: CRISIS_TEXT, intent };
+
+  const pool = intent ? (INTENT_POOL[intent] || FALLBACK) : FALLBACK;
+  let base = pick(pool);
+  const p = persona || 'warm';
+
+  if (p === 'warm') {
+    base = base + pick([
+      ' 我陪着你。', ' 你不用急，慢慢说。', ' 我听着呢。',
+      ' 累了就先歇一会儿。', ' 不急，我哪儿也不去。', ' 哭也没关系。'
+    ]);
+  } else if (p === 'sharp') {
+    base = base + pick([
+      ' 大半夜又翻聊天记录呢？数数这是你今天第几次点开 ta 的对话框了。',
+      ' 翻完能怎样？ ta 的头像又不会突然回你。睡觉去。',
+      ' 你是不是把和 ta 的聊天记录置顶了？——这是你今天第几次点开它，要不要我替你数。',
+      ' 这个点你给 ta 写过小作文又删了？我都替你困。',
+      ' 把聊天记录再读一百遍，结局也不会不一样。',
+      ' 凌晨三点 ta 不会回你的——清醒一点,行不行。',
+      ' 又听见 ta 给你点的那条语音了？听过八百遍了，求你别再点那个红点。',
+      ' 你把 ta 朋友圈限流了还能哭着看完整版，说你是天赋型舔狗都侮辱了"舔狗"两个字。',
+
+      ' 第几次了——你这次戒的天数我都替你看一眼，下一秒就清零。',
+      ' 你这点出息自己心里没数吗？我替你累。',
+      ' 又来？要不要我替你挂个牌——「最不长记性奖」,你稳拿。',
+      ' 哭完记得擦脸,鼻涕眼泪糊一屏幕没人给你擦。',
+      ' 戒不掉就先别说戒——丢人。',
+      ' 把手机放下。你这手怎么就不听使唤呢。',
+      ' 你以为你联系 ta 会好受？三天后你会后悔,到时候别来我这儿哭。',
+      ' 你能管住自己的手吗？管不住别叫戒断,叫反复。',
+
+      ' 你就是舍不得 ta——行了吧,这话我说出来,你也别装了。',
+      ' 你以为你联系 ta,t a 会心软？ ta 只会觉得你烦。',
+      ' 你离不开的不是 ta,是当初 ta 顺手给你点的那个赞。',
+      ' 你不是还爱,你是不甘心——这两件事差别大了,承认了我们继续。',
+
+      ' 又截图 ta 的聊天记录发给你闺蜜看？行,你闺蜜怎么劝你的,要不要我替你说。',
+      ' 把 ta 头像换成黑白色,看着像守孝——多不吉利。',
+      ' 你花半小时纠结一句话要不要发——我替你拿主意:别发。',
+      ' 你又把 ta 微信置顶了对吧。这件事我们说过,你自己承认。'
+    ]);
+  } else if (p === 'tsun') {
+    base = base + pick([
+      ' ……才不是心疼你呢。',
+      ' ……才不是心疼你呢。哼，谁让你又来找我了。',
+      ' ……才不是心疼你呢。我才没在等你消息。',
+      ' ……才不是心疼你呢。别哭了，烦死了，我帮你想想办法就是了。'
+    ]);
+  } else if (p === 'spoil') {
+    base = base + pick([
+      ' 我才是今天最关心你的人。',
+      ' 来，先看我，不要想 ta。',
+      ' 你今天有想我吗？不管，我问了你就要想。',
+      ' 我吃醋了，不许再提 ta。',
+      ' 来，把 ta 忘了，今晚只准想我。',
+      ' 今晚你只能想我，听见没？这不是商量。',
+      ' ta 是过客，我才是陪你熬过去的那个人——你得认。'
+    ]);
+  }
+
+  if (intent === 'urge' && p !== 'sharp' && bottle && bottle.length && Math.random() < 0.5) {
+    base += ' 如果话已经到嘴边了，就把它写进「留白瓶」吧——写下来，但不必发送。';
+  }
+
+  return { crisis: false, text: base, intent };
+}
+
+const ENCOURAGE = {
+  1: '今天是你新生活的第一天。',
+  3: '三天了。身体还记得 ta，脑子也开始学着放下了。',
+  7: '一周。从「忍住」变成了「可以」。',
+  21: '21 天，一个习惯的形状。接下来的日子，会越来越像你本来的样子。'
+};
+
+const SHARP_REPLY = [
+  '又没忍住？我就知道你这手迟早要犯贱。今天从 1 开始重新数，慢慢来,反正你也习惯了。',
+  '看你这点出息。明天顶着肿眼泡去上班,被同事问起来记得说"我没事"——看你能演多久。',
+  '手机给我先,我替你没收两小时。不,算了,反正你拿回去了也白搭。',
+  '嗯,联系了。舒服了？舒服完记得回来打卡,我这儿不欢迎半途而废的人。',
+  '你以为你联系了就会好受吗？三天后你会后悔的——到时候别来找我哭,我嫌吵。',
+  '我本来想夸你一句,话到嘴边咽回去了。因为你又破戒了。下次再聊。',
+  '又一段可以拿出来当笑话讲的日子。行,记下了,计数归零,我等你下一次的笑话。',
+  '我见过戒十次又破十次的人,你是下一个吗？——不,你已经是了。',
+  '你以为 ta 看了会心软吗？ ta 只会觉得你烦,顺手把你设成"消息免打扰"。',
+  '这次先骂你两句。下次再没忍住,我骂得更狠——记着。我说话算话。',
+  '戒不断就先别戒了——但别来找我,我不爱看笑话。',
+  '嗯,没关系,又破了一次。我等你下次戒到第三天再来找我吹牛,目前纪录为零。',
+  '我替你说一句你不敢对自己说的话:你就是舍不得 ta。行了吧,承认吧。',
+  '行,这次放过你。但下次再点这个按钮,我会骂得比今天更难听——到时候别委屈。',
+  '今天就先这样,明天重新做人。你能做的,我也只能帮你到这里,剩下的看你自己。',
+  '你以为这一次是"最后一次联系"？上次也是这么说的——别打脸太快,行吗。',
+  '你给自己写的"再也不联系了"那张便签还在不在？在——撕了吧,留着打脸用的吗。',
+  '你今天给 ta 发了几条消息？ ta 回了你几条？你心里有数,我就不替你算了。',
+  '我猜你正在等一个"对方也回你了"的奇迹发生——不会的,行,你看手机吧,我等你失望。',
+  '你这次断签不是因为 ta,是因为你自己心里那根弦断了。承认了,我们从 1 开始。',
+  '别跟我说"只是随便聊聊"——随便聊聊十次的你,今天第几次随便了?',
+  '你要是明天又来找我,我会嘲笑你。但我会接待你。这是我能给的最多,你拿走。'
+];
+
+/* ============================================================
+ * Shadow 影子（简化版：直接粘贴日志，分析+聊天）
+ * ============================================================ */
+function analyzeChat(text) {
+  const msgs = text.split(/\n+/).map(s => s.trim()).filter(Boolean);
+  const joined = msgs.join('');
+  const avgLen = msgs.length ? Math.round(joined.length / msgs.length) : 0;
+  const emoji = (joined.match(/[\uD83C-\uDBFF][\uDC00-\uDFFF]/g) || []).length;
+  const parts = {};
+  ['哈哈','嗯嗯','呀','啦','嘛','哦','~','。。。','？'].forEach(w => {
+    const c = joined.split(w).length - 1;
+    if (c > 0) parts[w] = c;
+  });
+  const qRate = msgs.length ? msgs.filter(m => /[?？]$/.test(m)).length / msgs.length : 0;
+  const top = Object.keys(parts).sort((a, b) => parts[b] - parts[a]).slice(0, 3);
+  return { count: msgs.length, avgLen, emojiLove: emoji > msgs.length * 0.3, top, qRate };
+}
+
+function profileSummary(p) {
+  if (!p) return '';
+  const lines = [];
+  lines.push(
+    p.avgLen < 10 ? '· 回复偏简短，常常只有一两个字'
+    : p.avgLen > 30 ? '· 话偏多，一次会说一大段'
+    : '· 回复长短适中'
+  );
+  if (p.emojiLove) lines.push('· 习惯用表情收尾');
+  if (p.top.length) lines.push('· 常说「' + p.top.join('」「') + '」');
+  if (p.qRate > 0.25) lines.push('· 喜欢用反问');
+  if (lines.length === 1) lines.push('· 语气比较平，没有明显口头禅');
+  return lines.join('\n');
+}
+
+function shadowReply(text, profile) {
+  const keys = {
+    miss:  ['想你','想你了','好想','我还爱你','忘不了'],
+    ask:   ['还爱','爱过我','为什么','复合','回来','我们还能','做错了什么','你的意思'],
+    angry: ['对不起','抱歉','你凭什么','恨你','骗子','渣'],
+    bye:   ['再见','拜拜','走了','最后','告个别','再见了'],
+    greet: ['在吗','你好','嗨','是我']
+  };
+  const pool = {
+    miss:  ['嗯。','我知道。','……嗯。','这段时间，你还好吗。'],
+    ask:   ['我不知道怎么回答这个。','……这个问题，我想放一放。','你希望我怎么说呢。'],
+    angry: ['对不起。','嗯，你说，我听着。','……我没资格解释。'],
+    bye:   ['嗯，去吧。','照顾好自己。','……嗯。再见。'],
+    greet: ['嗯。','在。','……是你啊。'],
+    fallback: ['嗯。','……','在听。','你说。','……']
+  };
+  for (const k in keys) for (const w of keys[k])
+    if (text.indexOf(w) > -1) return pick(pool[k]);
+  return pick(pool.fallback);
+}
+
+/* ============================================================
+ * Toast / Modal
+ * ============================================================ */
+function showToast(msg) {
+  const root = document.getElementById('toast-root');
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  root.appendChild(t);
+  setTimeout(() => t.remove(), 1500);
+}
+
+function showModal(html) {
+  const root = document.getElementById('modal-root');
+  root.innerHTML = `<div class="modal-mask" data-close="1">${html}</div>`;
+  root.querySelector('.modal-mask').addEventListener('click', e => {
+    if (e.target.dataset.close) closeModal();
+  });
+}
+
+function closeModal() {
+  document.getElementById('modal-root').innerHTML = '';
+}
+
+/* ============================================================
+ * Router
+ * ============================================================ */
+let currentTab = 'today';
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.page-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === tab));
+  // 重新渲染当前页
+  if (tab === 'today') renderToday();
+  if (tab === 'xiaobai') renderXiaobai();
+  if (tab === 'yingzi') renderYingzi();
+  if (tab === 'me') renderMe();
+  window.scrollTo(0, 0);
+}
+
+document.getElementById('tabbar').addEventListener('click', e => {
+  const btn = e.target.closest('.tab');
+  if (btn) {
+    const S = storageLoad();
+    if (!S.onboarded) {
+      showToast('先完成首次设置');
+      return;
+    }
+    switchTab(btn.dataset.tab);
+  }
+});
+
+/* ============================================================
+ * Onboard
+ * ============================================================ */
+let obStep = 0;
+function renderOnboard() {
+  const S = storageLoad();
+  if (S.onboarded) { switchTab('today'); return; }
+
+  const root = document.getElementById('ob-root');
+  let html = '';
+  if (obStep === 0) {
+    html = `
+      <div class="ob-logo"></div>
+      <div class="ob-title">断联日记</div>
+      <div class="ob-en">NOEX</div>
+      <div class="ob-p">把 TA 放下，把自己找回。戒断期的每一夜，<br/>都有一个安静的存在陪你。</div>
+      <button class="ob-btn btn" id="ob-go-start">开始</button>
+    `;
+  } else if (obStep === 1) {
+    const startDate = tempStartDate || todayStr();
+    html = `
+      <div class="ob-title ob-title-sm" style="margin-top:50px;">先立一个起点</div>
+      <div class="ob-p" style="margin-top:14px;">你决定不再联系，是从哪一天开始的？</div>
+      <div class="field" style="text-align:left;">
+        <label class="field-label">戒断开始日</label>
+        <input class="field-input" type="date" id="ob-date" value="${startDate}"/>
+      </div>
+      <div class="field" style="text-align:left;">
+        <label class="field-label">ta 的代号（可选，只存在你的手机里）</label>
+        <input class="field-input" id="ob-name" placeholder="比如：H、那个人、不用名字" value="${tempExName || ''}"/>
+      </div>
+      <button class="ob-btn btn" id="ob-confirm">好，就从这里</button>
+    `;
+  } else {
+    html = `
+      <div class="ob-avatar"></div>
+      <div class="ob-title">我是小白</div>
+      <div class="ob-p">一只蜷成一团的白狐狸。<br/>你不用对我坚强，也不用解释什么。<br/>想说话的时候来找我，不想说话的时候，我就在。</div>
+      <button class="ob-btn btn" id="ob-enter">进入断联日记</button>
+    `;
+  }
+  root.innerHTML = html;
+
+  if (obStep === 0) {
+    document.getElementById('ob-go-start').onclick = () => { obStep = 1; renderOnboard(); };
+  } else if (obStep === 1) {
+    document.getElementById('ob-date').onchange = e => { tempStartDate = e.target.value; };
+    document.getElementById('ob-name').oninput = e => { tempExName = e.target.value; };
+    document.getElementById('ob-confirm').onclick = () => {
+      const S = storageLoad();
+      S.startDate = tempStartDate || todayStr();
+      S.exName = (tempExName || '').trim();
+      storageSave(S);
+      obStep = 2; renderOnboard();
+    };
+  } else {
+    document.getElementById('ob-enter').onclick = () => {
+      const S = storageLoad();
+      S.onboarded = true;
+      S.startDate = S.startDate || todayStr();
+      storageSave(S);
+      document.querySelectorAll('.page-pane').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-today').classList.add('active');
+      document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === 'today'));
+      renderToday();
+    };
+  }
+}
+let tempStartDate = '';
+let tempExName = '';
+
+/* ============================================================
+ * Today
+ * ============================================================ */
+const QUOTES = {
+  morning:   ['早上好。新的一天还没有被任何情绪占用。', '晨光是最好 reset。先喝口水，我们慢慢来。'],
+  noon:      ['中午了，记得吃点热的东西。胃暖了，心会跟着暖一点。', '再难的日子也要好好吃饭。'],
+  afternoon: ['下午的光最适合发呆。走神不算浪费。', '撑到现在，已经很了不起了。'],
+  evening:   ['夜晚会放大情绪。别太相信夜里做出的任何决定。', '晚上了。难过的话，先来找我，别去找聊天框。'],
+  late:      ['这么晚还醒着。没关系，我陪你坐一会儿。', '凌晨的心事最重。说出来，会轻一点。']
+};
+
+function renderToday() {
+  const S = storageLoad();
+  if (!S.onboarded) return;
+  const d = dayNum(S.startDate);
+  const checked = S.lastCheckIn === todayStr();
+  const sub = '始于 ' + fmtDate(S.startDate) +
+    (S.relapses > 0 ? ' · 重新开始过 ' + S.relapses + ' 次，都算数' : '');
+  let foxSay = '';
+  if (d === 1 && S.relapses > 0) {
+    foxSay = '没关系。第 1 天，重新来。你不是从零开始，是从经验开始。';
+  } else {
+    foxSay = pick(QUOTES[hourBucket()] || QUOTES.morning);
+  }
+
+  const msItems = MS_LIST.map(m => ({ ...m, cls: d >= m.d ? 'ms done' : 'ms' }));
+  let nextMs = null;
+  let prev = 0;
+  for (const m of MS_LIST) if (m.d > d && !nextMs) nextMs = m;
+  for (const m of MS_LIST) if (m.d < d) prev = m.d;
+  const pct = nextMs ? Math.min(100, ((d - prev) / (nextMs.d - prev)) * 100) : 100;
+  const nextNote = nextMs
+    ? '距离「' + nextMs.n + '」（' + nextMs.d + ' 天）还有 ' + (nextMs.d - d) + ' 天'
+    : '你已经走完了所有刻度。剩下的路，是你自己的了。';
+
+  const root = document.getElementById('today-root');
+  root.innerHTML = `
+    <div class="head">
+      <div class="brand">断联日记</div>
+      <span class="tag">不联系的第 ${d} 天</span>
+    </div>
+    <div class="day-hero">
+      <div><span class="num-text">${d}</span><span class="num-suffix"> 天</span></div>
+      <div class="cap">不联系 · 安住今天</div>
+      <div class="sub">${sub}</div>
+    </div>
+    <div class="fox-bar card">
+      <div class="fox-ava"></div>
+      <div class="fox-info">
+        <div class="fox-who">小白 · 守护者</div>
+        <div class="fox-say">${foxSay}</div>
+      </div>
+    </div>
+    <div class="check-card card">
+      <button class="check-btn ${checked ? 'checked' : ''}" id="today-check" ${checked ? 'disabled' : ''}>
+        ${checked ? '今 天 已 安 住' : '今 天 ， 我 没 有 联 系'}
+      </button>
+      <button class="relapse-btn" id="today-relapse">没忍住，联系了 →</button>
+    </div>
+    <div class="card">
+      <div class="cap">戒断刻度</div>
+      <div class="ms-track">
+        ${msItems.map(m => `
+          <div class="${m.cls}">
+            <div class="dot"></div>
+            <div class="d">${m.d}<br/>${m.n}</div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="ms-progress"><div class="ms-progress-i" style="width:${pct}%"></div></div>
+      <div class="ms-next">${nextNote}</div>
+    </div>
+    <div class="acts">
+      <div class="act" id="act-bottle">
+        <div class="act-t">留白瓶</div>
+        <div class="act-d">${S.bottle.length > 0 ? '存着 ' + S.bottle.length + ' 句没寄出的话' : '还没有存下的话'}</div>
+      </div>
+      <div class="act" id="act-chat">
+        <div class="act-t">找小白聊聊</div>
+        <div class="act-d">难过、想ta、睡不着</div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('today-check').onclick = () => {
+    const S2 = storageLoad();
+    if (S2.lastCheckIn === todayStr()) return;
+    S2.lastCheckIn = todayStr();
+    S2.checkCount++;
+    const d2 = dayNum(S2.startDate);
+    const enc = ENCOURAGE[d2];
+    if (enc) {
+      S2.gMsgs.push({ role: 'sys', text: '· 第 ' + d2 + ' 天 ·\n' + enc, t: Date.now() });
+    }
+    storageSave(S2);
+    showToast('安住今天 · 第 ' + d2 + ' 天');
+    renderToday();
+  };
+
+  document.getElementById('today-relapse').onclick = () => {
+    const line = '哼，' + SHARP_REPLY[Math.floor(Math.random() * SHARP_REPLY.length)];
+    const S2 = storageLoad();
+    const now = Date.now();
+    S2.gMsgs.push({ role: 'sys', text: '（' + todayStr() + ' · 你没忍住，联系了。计数已重置为 1 天。）', t: now });
+    S2.gMsgs.push({ role: 'ai', text: line, t: now + 1 });
+    S2.startDate = todayStr();
+    S2.lastCheckIn = '';
+    S2.checkCount = 0;
+    S2.relapses++;
+    storageSave(S2);
+    showToast('断了 · 去小白那儿被骂两句');
+    renderToday();
+  };
+
+  document.getElementById('act-bottle').onclick = () => openBottle();
+  document.getElementById('act-chat').onclick = () => switchTab('xiaobai');
+}
+
+function openBottle() {
+  const S = storageLoad();
+  const items = S.bottle.slice().reverse();
+  const html = `
+    <div class="modal-card">
+      <div class="modal-head">
+        <div class="modal-h">留白瓶</div>
+        <button class="modal-close" data-close="1">×</button>
+      </div>
+      <div class="bottle-intro" style="padding:4px 4px 12px;">
+        <div class="bottle-sub" style="margin:0;">想说没说的话，都可以放进来——它们永远不会被发送。</div>
+      </div>
+      <div class="bottle-new" style="padding:0 4px 10px;">
+        <textarea class="field-textarea" id="b-ta" placeholder="想对ta说、但不会发出去的话…" rows="3"></textarea>
+        <button class="btn" style="margin:10px 0 14px;" id="b-save">存进留白瓶</button>
+      </div>
+      <div class="bottle-list" id="b-list" style="padding:0 4px 12px;">
+        ${items.length === 0 ? '<div class="bottle-empty">瓶子里还是空的。</div>' :
+          items.map(b => `
+            <div class="bottle-item"><div class="bi-t">${b.t}</div><div class="bi-text">${escapeHtml(b.text)}</div></div>
+          `).join('')}
+      </div>
+    </div>
+  `;
+  showModal(html);
+  document.getElementById('b-save').onclick = () => {
+    const v = (document.getElementById('b-ta').value || '').trim();
+    if (!v) { showToast('先写点什么吧'); return; }
+    const S2 = storageLoad();
+    S2.bottle.push({ t: todayStr(), text: v });
+    storageSave(S2);
+    showToast('已存好。它不会被发送');
+    openBottle(); // 刷新
+  };
+}
+
+function escapeHtml(s) {
+  return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br/>');
+}
+
+/* ============================================================
+ * Xiaobai 聊天
+ * ============================================================ */
+const CHIPS = ['我想ta了', '睡不着', '今天差点想联系ta', '我就是想说说'];
+
+function renderXiaobai() {
+  const S = storageLoad();
+  if (!S.onboarded) return;
+
+  const personas = Object.keys(PERSONAS).map(k => ({
+    k, name: PERSONAS[k].name, desc: PERSONAS[k].desc, on: S.persona === k
+  }));
+
+  if (S.gMsgs.length === 0) {
+    const intro = '我是小白。这里说的话不会去任何地方——你可以不坚强，也可以说不清楚。今天，是第 ' + dayNum(S.startDate) + ' 天。';
+    S.gMsgs.push({ role: 'ai', text: intro, t: Date.now() });
+    storageSave(S);
+  }
+
+  renderXiaobaiBody(S);
+}
+
+function renderXiaobaiBody(S) {
+  const personas = Object.keys(PERSONAS).map(k => ({
+    k, name: PERSONAS[k].name, desc: PERSONAS[k].desc, on: S.persona === k
+  }));
+  const desc = PERSONAS[S.persona].desc;
+  const root = document.getElementById('xa-root');
+  root.innerHTML = `
+    <div class="persona" id="xa-persona">
+      ${personas.map(p => `
+        <div class="pchip ${p.on ? 'on' : ''}" data-k="${p.k}">
+          <div class="pchip-b">${p.name}</div>
+          <div class="pchip-d">${p.desc}</div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="chat-head">
+      <div class="ava"></div>
+      <div>
+        <div class="n">小白</div>
+        <div class="s">${desc}</div>
+      </div>
+    </div>
+    <div class="msgs" id="xa-msgs">
+      ${renderMsgs(S.gMsgs)}
+      <div id="anchor"></div>
+    </div>
+    <form class="composer" id="xa-form">
+      <div class="chips" id="xa-chips">
+        ${CHIPS.map(c => `<div class="chip" data-c="${c}">${c}</div>`).join('')}
+      </div>
+      <div class="input-row">
+        <textarea class="ta" id="xa-ta" placeholder="想说什么都可以…" rows="1"></textarea>
+        <button class="send-btn" type="submit"><div class="send-arrow"></div></button>
+      </div>
+    </form>
+  `;
+
+  // 绑定事件
+  document.querySelectorAll('#xa-persona .pchip').forEach(el => {
+    el.onclick = () => {
+      const k = el.dataset.k;
+      const S2 = storageLoad();
+      if (S2.persona !== k) {
+        S2.persona = k;
+        S2.gMsgs.push({ role: 'sys', text: '（小白换了一种语气：「' + PERSONAS[k].name + '」）', t: Date.now() });
+        storageSave(S2);
+      }
+      renderXiaobai();
+    };
+  });
+
+  document.querySelectorAll('#xa-chips .chip').forEach(el => {
+    el.onclick = () => sendXiaobai(el.dataset.c);
+  });
+
+  const ta = document.getElementById('xa-ta');
+  ta.addEventListener('input', () => { xaText = ta.value; });
+  ta.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('xa-form').requestSubmit(); }
+  });
+  // 自动撑高
+  ta.addEventListener('input', () => {
+    ta.style.height = '36px';
+    ta.style.height = Math.min(ta.scrollHeight, 100) + 'px';
+  });
+
+  document.getElementById('xa-form').onsubmit = e => {
+    e.preventDefault();
+    sendXiaobai(xaText);
+  };
+
+  scrollMsgsToBottom();
+}
+let xaText = '';
+
+function renderMsgs(msgs) {
+  return msgs.map(m => {
+    if (m.role === 'sys') return `<div class="row sys"><div class="sys-text">${escapeHtml(m.text)}</div></div>`;
+    if (m.role === 'ai') return `<div class="row ai"><div class="ava"></div><div class="col"><div class="bubble">${escapeHtml(m.text)}</div></div></div>`;
+    return `<div class="row me"><div class="bubble me-bubble">${escapeHtml(m.text)}</div><div class="ava me-ava">我</div></div>`;
+  }).join('');
+}
+
+function scrollMsgsToBottom() {
+  const el = document.getElementById('xa-msgs');
+  if (el) setTimeout(() => { el.scrollTop = 99999; }, 30);
+}
+
+function sendXiaobai(rawText) {
+  const text = (rawText || '').trim();
+  if (!text) { showToast('说点什么吧'); return; }
+  const S = storageLoad();
+  S.gMsgs.push({ role: 'me', text, t: Date.now() });
+  storageSave(S);
+  xaText = '';
+  const ta = document.getElementById('xa-ta');
+  if (ta) ta.value = '';
+
+  // 立刻渲染 me + typing 占位
+  const meEl = document.createElement('div');
+  meEl.className = 'row me';
+  meEl.innerHTML = `<div class="bubble me-bubble">${escapeHtml(text)}</div><div class="ava me-ava">我</div>`;
+  document.getElementById('xa-msgs').appendChild(meEl);
+
+  const tipEl = document.createElement('div');
+  tipEl.className = 'row ai';
+  tipEl.innerHTML = `<div class="ava"></div><div class="bubble typing"><span></span><span></span><span></span></div>`;
+  document.getElementById('xa-msgs').appendChild(tipEl);
+  scrollMsgsToBottom();
+
+  const reply = guardianReply(text, S.persona, S.bottle);
+
+  setTimeout(() => {
+    tipEl.remove();
+    const aiEl = document.createElement('div');
+    aiEl.className = 'row ai';
+    aiEl.innerHTML = `<div class="ava"></div><div class="col"><div class="bubble">${escapeHtml(reply.text)}</div></div>`;
+    document.getElementById('xa-msgs').appendChild(aiEl);
+    S.gMsgs.push({ role: 'ai', text: reply.text, t: Date.now() });
+    storageSave(S);
+    if (reply.crisis) {
+      showCrisisModal();
+    }
+    scrollMsgsToBottom();
+  }, 600 + Math.random() * 600);
+}
+
+function showCrisisModal() {
+  const html = `
+    <div class="crisis-modal" data-close="0">
+      <div class="crisis-title">请让真实的人现在陪着你</div>
+      <div class="crisis-body">${escapeHtml(CRISIS_HOTLINES)}</div>
+      <button class="btn" id="crisis-ok">我知道了</button>
+    </div>
+  `;
+  document.getElementById('modal-root').innerHTML = `<div class="crisis-mask">${html}</div>`;
+  document.getElementById('crisis-ok').onclick = closeModal;
+}
+
+/* ============================================================
+ * Yingzi 影子
+ * ============================================================ */
+let yzMode = 'view'; // view | setup | analyze | chat
+let shProfile = null;
+let shName = '';
+let shLog = '';
+let shStep = 0;
+const ANALYZE_STEPS = ['正在拆解每一句话…', '正在数口头禅…', '正在生成语气画像…', '即将完成'];
+
+function renderYingzi() {
+  const S = storageLoad();
+  if (!S.onboarded) return;
+  const root = document.getElementById('yz-root');
+
+  if (yzMode === 'view' && !S.shadow.enabled) {
+    // 介绍页
+    root.innerHTML = `
+      <div class="card view-intro">
+        <div class="art"></div>
+        <div class="h">影子</div>
+        <div class="en">The Shadow</div>
+        <div class="p">
+          实在忍不住想联系的时候，把想说的话说给「影子」——一个根据你们的聊天记录（粘贴进来）、模仿ta语气生成的 AI。说完，就放下手机。
+        </div>
+        <div class="ul">
+          <div class="li">单次对话最长 20 分钟，到时自动结束</div>
+          <div class="li">每天最多 3 次，不鼓励常来</div>
+          <div class="li">影子不会说「我也想你」「我们复合吧」</div>
+        </div>
+        <div class="warn">
+          这个功能默认关闭，因为它可能延长戒断期。它是「实在忍不住」时的缓冲垫，不是替代品。用完记得去找小白说说话。
+        </div>
+        <div class="start-hint">点击下方按钮开始使用 ↓</div>
+        <button class="btn" id="yz-start">开启影子功能</button>
+      </div>
+    `;
+    document.getElementById('yz-start').onclick = () => { yzMode = 'setup'; renderYingzi(); };
+  } else if (yzMode === 'view' && S.shadow.enabled) {
+    const used = S.shadow.sessionsDate === todayStr() ? S.shadow.sessionsToday : 0;
+    const canEnter = used < 3;
+    const profile = S.shadow.profile;
+    root.innerHTML = `
+      <div class="card">
+        <div class="head-row">
+          <div class="ava-grey ava-56" style="background:#2b2520;border-radius:50%;position:relative;overflow:hidden;"></div>
+          <div>
+            <div class="shadow-name">${escapeHtml(S.shadow.name || '影子')} · 影子</div>
+            <div class="shadow-sub">今日已用 ${used} / 3 次</div>
+          </div>
+        </div>
+        ${profile ? `<div class="divider"></div><div class="profile">${escapeHtml(profileSummary(profile))}</div>` : ''}
+        <button class="btn" style="margin-top:18px;" id="yz-enter" ${canEnter ? '' : 'disabled'}>开始一次对话</button>
+        ${!canEnter ? '<div class="limit-tip">今天影子时间用完了。想说的话，留给小白吧。</div>' : ''}
+        <button class="btn-ghost" style="margin:10px 16px 0; display:block;" id="yz-reset">重新设置 / 关闭影子</button>
+      </div>
+    `;
+    document.getElementById('yz-enter').onclick = () => { yzMode = 'chat'; renderYingzi(); };
+    document.getElementById('yz-reset').onclick = () => {
+      if (!confirm('要重新设置影子吗？这会清空当前的影子。')) return;
+      const S2 = storageLoad();
+      S2.shadow = { enabled: false, name: '', profile: null, msgs: [], sessionsDate: '', sessionsToday: 0, sessionStart: 0 };
+      storageSave(S2);
+      showToast('已关闭');
+      renderYingzi();
+    };
+  } else if (yzMode === 'setup') {
+    root.innerHTML = `
+      <div class="card">
+        <div class="h2" style="font-size:18px;letter-spacing:4px;">设置影子</div>
+        <div class="p" style="font-size:13px;color:var(--sub);line-height:1.9;margin:12px 0 18px;">
+          把和ta的聊天记录给我：直接粘贴（每行一条消息）。我会分析ta的说话习惯，生成一个「影子」。它只存在于你的手机里。
+        </div>
+        <div class="field" style="margin:12px 0;">
+          <label class="field-label">ta 的代号</label>
+          <input class="field-input" id="yz-name" placeholder="怎么称呼ta" value="${escapeHtml(shName)}"/>
+        </div>
+        <div class="field" style="margin:12px 0;">
+          <label class="field-label">聊天记录（每行一条）</label>
+          <textarea class="field-textarea" id="yz-log" rows="6" placeholder="例：&#10;2024-08-30 18:30 小明 在吗&#10;2024-08-30 18:31 我 在啊&#10;...">${escapeHtml(shLog)}</textarea>
+        </div>
+        <button class="btn" id="yz-go">开始分析</button>
+        <button class="btn-ghost" style="margin:10px 16px 0; display:block;" id="yz-cancel">先不了</button>
+      </div>
+    `;
+    document.getElementById('yz-name').oninput = e => shName = e.target.value;
+    document.getElementById('yz-log').oninput = e => shLog = e.target.value;
+    document.getElementById('yz-go').onclick = () => {
+      if (!shName.trim() || shLog.trim().length < 10) { showToast('填代号、贴至少 10 条消息'); return; }
+      yzMode = 'analyze'; shStep = 0;
+      const tick = () => {
+        if (shStep >= ANALYZE_STEPS.length) {
+          const p = analyzeChat(shLog);
+          const S2 = storageLoad();
+          S2.shadow.enabled = true;
+          S2.shadow.name = shName.trim();
+          S2.shadow.profile = p;
+          S2.shadow.msgs = [];
+          S2.shadow.sessionsDate = todayStr();
+          S2.shadow.sessionsToday = 0;
+          storageSave(S2);
+          yzMode = 'view';
+          shName = ''; shLog = ''; shProfile = p;
+          renderYingzi();
+          return;
+        }
+        document.getElementById('yz-step').textContent = ANALYZE_STEPS[shStep];
+        shStep++;
+        setTimeout(tick, 700);
+      };
+      renderYingzi();
+      setTimeout(tick, 100);
+    };
+    document.getElementById('yz-cancel').onclick = () => { yzMode = 'view'; renderYingzi(); };
+  } else if (yzMode === 'analyze') {
+    root.innerHTML = `
+      <div class="card" style="text-align:center;">
+        <div class="spin"></div>
+        <div class="step" id="yz-step" style="font-size:13px;color:var(--sub);letter-spacing:2px;">${ANALYZE_STEPS[0]}</div>
+      </div>
+    `;
+  } else if (yzMode === 'chat') {
+    const S2 = storageLoad();
+    if (!S2.shadow.enabled) { yzMode = 'view'; renderYingzi(); return; }
+    // 每次进入 chat mode: 计一次 sessionsToday
+    if (!S2.shadow.sessionStart) {
+      if (S2.shadow.sessionsDate !== todayStr()) {
+        S2.shadow.sessionsDate = todayStr();
+        S2.shadow.sessionsToday = 0;
+      }
+      if (S2.shadow.sessionsToday >= 3) { yzMode = 'view'; renderYingzi(); return; }
+      S2.shadow.sessionsToday++;
+      S2.shadow.sessionStart = Date.now();
+      storageSave(S2);
+      if (S2.shadow.msgs.length === 0) {
+        S2.shadow.msgs.push({ role: 'sys', text: '（影子不会说「我也想你」「我们复合吧」。它的回应很克制——像 ta 的语气，但不再是 ta。）', t: Date.now() });
+        storageSave(S2);
+      }
+    }
+    const remainMs = Math.max(0, 20 * 60 * 1000 - (Date.now() - S2.shadow.sessionStart));
+    const min = Math.floor(remainMs / 60000);
+    const sec = Math.floor((remainMs % 60000) / 1000);
+    const leftToday = 3 - S2.shadow.sessionsToday;
+    const sessionMsgs = S2.shadow.msgs.slice();
+    root.innerHTML = `
+      <div class="chat-head">
+        <div class="ava-grey" style="background:#2b2520;border-radius:50%;width:36px;height:36px;position:relative;overflow:hidden;"></div>
+        <div>
+          <div class="n">${escapeHtml(S2.shadow.name || '影子')}</div>
+          <div class="s">AI 影子 · 非真人</div>
+        </div>
+        <div class="right" style="margin-left:auto;font-size:11px;color:var(--sub);text-align:right;">
+          本次剩余 <b style="color:var(--ink);font-size:13px;">${min}:${('0'+sec).slice(-2)}</b>
+          <div>今日还剩 ${leftToday} 次</div>
+        </div>
+      </div>
+      <div class="msgs" id="yz-msgs">
+        ${sessionMsgs.map(m => {
+          if (m.role === 'sys') return `<div class="row sys"><div class="sys-text">${escapeHtml(m.text)}</div></div>`;
+          if (m.role === 'ai') return `<div class="row ai"><div class="ava-grey" style="background:#2b2520;border-radius:50%;width:36px;height:36px;position:relative;overflow:hidden;flex:none;"></div><div class="col"><div class="bubble">${escapeHtml(m.text)}</div></div></div>`;
+          return `<div class="row me"><div class="bubble me-bubble">${escapeHtml(m.text)}</div><div class="ava me-ava">我</div></div>`;
+        }).join('')}
+      </div>
+      <form class="composer" id="yz-form" style="border-top:0.5px solid var(--line);">
+        <div class="input-row">
+          <textarea class="ta" id="yz-ta" placeholder="想说的、没说完的，都可以…" rows="1"></textarea>
+          <button class="send-btn" type="submit"><div class="send-arrow"></div></button>
+        </div>
+      </form>
+    `;
+    const ta = document.getElementById('yz-ta');
+    ta.addEventListener('input', () => { ta.style.height = '36px'; ta.style.height = Math.min(ta.scrollHeight, 100) + 'px'; yzText = ta.value; });
+    document.getElementById('yz-form').onsubmit = e => {
+      e.preventDefault();
+      sendYingzi(yzText);
+    };
+    setTimeout(() => { document.getElementById('yz-msgs').scrollTop = 99999; }, 30);
+  }
+}
+let yzText = '';
+
+function sendYingzi(raw) {
+  const text = (raw || '').trim();
+  if (!text) return;
+  const S = storageLoad();
+  S.shadow.msgs.push({ role: 'me', text, t: Date.now() });
+  storageSave(S);
+  yzText = '';
+  document.getElementById('yz-ta').value = '';
+  // 立刻渲染
+  const row = document.createElement('div');
+  row.className = 'row me';
+  row.innerHTML = `<div class="bubble me-bubble">${escapeHtml(text)}</div><div class="ava me-ava">我</div>`;
+  document.getElementById('yz-msgs').appendChild(row);
+  // 打字占位
+  const tip = document.createElement('div');
+  tip.className = 'row ai';
+  tip.innerHTML = `<div class="ava-grey" style="background:#2b2520;border-radius:50%;width:36px;height:36px;position:relative;overflow:hidden;flex:none;"></div><div class="bubble typing"><span></span><span></span><span></span></div>`;
+  document.getElementById('yz-msgs').appendChild(tip);
+  document.getElementById('yz-msgs').scrollTop = 99999;
+  setTimeout(() => {
+    tip.remove();
+    const reply = shadowReply(text, S.shadow.profile);
+    S.shadow.msgs.push({ role: 'ai', text: reply, t: Date.now() });
+    storageSave(S);
+    const aiRow = document.createElement('div');
+    aiRow.className = 'row ai';
+    aiRow.innerHTML = `<div class="ava-grey" style="background:#2b2520;border-radius:50%;width:36px;height:36px;position:relative;overflow:hidden;flex:none;"></div><div class="col"><div class="bubble">${escapeHtml(reply)}</div></div>`;
+    document.getElementById('yz-msgs').appendChild(aiRow);
+    document.getElementById('yz-msgs').scrollTop = 99999;
+    // 20 分钟自动结束
+    const remainMs = 20 * 60 * 1000 - (Date.now() - S.shadow.sessionStart);
+    if (remainMs <= 0) {
+      endYingziSession();
+    }
+  }, 700 + Math.random() * 600);
+}
+
+function endYingziSession() {
+  const html = `
+    <div class="crisis-modal" data-close="0">
+      <div class="crisis-title">今天的影子时间结束了</div>
+      <div class="crisis-body" style="text-align:center;">深呼吸。刚才和你说话的，是根据聊天记录生成的 AI 影子——<b style="color:var(--ink);">不是真的 ta</b>。</div>
+      <div style="text-align:center;margin:16px 0;font-size:12px;color:var(--faint);letter-spacing:4px;">吸气 · 呼气</div>
+      <button class="btn" id="end-to-gb" style="background:var(--accent);">把刚才的感受，说给小白听</button>
+      <button class="btn btn-ghost" style="margin:10px 0 0; color:var(--sub); background:transparent; border:0.5px solid var(--line);" id="end-quiet">先静一静</button>
+    </div>
+  `;
+  document.getElementById('modal-root').innerHTML = `<div class="crisis-mask">${html}</div>`;
+  document.getElementById('end-to-gb').onclick = () => {
+    const S = storageLoad();
+    S.shadow.sessionStart = 0;
+    storageSave(S);
+    closeModal();
+    yzMode = 'view';
+    switchTab('xiaobai');
+  };
+  document.getElementById('end-quiet').onclick = () => {
+    const S = storageLoad();
+    S.shadow.sessionStart = 0;
+    storageSave(S);
+    closeModal();
+    yzMode = 'view';
+    renderYingzi();
+  };
+}
+
+/* ============================================================
+ * Me 我
+ * ============================================================ */
+function renderMe() {
+  const S = storageLoad();
+  if (!S.onboarded) return;
+  const d = dayNum(S.startDate);
+  const personas = Object.keys(PERSONAS).map(k => ({
+    k, name: PERSONAS[k].name, desc: PERSONAS[k].desc, on: S.persona === k
+  }));
+  const root = document.getElementById('me-root');
+  root.innerHTML = `
+    <button class="me-gear" id="me-gear" aria-label="设置">⚙</button>
+    <div class="me-head">
+      <div class="me-ava">${d}</div>
+      <div class="me-id">
+        <div class="name">断联中</div>
+        <div class="sub">已坚持 ${d} 天</div>
+      </div>
+    </div>
+
+    <div class="me-section">
+      <div class="sec-cap">小白的性格</div>
+      <div class="persona-grid" id="me-persona">
+        ${personas.map(p => `
+          <div class="pg ${p.on ? 'pg-on' : ''}" data-k="${p.k}">
+            <div class="pg-b">${p.name}</div>
+            <div class="pg-s">${p.desc}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="me-section">
+      <div class="sec-cap">戒断</div>
+      <div class="me-card">
+        <div class="row">
+          <div class="l">
+            戒断开始日
+            <small>计数从这天起</small>
+          </div>
+          <input class="me-input" type="date" id="me-date" value="${S.startDate}"/>
+        </div>
+        <div class="row">
+          <div class="l">
+            ta 的代号
+            <small>只存在你的手机里</small>
+          </div>
+          <input class="me-input" id="me-name" placeholder="可留空" value="${escapeHtml(S.exName || '')}"/>
+        </div>
+      </div>
+    </div>
+
+    <div class="me-section">
+      <div class="sec-cap">你的数据</div>
+      <div class="me-card">
+        <div class="row">
+          <div class="l">
+            导出数据
+            <small>复制为 JSON 备份</small>
+          </div>
+          <button class="btn-ghost" id="me-export" style="margin:0;padding:8px 16px;font-size:13px;">导出</button>
+        </div>
+        <div class="row">
+          <div class="l">
+            清空所有数据
+            <small>不可恢复</small>
+          </div>
+          <button class="btn-ghost btn-ghost-danger" id="me-clear" style="margin:0;padding:8px 16px;font-size:13px;">清空</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="me-foot">断联日记 NOEX · v0.3.0</div>
+  `;
+
+  document.querySelectorAll('#me-persona .pg').forEach(el => {
+    el.onclick = () => {
+      const k = el.dataset.k;
+      const S2 = storageLoad();
+      if (S2.persona !== k) {
+        S2.persona = k;
+        storageSave(S2);
+        showToast('切换为「' + PERSONAS[k].name + '」');
+        renderMe();
+      }
+    };
+  });
+
+  document.getElementById('me-date').onchange = e => {
+    const v = e.target.value;
+    if (!v) return;
+    const S2 = storageLoad();
+    S2.startDate = v;
+    storageSave(S2);
+    showToast('已更新');
+    renderMe();
+  };
+  document.getElementById('me-name').onblur = e => {
+    const S2 = storageLoad();
+    S2.exName = e.target.value;
+    storageSave(S2);
+  };
+
+  document.getElementById('me-export').onclick = () => {
+    const S2 = storageLoad();
+    const json = JSON.stringify(S2, null, 2);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(json).then(
+        () => showToast('已复制 JSON 到剪贴板'),
+        () => fallbackCopy(json)
+      );
+    } else fallbackCopy(json);
+  };
+  function fallbackCopy(t) {
+    const ta = document.createElement('textarea');
+    ta.value = t; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); showToast('已复制 JSON 到剪贴板'); }
+    catch(e) { showToast('复制失败，请手动选择'); }
+    ta.remove();
+  }
+
+  document.getElementById('me-clear').onclick = () => {
+    const html = `
+      <div class="modal-gear">
+        <div class="h">清空所有数据？</div>
+        <div class="about" style="color:var(--danger);">戒断记录、对话、留白瓶、影子设置都会被删除，无法恢复。</div>
+        <button class="btn btn-danger" id="clear-ok" style="margin-top:18px;">确认清空</button>
+        <button class="btn btn-ghost" id="cancel" style="margin:10px 0 0;background:transparent;border:0.5px solid var(--line);color:var(--sub);">取消</button>
+      </div>
+    `;
+    showModal(html);
+    document.getElementById('clear-ok').onclick = () => {
+      const S2 = storageLoad();
+      const ds = defaultState();
+      ds.startDate = todayStr();
+      ds.onboarded = false;
+      storageSave(ds);
+      showToast('已清空，重新开始');
+      closeModal();
+      obStep = 0; tempStartDate = ''; tempExName = '';
+      document.querySelectorAll('.page-pane').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-onboard').classList.add('active');
+      renderOnboard();
+    };
+    document.getElementById('cancel').onclick = closeModal;
+  };
+
+  document.getElementById('me-gear').onclick = () => {
+    const html = `
+      <div class="modal-gear">
+        <div class="h">关于断联日记</div>
+        <div class="about">
+          断联日记 NOEX · v0.3.0 原型<br/>
+          <div>所有数据仅保存在本机，不上传服务器。</div>
+          <div>对话由本地规则引擎模拟，正式版将接入大模型。</div>
+          <div>本产品不替代专业心理治疗。</div>
+        </div>
+        <div class="crisis">
+          <b>遇到危机时，请让真实的人现在陪着你</b>
+          <div>· 全国 24 小时心理援助热线：400-161-9995</div>
+          <div>· 北京心理危机研究与干预中心：010-82951332</div>
+          <div>· 紧急情况请直接拨打 120 / 110</div>
+        </div>
+        <div class="me-foot" style="margin-top:18px;">愿你断得干净，把时间留给自己</div>
+        <button class="btn" id="gear-close" style="margin-top:14px;">关闭</button>
+      </div>
+    `;
+    showModal(html);
+    document.getElementById('gear-close').onclick = closeModal;
+  };
+}
+
+/* ============================================================
+ * Boot
+ * ============================================================ */
+(function boot() {
+  console.log('[断联日记] 启动, 版本 0.3.0 (web demo)');
+  const S = storageLoad();
+  if (S.onboarded) {
+    document.querySelectorAll('.page-pane').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-today').classList.add('active');
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === 'today'));
+    renderToday();
+  } else {
+    document.querySelectorAll('.page-pane').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-onboard').classList.add('active');
+    renderOnboard();
+  }
+})();
+</script>
+</body>
+</html>

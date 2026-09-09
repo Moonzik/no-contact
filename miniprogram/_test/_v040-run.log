@@ -1,0 +1,68 @@
+
+[storage]
+  ✓ 首次加载返回默认状态
+  ✓ 默认状态含 shadow 子对象
+  ✓ save 后 load 读到一致数据
+  ✓ 字段缺失时自动补默认
+  ✓ clear 后 load 回到默认
+
+[guardian]
+  ✓ detectIntent 思 ta
+  ✓ detectIntent 想联系
+  ✓ detectIntent 睡不着
+  ✓ detectIntent 自杀 → crisis
+  ✓ detectIntent 默认 null
+  ✓ warm 不再前置安慰（不含「嗯，我在。」前缀）
+  ✓ warm 结尾温柔收尾（陪我/不急/听着/歇/哭）
+  ✓ warm reply 无 crisis
+  ✓ sharp 20 次采样至少 1 次含毒舌尾巴
+  ✓ tsun 含「才不是心疼你」
+  ✓ spoil 含吃醋 / 争宠
+  ✓ crisis 关键词触发危机回复
+  ✓ ENCOURAGE 含 1/3/7/21
+
+[shadow]
+  ✓ analyzeChat count >= 4
+  ✓ analyzeChat top 包含 嗯嗯
+  ✓ analyzeChat qRate > 0
+  ✓ shadowReply「想你」命中 miss pool
+  ✓ shadowReply「为什么」命中 ask pool
+  ✓ shadowReply 默认 fallback
+  ✓ profileSummary 至少 1 行
+  ✓ computeAffinity 未启用返回 80
+  ✓ SHADOW_AFFINITY 常量存在
+  ✓ computeAffinity 0 天 / 0 session = 80
+  ✓ computeAffinity 7 天 = 62.5
+  ✓ computeAffinity 21 天触底 = 30
+  ✓ computeAffinity 100 天仍触底 = 30
+  ✓ shadowReply 80% 命中 miss pool（高仿期）
+  ✓ shadowReply 30% 命中 miss pool（通用期）
+  ✓ shadowReply 50% mixed 也返回
+  ✓ 高仿期 miss 30 次采样带 top 口头禅
+  ✓ 通用期 miss 30 次采样不带 top 口头禅
+  ✓ detectDeclaration 「我已经不想要 ta 了」
+  ✓ detectDeclaration 「算了吧」
+  ✓ detectDeclaration 「放下」
+  ✓ detectDeclaration 「普通聊天」不命中
+  ✓ detectDeclaration 空字符串不命中
+  ✓ shouldReveal: 7 天未用触发
+  ✓ shouldReveal: 3 天未用未触发
+  ✓ shouldReveal: 30 天长程触发
+  ✓ shouldReveal: 已触发过不再触发
+  ✓ affinityStageText 80% 走高仿期文案
+  ✓ affinityStageText 50% 走混合文案
+  ✓ affinityStageText 30% 走通用文案
+  ✓ REVEAL_TEXT 包含「根本就不是 TA」
+  ✓ REVEAL_OPTIONS 至少 3 个去向
+
+[wechat]
+  ✓ UTF-8 BOM 解码
+  ✓ UTF-16LE 启发式
+  ✓ 解析出 2 位说话人
+  ✓ 说话人含 我 和 Ta
+  ✓ Ta 的消息多于 我 的
+  ✓ defaultShadowSpeaker 排除「我」
+  ✓ 另一种 head 也能解析
+  ✓ 无 head 不报错, 返回 cleaned
+
+=== 58 passed, 0 failed ===
