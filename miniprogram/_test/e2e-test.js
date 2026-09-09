@@ -366,10 +366,12 @@ console.log('\n========== me ==========');
   mp.onClearConfirm();
   check('onClearConfirm 重置 state', stored.noex_mvp_v1.onboarded === false);
 
-  mp.onGear();
-  check('onGear 弹出 showGear', mp.data.showGear === true);
-  mp.onCloseGear();
-  check('onCloseGear 关闭弹层', mp.data.showGear === false);
+  /* v0.9.2：齿轮弹层已取消，关于内容平铺进页面；改为验证隐私指引入口仍可点 */
+  wxLog.length = 0;
+  mp.onOpenPrivacy();
+  check('onOpenPrivacy 有反馈（隐私指引入口可用）',
+    wxLog.some(x => x[0] === 'toast'));
+  check('me 页不再有 showGear 弹层状态', mp.data.showGear === undefined);
 }
 
 console.log('\n========== bottle ==========');
@@ -478,14 +480,24 @@ console.log('\n========== 边界场景 ==========');
   /* 关键词必须覆盖毒舌池里足够多的条目：
      窄关键词(脑子|出息|手贱|肿眼泡|破戒|长记性)只命中 24 条里的 2 条 → 单次 8%，30 次仍 ~7% flaky。
      改用宽关键词（命中 7 条）+ 60 次采样 → flake < 1e-9。与 integration-test 保持一致。 */
+  /* v0.9.3：毒舌尾巴分两档——断联类意图（miss/urge/…）才用「戳 TA」那池，
+     用「我好想他」明确命中 miss；「我想 ta」识别不出意图，走的是日常档，不提 TA。 */
   let sharpHit = false;
   for (let i = 0; i < 60 && !sharpHit; i++) {
-    const r = guardian.guardianReply('我想 ta', 'sharp');
+    const r = guardian.guardianReply('我好想他', 'sharp');
     if (/(脑子|出息|手贱|肿眼泡|破戒|长记性|舍不得|戒不掉|联系人|翻聊天|置顶)/.test(r.text)) {
       sharpHit = true;
     }
   }
-  check('sharp 60 次内能命中毒舌尾巴（宽关键词）', sharpHit);
+  check('sharp 断联意图仍会戳 TA（宽关键词）', sharpHit);
+
+  /* 日常话题 30 次都不应出现「想 TA / 刷朋友圈 / 置顶」这类把话题拽回断联的话 */
+  let dailyDirty = 0;
+  for (let i = 0; i < 30; i++) {
+    const r = guardian.guardianReply('今天加班好累', 'sharp');
+    if (/(想 TA|想他|想她|朋友圈|置顶|聊天记录|戒|TA 一点关系)/.test(r.text)) dailyDirty++;
+  }
+  check('sharp 日常话题不再硬扯回 TA', dailyDirty === 0, '命中 ' + dailyDirty + '/30');
 }
 
 /* 8. crisis 关键词触发危机回复 */
@@ -550,7 +562,7 @@ console.log('\n========== 边界场景 ==========');
   check('跨天后 sessionsToday 重置为 0', S2.shadow.sessionsToday === 0);
 }
 
-/* 13. yingzi 7 天未使用 → 打开页面即触发洞察；且只触发一次 */
+/* 13. v0.9.3 · 洞察只在「用户在对话里起疑」时触发；打开页面不再自动弹 */
 {
   stored = {}; seedUser();
   const yz = makePage(yingzi);
@@ -560,10 +572,22 @@ console.log('\n========== 边界场景 ==========');
   S.shadow.firstUsedAt = Date.now() - 20 * 86400000;
   S.shadow.observation.lastUsedAt = Date.now() - 8 * 86400000; /* 8 天没用 */
   stored.noex_mvp_v1 = JSON.parse(JSON.stringify(S));
-  yz.onShow(); /* refresh 应触发 no_use */
-  check('7天未用 → 打开影子页触发洞察面板', yz.data.showReveal === true);
+  yz.onShow();
+  check('8 天没用也不自动弹洞察', yz.data.showReveal !== true);
+
+  /* 进对话，先正常聊：不起疑就不该弹 */
+  yz.onEnterChat();
+  check('进入 chat 模式', yz.data.mode === 'chat');
+  yz.sendShadow('今天上班好累');
+  check('正常聊天不触发洞察', yz.data.showReveal !== true);
+
+  /* 起疑：这才是唯一该弹的时机 */
+  yz.sendShadow('你怎么越来越不像他了');
+  check('用户起疑 → 触发洞察面板', yz.data.showReveal === true);
   check('洞察文案含「根本就不是 TA」', (yz.data.reveal && yz.data.reveal.text || '').indexOf('根本就不是 TA') > -1);
-  check('触发原因 no_use', yz.data.reveal && yz.data.reveal.reason === 'no_use');
+  check('触发原因 user_doubt', yz.data.reveal && yz.data.reveal.reason === 'user_doubt');
+  check('影子先回了一句「被你发现了」',
+    (stored.noex_mvp_v1.shadow.msgs || []).some(m => m.role === 'ai' && /被你发现/.test(m.text)));
   check('revealTriggered 已持久化', stored.noex_mvp_v1.shadow.revealTriggered === true);
   yz.onRevealDismiss();
   check('关闭面板后 showReveal=false', yz.data.showReveal === false);

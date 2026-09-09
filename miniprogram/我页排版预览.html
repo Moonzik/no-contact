@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="g2ytrKxBK1NrRNIlDhZUgy">
+<head data-page-node-id="sDLydiqckNofFwnNjWE2mz">
+<meta charset="utf-8" data-page-node-id="BKWtejktyY8DPv3cVVcbee">
+<meta name="viewport" content="width=device-width, initial-scale=1" data-page-node-id="h2KHDA1vWznTbW05QtN2iq">
+<title>「我」页新排版预览 · NOEX v0.9.2</title>
+<style>
+  :root{
+    --bg:#faf9f4; --card:#fff; --ink:#26231e; --sub:#8f887b;
+    --faint:#b8b1a4; --line:#e9e4d8; --accent:#b5623c; --danger:#a5432e;
+    --serif:"Noto Serif SC","Songti SC","SimSun",serif;
+    --sans:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:40px 20px 64px; background:#efece4; color:var(--ink);
+    font-family:var(--sans); display:flex; flex-direction:column; align-items:center;
+  }
+  h1{font-family:var(--serif); font-size:22px; letter-spacing:2px; margin:0 0 6px;}
+  .lead{color:var(--sub); font-size:14px; margin:0 0 4px;}
+  .note{color:var(--faint); font-size:12.5px; margin:0 0 28px;}
+  .wrap{display:flex; gap:36px; flex-wrap:wrap; justify-content:center; align-items:flex-start;}
+  .col{display:flex; flex-direction:column; align-items:center;}
+  .col h2{font-size:14px; color:var(--sub); font-weight:600; letter-spacing:1px; margin:0 0 12px;}
+  .phone{
+    width:330px; background:var(--bg); border-radius:34px; overflow:hidden;
+    box-shadow:0 18px 44px rgba(38,35,30,.16); border:1px solid #ded8cb;
+    display:flex; flex-direction:column;
+  }
+  .notch{height:26px; background:var(--bg);}
+  .screen{padding:0 20px 26px; flex:1;}
+  .topbar{height:34px; display:flex; align-items:center; justify-content:center;
+    font-family:var(--serif); font-size:15px; letter-spacing:3px; color:var(--ink);}
+  .gearold{position:relative;}
+  .gearold::after{
+    content:"⚙"; position:absolute; right:0; top:-2px; font-size:17px; color:var(--sub);
+  }
+  /* 身份卡 */
+  .head{display:flex; align-items:center; gap:14px; background:var(--card);
+    border:1px solid var(--line); border-radius:16px; padding:18px 16px; margin-bottom:12px;}
+  .ava{width:62px;height:62px;border-radius:50%;border:2px solid var(--ink);
+    display:flex;align-items:center;justify-content:center;font-family:var(--serif);
+    font-size:22px;flex:0 0 auto;background:var(--bg);}
+  .nick{font-family:var(--serif);font-size:18px;letter-spacing:2px;}
+  .sub{font-size:12px;color:var(--faint);margin-top:5px;letter-spacing:1px;}
+  .chev{width:8px;height:8px;border-top:2px solid var(--faint);border-right:2px solid var(--faint);
+    transform:rotate(45deg);margin-left:auto;margin-right:3px;}
+  /* 卡片 */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:3px 16px;margin-bottom:12px;}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:12px;
+    padding:13px 0;border-bottom:1px solid var(--line);min-height:50px;}
+  .row:last-child{border-bottom:none;}
+  .row .l{font-size:14px;}
+  .row .l small{display:block;font-size:11.5px;color:var(--faint);margin-top:3px;}
+  .go{font-size:13.5px;color:var(--accent);flex:0 0 auto;padding-left:10px;}
+  .go-danger{color:var(--danger);}
+  .val{font-size:14px;color:var(--accent);}
+  /* 关于卡（新） */
+  .about-card{padding:16px 16px 4px;}
+  .about-head{font-family:var(--serif);font-size:16px;letter-spacing:2px;margin-bottom:9px;}
+  .about-line{font-size:12.5px;color:var(--sub);line-height:1.9;}
+  .ai{color:var(--accent);}
+  .row-sep{border-top:1px solid var(--line);margin-top:8px;}
+  /* 危机块 */
+  .crisis{background:#fbf3ee;border:1px solid #ead8cb;border-radius:14px;
+    padding:14px 16px;font-size:12.5px;color:#9a5d3a;line-height:1.85;}
+  .crisis b{color:#7a3a1e;}
+  .foot{text-align:center;color:var(--faint);font-size:11.5px;letter-spacing:2px;margin-top:20px;}
+  /* 旧的齿轮弹层 */
+  .old-layer{position:relative;}
+  .old-layer .mask{background:rgba(38,35,30,.4);border-radius:0 0 24px 24px;
+    padding:14px 18px 18px;color:#fff;font-size:12px;line-height:1.7;text-align:center;}
+  .old-layer .mask .t{font-family:var(--serif);font-size:14px;letter-spacing:2px;margin-bottom:8px;}
+  .old-layer .mask .ln{opacity:.9;}
+  .striked{text-decoration:line-through;opacity:.55;}
+  .tagnew{display:inline-block;background:var(--accent);color:#fff;font-size:10.5px;
+    border-radius:999px;padding:2px 8px;letter-spacing:1px;margin-left:6px;vertical-align:2px;}
+</style>
+</head>
+<body data-page-node-id="trER1GlfAWWnEZtrDomvrb">
+
+<h1 data-page-node-id="pXl6OwpAC8iQiJ6BGE8Etw">「我」页新排版 · v0.9.2</h1>
+<p class="lead" data-page-node-id="l20C9KtimAAHEbSIuQAoRx">右上角齿轮按钮已删除，里面的内容全部直接铺在页面上</p>
+<p class="note" data-page-node-id="tyClesC0ewWsqEdYdrk3ED">左边是改之前，右边是改之后（示意排版，非实际截图）</p>
+
+<div class="wrap" data-page-node-id="udvOP54hE1bU1WLyOVoCV9">
+
+  <!-- 改之前 -->
+  <div class="col" data-page-node-id="8T1PzOvzyJAoNIxlTLO79U">
+    <h2 data-page-node-id="aufKrlkzw7ajUpI61MDwou">改之前</h2>
+    <div class="phone" data-page-node-id="ZsfMfSgCdsgZkZNR7THqF6">
+      <div class="notch" data-page-node-id="txYi5oC0S1GxRSr1lNVqZM"></div>
+      <div class="screen" data-page-node-id="02mnnAoHL279oaAzqI6O7i">
+        <div class="topbar gearold" data-page-node-id="DxFnr8FLrY5kEnUo7e5msd">我</div>
+
+        <div class="head" data-page-node-id="aUIlflpfq7GrTQeWtqfxMY">
+          <div class="ava" data-page-node-id="H2qfd1OSAikX4clfjNpGJE">7</div>
+          <div data-page-node-id="IgNdEdWUbCpV9tIlsO77yg">
+            <div class="nick" data-page-node-id="NvlPecGXkElKsinZF164Ex">断联中</div>
+            <div class="sub" data-page-node-id="60121Bytr145GTyK7N2h2c">断联第 7 天</div>
+          </div>
+          <div class="chev" data-page-node-id="7oY9aGnSDlI9Ne2Dc2fVyh"></div>
+        </div>
+
+        <div class="card" data-page-node-id="QghLp7KK9npV6AtpTkFES9">
+          <div class="row" data-page-node-id="JaQfuRuTiWv2swzcE6jAIL"><div class="l" data-page-node-id="cTFX7Mo8s452bVXNv53RFm">戒断开始日<small data-page-node-id="wtJrABpootsPMHJM7n98oc">计数从这天起</small></div><div class="val" data-page-node-id="g92UwESTReWkPQDKXBbT9l">2026-09-03</div></div>
+          <div class="row" data-page-node-id="lJgG7yIHFCD4kECq5hkTTd"><div class="l" data-page-node-id="LscRR60SYrHIG2zWMCZCzu">TA 的代号<small data-page-node-id="6SE9vxJHFhBEmlvAXrMWn5">只存在你的手机里</small></div><div class="val" data-page-node-id="JGiAqGOuhkXadDl4EqyzbE">可留空</div></div>
+        </div>
+
+        <div class="card" data-page-node-id="EmLZeRCZzdWQL4GnzoDKke">
+          <div class="row" data-page-node-id="ZGoVdy9uPjkSjLNhs2GBDd"><div class="l" data-page-node-id="Iuhu78TqaWARaljSZXGhLG">导出数据<small data-page-node-id="rLoemI0Pnmxb40LHMzVJ9c">复制为 JSON 备份</small></div><div class="go" data-page-node-id="mk9de07OEocdUzvuvIMSx2">导出</div></div>
+          <div class="row" data-page-node-id="G9maRmBdG8lwaKKQ0klgpf"><div class="l" data-page-node-id="8XE1qZfz8oKd3BWKldA6nA">清空所有数据<small data-page-node-id="v89A7zoEFzeLIrPyq1CrEz">不可恢复</small></div><div class="go go-danger" data-page-node-id="fhxr7nC0al52GNfE4wEqJR">清空</div></div>
+        </div>
+
+        <div class="card" data-page-node-id="hsnQwZxIARAghprjq5Ask4">
+          <div class="row" data-page-node-id="uABLBezT9pYTBkHVAfv0SK"><div class="l" data-page-node-id="YDBQNwOWo6iGiylh2vRk9Z">关于断联日记<small data-page-node-id="ma4JIxbBcPywVbMhzJBmHs">版本 · AI 引擎状态 · 危机热线</small></div><div class="go" data-page-node-id="PE5Y2ZXKaEIBt1LV9RPCpe">查看</div></div>
+          <div class="row" data-page-node-id="nU0oBUFF4PZ2gJY5FvckAb"><div class="l" data-page-node-id="eEXCoEhks1EiMZm0uWrsuI">用户隐私保护指引<small data-page-node-id="e56RyxsBVGdGBJ1HQYdOhg">你的数据怎么存 · 是否共享给 AI</small></div><div class="go" data-page-node-id="KXdkBPP7mruH74LAkENbNS">查看</div></div>
+        </div>
+
+        <div class="old-layer" style="margin-top:8px;" data-page-node-id="MvH7lgdcLLic43yiwhknzB">
+          <div class="card" style="padding:0;margin-bottom:0;overflow:hidden;" data-page-node-id="y6tEXkG1d6g6LJFXhIog3e">
+            <div class="mask" data-page-node-id="PhjVpgDoOa7jUbukNolr5q">
+              <div class="t" data-page-node-id="UwMfFYTWD3K13zWEb2CqJQ">关于断联日记</div>
+              <div class="ln" data-page-node-id="BJVciUvQsjQb0btL2UK5yJ">版本号 · AI 状态</div>
+              <div class="ln" data-page-node-id="jYKV1b3Jx0bJek97G8RM5N">危机热线三条</div>
+              <div class="ln" data-page-node-id="Cjc3ndWy7JEsaeg8zyQkqf">隐私指引入口</div>
+              <div class="ln" style="margin-top:6px;font-size:11px;opacity:.7;" data-page-node-id="FcU2L2xUHcaYeA9C6Yk4hl">← 全都在弹层里，不点开永远看不到</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="foot" data-page-node-id="caflSmm3DK69Adb3Wcg54x">断联日记 NOEX · v0.9.1</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 改之后 -->
+  <div class="col" data-page-node-id="O8E7HF0UHeFeOzY85CwKCC">
+    <h2 data-page-node-id="Hj9Fc5ydcKuz1jvtkdOI8L">改之后 <span class="tagnew" data-page-node-id="s5AjzzTivTYN6VHTBAktte">v0.9.2</span></h2>
+    <div class="phone" data-page-node-id="NPlgraBgCe8RvQ2qA6J3c6">
+      <div class="notch" data-page-node-id="L0DvOFDyu4qi6gn1wBUmCz"></div>
+      <div class="screen" data-page-node-id="xgtv50JRgjHzUgAUARciMG">
+        <div class="topbar" data-page-node-id="AdwJIppCAdaGrKjZKtWZ5T">我</div>
+
+        <div class="head" data-page-node-id="4pD97TWUYWPKDw6zKRKnXh">
+          <div class="ava" data-page-node-id="2ytPARuZdFlcgKJkEWnPqs">7</div>
+          <div data-page-node-id="QAnc3blp81P2h6OvdFUc3E">
+            <div class="nick" data-page-node-id="zwxsp2DP0l8G9SaaIQNrrc">断联中</div>
+            <div class="sub" data-page-node-id="C80fZC5GwelFlOaFMeV44y">断联第 7 天</div>
+          </div>
+          <div class="chev" data-page-node-id="iKgMuRmOvxD7wiwRJoSkcP"></div>
+        </div>
+
+        <div class="card" data-page-node-id="3xk9buZ2g5xCO04jXYoT5S">
+          <div class="row" data-page-node-id="APeCWdDSpTyPLAVEbGpEB3"><div class="l" data-page-node-id="m5UivCo8Vbu41UfnGLKQNy">戒断开始日<small data-page-node-id="zQLL8lCIVYdX1C25YQPmqG">计数从这天起</small></div><div class="val" data-page-node-id="ZYJG6d12q1Qu7acXdu1a3x">2026-09-03</div></div>
+          <div class="row" data-page-node-id="LUw7GLgUaGnSzBnaTjkasz"><div class="l" data-page-node-id="BdHBc4ZEYXetW9T5i1VsiL">TA 的代号<small data-page-node-id="ruaS1z8K0h9khPGtTkqabI">只存在你的手机里</small></div><div class="val" data-page-node-id="un1S7PKaIvRfykfPHHau7C">可留空</div></div>
+        </div>
+
+        <div class="card" data-page-node-id="ckEmtR5dCGnVGHieSyWIt4">
+          <div class="row" data-page-node-id="uiiUqPqjDfTyC1bpIkwzcR"><div class="l" data-page-node-id="nTHpeGTJfYGursVH3CEa1H">导出数据<small data-page-node-id="L35JwdT2abtNPBP4M5kQaA">复制为 JSON 备份</small></div><div class="go" data-page-node-id="5gHH5EtOfhyJHBIgxywZDG">导出</div></div>
+          <div class="row" data-page-node-id="OFNU7rXg5qeZgOwanu9rEA"><div class="l" data-page-node-id="D1kSKqAQutbR2ZNGX7mR1k">清空所有数据<small data-page-node-id="wOTE09bXRSOISJdHjT2Jyq">不可恢复</small></div><div class="go go-danger" data-page-node-id="gLI04NmMjNvGRcbzNFhZQc">清空</div></div>
+        </div>
+
+        <div class="card about-card" data-page-node-id="AmTEHoQFMxSHdAxV6GhHCJ">
+          <div class="about-head" data-page-node-id="Z60s6aZYiQhjpgoDEWaeDH">关于断联日记</div>
+          <div class="about-line" data-page-node-id="RdVBfp4vZI6cOdNpOFTDuA">断联日记 NOEX · v0.9.2</div>
+          <div class="about-line ai" data-page-node-id="3jI21EAQgmfgD4LNuquJVP">AI 智能体 · 云函数</div>
+          <div class="about-line" data-page-node-id="bWqaGAsaISDvFv44oFTu26">所有数据仅保存在本机，不上传服务器。</div>
+          <div class="about-line" data-page-node-id="n0kOuOTjZ1CT3MebvT0jub">本产品不替代专业心理治疗。</div>
+          <div class="row row-sep" data-page-node-id="13eqEzOFl8CsgFMH3HJ9aO"><div class="l" data-page-node-id="3ThtOP2GxQ63yzqpVdZzwp">用户隐私保护指引<small data-page-node-id="3bpgVQJ0mWteycEo2Z7X66">你的数据怎么存 · 是否共享给 AI</small></div><div class="go" data-page-node-id="2vCSLKD4tEQVbHcYsI8sf3">查看</div></div>
+        </div>
+
+        <div class="crisis" data-page-node-id="2r3QD9nkUHM9oyDSK0oyfA">
+          <b data-page-node-id="SDYVFVtCClmvGsAVjNFtT1">遇到危机时，请让真实的人现在陪着你</b>
+          <div data-page-node-id="SHrAi9nqrpapYNQ6YBDO0N">· 全国 24 小时心理援助热线：400-161-9995</div>
+          <div data-page-node-id="eWEp91BsHpDOkmbzZoYfgB">· 北京心理危机研究与干预中心：010-82951332</div>
+          <div data-page-node-id="ibO8YNJLgiDlAtaHYmUG3j">· 紧急情况请直接拨打 120 / 110</div>
+        </div>
+
+        <div class="foot" data-page-node-id="Nb3qDfzKj1ANMiWSfK7K1F">愿你断得干净，把时间留给自己</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

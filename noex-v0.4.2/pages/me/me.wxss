@@ -5,42 +5,8 @@
   box-sizing: border-box;
   min-height: 100vh;
   position: relative;
-  padding-top: calc(96rpx + env(safe-area-inset-top));
-}
-
-.me-gear {
-  position: fixed;
-  top: calc(28rpx + env(safe-area-inset-top));
-  right: 28rpx;
-  width: 68rpx;
-  height: 68rpx;
-  border-radius: 50%;
-  background: var(--card);
-  border: 1rpx solid var(--line);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-  padding: 0;
-}
-.me-gear::after { display: none; }
-.gear-icon {
-  width: 30rpx;
-  height: 30rpx;
-  border: 4rpx solid var(--sub);
-  border-radius: 50%;
-  position: relative;
-}
-.gear-icon::before {
-  content: '';
-  position: absolute;
-  width: 14rpx;
-  height: 14rpx;
-  border-radius: 50%;
-  border: 4rpx solid var(--sub);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  /* v0.9.2：右上角齿轮取消，顶部不需要再为它留空 */
+  padding-top: calc(56rpx + env(safe-area-inset-top));
 }
 
 /* ── 身份卡 ───────────────────────────── */
@@ -192,15 +158,49 @@
   margin-top: 40rpx;
 }
 
-/* v0.9.1 · 「我」页底部直接展示的 AI 引擎状态（一目了然，不用点进关于） */
-.ai-line-onpage {
-  text-align: center;
-  color: var(--faint);
-  font-size: 22rpx;
-  margin-top: 10rpx;
-  margin-bottom: 32rpx;
+/* v0.9.2 · 关于内容平铺在页面上（不再藏在右上角齿轮弹层里） */
+.about-card {
+  padding: 32rpx 32rpx;
+}
+.about-head {
+  font-family: var(--serif);
+  font-size: 32rpx;
+  letter-spacing: 4rpx;
+  text-indent: 4rpx; /* 抵消 letter-spacing 造成的偏移 */
+  margin-bottom: 18rpx;
+}
+.about-line {
+  font-size: 25rpx;
+  color: var(--sub);
+  line-height: 1.9;
   letter-spacing: 1rpx;
 }
+/* AI 引擎状态：一眼确认接没接上大模型 */
+.ai-line-card {
+  color: var(--accent);
+  margin-top: 2rpx;
+  margin-bottom: 4rpx;
+}
+
+/* 隐私指引入口：审核要求小程序内可触达，
+   v0.9.2 起并入「关于断联日记」卡片，用一条上分隔线和上面的文字分开 */
+.row-sep {
+  border-top: 1rpx solid var(--line);
+  margin-top: 16rpx;
+}
+
+/* 危机求助：页面级展示，加上下间距 */
+.crisis {
+  background: #fbf3ee;
+  border: 1rpx solid #ead8cb;
+  border-radius: 24rpx;
+  padding: 28rpx 32rpx;
+  font-size: 25rpx;
+  color: #9a5d3a;
+  line-height: 1.85;
+  margin-bottom: 32rpx;
+}
+.crisis b { color: #7a3a1e; }
 
 /* ── 弹层 ───────────────────────────── */
 .mask {
@@ -334,35 +334,3 @@
   text-underline-offset: 6rpx;
 }
 
-.about {
-  font-size: 25rpx;
-  color: var(--sub);
-  line-height: 1.9;
-  margin: 12rpx 0 28rpx;
-}
-/* 隐私指引入口：审核要求小程序内可触达 */
-.privacy-link {
-  display: block;
-  text-align: center;
-  margin: -12rpx 0 28rpx;
-  padding: 12rpx 0;
-}
-.crisis {
-  background: #fbf3ee;
-  border: 1rpx solid #ead8cb;
-  border-radius: 24rpx;
-  padding: 28rpx 32rpx;
-  font-size: 25rpx;
-  color: #9a5d3a;
-  line-height: 1.85;
-  margin-top: 12rpx;
-}
-.crisis b { color: #7a3a1e; }
-
-/* v0.9.0 · 关于页 AI 引擎状态 */
-.ai-line {
-  margin-top: 10rpx;
-  font-size: 23rpx;
-  color: var(--faint);
-  letter-spacing: 1rpx;
-}

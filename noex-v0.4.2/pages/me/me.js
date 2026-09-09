@@ -21,8 +21,8 @@ Page({
     avaSupported: true,
     nickSupported: true,
     showLogout: false,
-    showGear: false,
     showClear: false,
+    devtools: false,
     version: ''
   },
 
@@ -33,7 +33,9 @@ Page({
     this.setData({
       version: this.readVersion(),
       avaSupported: user.avatarSupported(),
-      nickSupported: user.nicknameSupported()
+      nickSupported: user.nicknameSupported(),
+      /* v0.9.3：模拟器里 chooseAvatar 点不动，页面上直接给出「从相册选」的提示语 */
+      devtools: user.isDevtools()
     });
 
     /* 从别的功能页点「去登录」过来的：自动展开登录卡 */
@@ -160,6 +162,19 @@ Page({
     });
   },
 
+  /* 微信头像按钮报错（基础库不支持 / 隐私指引没配 / 授权被拒）。
+     这里不再让用户对着一个没反应的圆点干瞪眼，直接转相册。 */
+  onAvatarError(e) {
+    this._clearAvatarTimer();
+    const msg = (e && e.detail && (e.detail.errMsg || e.detail.errno)) || '';
+    wx.showToast({
+      title: /privacy|auth|授权/i.test(String(msg)) ? '隐私指引未配置，先用相册选' : '改用相册选头像',
+      icon: 'none',
+      duration: 2200
+    });
+    this.onPickAvatarAlbum();
+  },
+
   /* 兜底：从相册/拍照选一张当头像 */
   onPickAvatarAlbum() {
     this._clearAvatarTimer();
@@ -264,14 +279,6 @@ Page({
 
   onClearCancel() {
     this.setData({ showClear: false });
-  },
-
-  onGear() {
-    this.setData({ showGear: true });
-  },
-
-  onCloseGear() {
-    this.setData({ showGear: false });
   },
 
   /* 跳转微信托管的《用户隐私保护指引》——审核要求在小程序内可触达 */

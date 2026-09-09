@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NOEX v0.9.3 更新说明</title>
+<style>
+  :root{
+    --bg:#faf9f4;--card:#fff;--ink:#26231e;--sub:#8f887b;--faint:#b8b1a4;
+    --line:#e9e4d8;--accent:#b5623c;--danger:#a5432e;--ok:#4a7c59;
+    --serif:"Noto Serif SC","Songti SC","SimSun",serif;
+    --sans:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:48px 20px 72px;background:#efece4;color:var(--ink);font-family:var(--sans);
+       display:flex;flex-direction:column;align-items:center}
+  .wrap{max-width:760px;width:100%}
+  h1{font-family:var(--serif);font-size:26px;letter-spacing:2px;margin:0 0 6px}
+  .lead{color:var(--sub);font-size:14px;margin:0 0 32px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 28px;margin-bottom:20px}
+  h2{font-family:var(--serif);font-size:19px;letter-spacing:1px;margin:0 0 6px;display:flex;align-items:center;gap:10px}
+  .num{background:var(--ink);color:#fff;width:26px;height:26px;border-radius:50%;display:inline-flex;
+       align-items:center;justify-content:center;font-size:14px;font-family:var(--sans);flex:0 0 auto}
+  .desc{color:var(--sub);font-size:13.5px;line-height:1.75;margin:0 0 18px}
+  .cmp{display:flex;flex-direction:column;gap:10px}
+  .row{display:flex;gap:12px;align-items:flex-start}
+  .tag{flex:0 0 68px;font-size:12px;padding:4px 8px;border-radius:8px;text-align:center;margin-top:2px}
+  .old{background:#f0ebe1;color:var(--faint)}
+  .new{background:#eaf2ec;color:var(--ok)}
+  .bubble{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px 16px;
+          font-size:14px;line-height:1.7;flex:1}
+  .bubble .u{display:block;color:var(--faint);font-size:12px;margin-bottom:4px}
+  .dead{color:var(--faint);text-decoration:line-through;text-decoration-color:var(--danger)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:6px}
+  th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:#f6f2ea;font-weight:600;font-size:13px}
+  code{background:#f3efe6;padding:1px 6px;border-radius:5px;font-size:12.5px}
+  .warn{background:#fdf3ee;border:1px solid #ead8cb;border-radius:12px;padding:14px 18px;
+        font-size:13.5px;line-height:1.8;color:#9a5d3a}
+  .warn b{color:#7a3a1e}
+  ul{margin:6px 0 0;padding-left:20px;font-size:13.5px;line-height:1.9;color:var(--sub)}
+  li b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>v0.9.3 · 这次改了三件事</h1>
+  <p class="lead">小白变正常了 · 影子不再抢着说教 · 头像能传了</p>
+
+  <!-- 1 -->
+  <div class="card">
+    <h2><span class="num">1</span>小白 = 正常 AI 聊天，只是多了个性格</h2>
+    <p class="desc">
+      以前不管你聊什么，小白都会往「TA / 断联 / 前任」上拽，还要在结尾硬补一段感情分析。
+      现在：你聊什么它接什么（工作、晚饭、天气、剧、猫），该毒舌时照样毒舌，
+      <b>只有你自己先提起想念、想联系、难过这些，它才进入那个话题</b>。
+    </p>
+    <div class="cmp">
+      <div class="row">
+        <span class="tag old">改之前</span>
+        <div class="bubble">
+          <span class="u">你：今天加班到十点，好累</span>
+          <span class="dead">「嗯，我在听。你说的这些，比反复想 TA 有意义多了。」</span>
+        </div>
+      </div>
+      <div class="row">
+        <span class="tag new">改之后</span>
+        <div class="bubble">
+          <span class="u">你：今天加班到十点，好累</span>
+          「十点……你们公司是把人当电池用吗。先吃点东西，别空着肚子睡。」
+        </div>
+      </div>
+      <div class="row">
+        <span class="tag new">没变</span>
+        <div class="bubble">
+          <span class="u">你：我还是会想他</span>
+          「想吧，想够了自己会腻的。（这里照旧认真陪你谈断联）」
+        </div>
+      </div>
+    </div>
+    <ul>
+      <li><b>AI 模式</b>：系统提示词重写，明确禁止「在结尾额外补一段关于 TA/感情的话」。</li>
+      <li><b>本地模式（没接 AI 时）</b>：毒舌尾巴拆成两档——聊断联才用「戳 TA」那档，
+          聊日常用通用毒舌；识别出意图后不再追加第二段。</li>
+    </ul>
+  </div>
+
+  <!-- 2 -->
+  <div class="card">
+    <h2><span class="num">2</span>「你需要的根本就不是 TA」——只在你问的时候才说</h2>
+    <p class="desc">
+      以前是<b>计时自动弹</b>（7 天没用 / 满 30 天 / 相似度触底 14 天），你根本没问就被说教。
+      现在自动触发<b>全部取消</b>，只有你在对话里起疑时才出现。
+    </p>
+    <div class="cmp">
+      <div class="row">
+        <span class="tag old">改之前</span>
+        <div class="bubble">打开影子页 → 什么都没说 → 直接弹出「你看，你需要的根本就不是 TA。」</div>
+      </div>
+      <div class="row">
+        <span class="tag new">改之后</span>
+        <div class="bubble">
+          <span class="u">你：你怎么越来越不像他了</span>
+          影子：「……嗯。被你发现了。」→ 才弹出揭示
+        </div>
+      </div>
+    </div>
+    <p class="desc" style="margin-top:16px">能触发的提问（举例）：</p>
+    <table>
+      <tr><th style="width:150px">你会说的话</th><th>是否触发</th></tr>
+      <tr><td>你怎么越来越不像他了</td><td>✅ 触发</td></tr>
+      <tr><td>你变了 / 感觉你好陌生</td><td>✅ 触发</td></tr>
+      <tr><td>你到底是谁 / 你是在装他吗</td><td>✅ 触发</td></tr>
+      <tr><td>以前你会秒回我的</td><td>✅ 触发</td></tr>
+      <tr><td>今天上班好累</td><td>❌ 不触发</td></tr>
+    </table>
+    <p class="desc" style="margin-top:14px">保留的另一种触发：你自己宣告放下（「算了」「我不要了」）。</p>
+  </div>
+
+  <!-- 3 -->
+  <div class="card">
+    <h2><span class="num">3</span>头像上传点不动</h2>
+    <p class="desc">三个原因，一次性都处理了：</p>
+    <table>
+      <tr><th style="width:180px">原因</th><th>处理</th></tr>
+      <tr>
+        <td><b>隐私协议没配</b>（最主要）<br>mp 后台还没提交《用户隐私保护指引》</td>
+        <td>微信会<b>静默拦截</b>头像/相册接口，表现就是点了没反应。<br>
+            已把 <code>app.json</code> 的 <code>__usePrivacyCheck__</code> 临时改成 <code>false</code>，现在能测了。</td>
+      </tr>
+      <tr>
+        <td><b>开发者工具模拟器</b>里 chooseAvatar 常常不响应</td>
+        <td>检测到模拟器环境就自动降级成「从相册选」按钮，页面提示也跟着变。</td>
+      </tr>
+      <tr>
+        <td>chooseAvatar 报错没有任何提示</td>
+        <td>新增 <code>binderror</code> 兜底：一出错就自动转相册，并 toast 说明原因。</td>
+      </tr>
+    </table>
+    <div class="warn" style="margin-top:16px">
+      <b>⚠️ 提审前必须做：</b><br>
+      1. 去 mp 后台 → 设置 → 服务内容声明 → 提交《用户隐私保护指引》，等过审；<br>
+      2. 把 <code>app.json</code> 里的 <code>__usePrivacyCheck__</code> <b>改回 true</b>，重新编译再上传。<br>
+      顺序错了会被拒审。（<code>PRIVACY.md</code> 开头已经写了这段）
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">✓</span>测试</h2>
+    <p class="desc">
+      530 项全过：单元 94 · 集成 26 · E2E 135 · 静态 124 · 去重 48 · AI 103。<br>
+      版本升到 <b>v0.9.3</b>，文件已同步到导入目录，点「编译」即可看到。
+    </p>
+  </div>
+
+</div>
+</body>
+</html>

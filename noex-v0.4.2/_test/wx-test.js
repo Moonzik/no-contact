@@ -128,7 +128,8 @@ console.log('\n[guardian]');
     const r = guardian.guardianReply('我今天路过那家咖啡店了，好难受', 'warm', [], {});
     if (r.text.indexOf('咖啡店') > -1) intHit++;
   }
-  check('有意图时接话概率合理（30 次中 8~30 次）', intHit >= 8 && intHit <= 30, '命中 ' + intHit + '/30');
+  /* v0.9.3：识别出意图后就不再额外追加接话（用户反馈「故意多加一段」） */
+  check('有意图时不再追加接话', intHit === 0, '命中 ' + intHit + '/30');
 
   const crisis = guardian.guardianReply('我不想活了', 'warm');
   check('crisis 关键词触发危机回复', crisis.crisis === true);
@@ -211,14 +212,21 @@ console.log('\n[shadow]');
     totalShadowSessions: 5,
     observation: { lastUsedAt: now0 + 1 * 86400000 }
   };
-  check('shouldReveal: 7 天未用触发', shadow.shouldReveal(S_no_use, now0 + 8 * 86400000) !== false);
+  /* v0.9.3：自动计时触发全部取消——没被问就不该说教 */
+  check('shouldReveal: 8 天未用也不自动触发', shadow.shouldReveal(S_no_use, now0 + 8 * 86400000) === false);
   check('shouldReveal: 3 天未用未触发', shadow.shouldReveal(S_no_use, now0 + 4 * 86400000) === false);
   /* 2. 长程使用 */
   const S_long = { revealTriggered: false, firstUsedAt: now0, totalShadowSessions: 50, observation: { lastUsedAt: now0 + 30 * 86400000 } };
-  check('shouldReveal: 30 天长程触发', shadow.shouldReveal(S_long, now0 + 31 * 86400000) !== false);
+  check('shouldReveal: 30 天长程也不自动触发', shadow.shouldReveal(S_long, now0 + 31 * 86400000) === false);
   /* 3. 已经触发过的不再触发 */
   const S_done = { revealTriggered: true, firstUsedAt: now0, totalShadowSessions: 50, observation: { lastUsedAt: now0 } };
-  check('shouldReveal: 已触发过不再触发', shadow.shouldReveal(S_done, now0 + 100 * 86400000) === false);
+  check('shouldReveal: 已触发过不再触发', shadow.shouldReveal(S_done, now0 + 100 * 86400000, '你怎么越来越不像他了') === false);
+  /* 4. v0.9.3：只有用户在对话里起疑才触发 */
+  check('shouldReveal: 用户起疑才触发',
+    shadow.shouldReveal(S_long, now0 + 31 * 86400000, '你怎么越来越不像他了') !== false);
+  check('detectDoubt 命中「你怎么越来越不像他了」', shadow.detectDoubt('你怎么越来越不像他了') === true);
+  check('detectDoubt 命中「你变了」', shadow.detectDoubt('你变了') === true);
+  check('detectDoubt 不命中日常聊天', shadow.detectDoubt('今天上班好累') === false);
 
   /* affinityStageText 三段文案 */
   check('affinityStageText 80% 走高仿期文案', /影子今天/.test(shadow.affinityStageText(80)));

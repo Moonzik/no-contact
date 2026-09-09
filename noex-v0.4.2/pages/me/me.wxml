@@ -1,9 +1,5 @@
 <view class="me">
 
-  <button class="me-gear" bindtap="onGear" aria-label="设置">
-    <view class="gear-icon"></view>
-  </button>
-
   <!-- 身份卡：未登录显示「点击登录」，已登录显示头像 + 昵称 -->
   <view class="me-head" bindtap="onEditProfile" hover-class="head-hover">
     <view class="ava-wrap">
@@ -59,16 +55,15 @@
     </view>
   </view>
 
-  <!-- 关于 / 设置 -->
-  <view class="me-card">
-    <view class="row" bindtap="onGear" hover-class="row-hover">
-      <view class="l">
-        关于断联日记
-        <small>版本 · AI 引擎状态 · 危机热线</small>
-      </view>
-      <view class="row-go">查看</view>
-    </view>
-    <view class="row" bindtap="onOpenPrivacy" hover-class="row-hover">
+  <!-- 关于 / 隐私 / 求助：v0.9.2 取消右上角齿轮，全部直接平铺在页面上 -->
+  <view class="me-card about-card">
+    <view class="about-head">关于断联日记</view>
+    <view class="about-line">断联日记 NOEX · v{{version}}</view>
+    <view class="about-line ai-line-card">{{aiText}}</view>
+    <view class="about-line">所有数据仅保存在本机，不上传服务器。</view>
+    <view class="about-line">本产品不替代专业心理治疗。</view>
+
+    <view class="row row-sep" bindtap="onOpenPrivacy" hover-class="row-hover">
       <view class="l">
         用户隐私保护指引
         <small>你的数据怎么存 · 是否共享给 AI</small>
@@ -77,8 +72,15 @@
     </view>
   </view>
 
-  <view class="me-foot">断联日记 NOEX · v{{version}}</view>
-  <view class="ai-line-onpage">{{aiText}}</view>
+  <!-- 危机求助方式：不折叠、不藏在弹层里 -->
+  <view class="crisis">
+    <b>遇到危机时，请让真实的人现在陪着你</b>
+    <view>· 全国 24 小时心理援助热线：400-161-9995</view>
+    <view>· 北京心理危机研究与干预中心：010-82951332</view>
+    <view>· 紧急情况请直接拨打 120 / 110</view>
+  </view>
+
+  <view class="me-foot">愿你断得干净，把时间留给自己</view>
 
   <!-- 登录 / 编辑资料 -->
   <view class="mask" wx:if="{{showLogin}}" bindtap="onProfileClose">
@@ -88,7 +90,7 @@
       <!-- 支持 chooseAvatar 的基础库：点一下直接拉取微信头像 -->
       <block wx:if="{{avaSupported}}">
         <button class="ava-pick" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar"
-                bindtap="onAvatarTap" hover-class="none">
+                bindtap="onAvatarTap" binderror="onAvatarError" hover-class="none">
           <image class="ava-pick-img" src="{{tmpAvatar}}" mode="aspectFill" wx:if="{{tmpAvatar}}" />
           <view class="ava-pick-img ava-pick-ph" wx:else>选微信头像</view>
         </button>
@@ -101,9 +103,9 @@
         </button>
       </block>
 
-      <!-- 兜底入口：微信头像那颗按钮如果点不动（隐私指引未配置/基础库问题），这里一定行 -->
+      <!-- 兜底入口：微信头像那颗按钮如果点不动（模拟器 / 隐私指引未配置 / 基础库问题），这里一定行 -->
       <view class="ava-alt" bindtap="onPickAvatarAlbum" hover-class="ava-alt-hover">
-        用不了微信头像？点这里从相册选
+        {{devtools ? '模拟器里请用这个从相册选头像' : '选微信头像没反应？点这里从相册选'}}
       </view>
 
       <!-- 支持 type="nickname" 的基础库：聚焦时微信自动带出昵称 -->
@@ -135,28 +137,6 @@
       <view class="sheet-p">头像和昵称会被移除，戒断记录不受影响。</view>
       <button class="btn btn-primary" bindtap="onLogoutConfirm">退出登录</button>
       <button class="btn btn-ghost" style="margin-top:16rpx;" bindtap="onLogoutCancel">取消</button>
-    </view>
-  </view>
-
-  <!-- 关于 -->
-  <view class="mask" wx:if="{{showGear}}" bindtap="onCloseGear">
-    <view class="sheet" catchtap="noop">
-      <view class="h">关于断联日记</view>
-      <view class="about">
-        断联日记 NOEX · v{{version}}
-        <view class="ai-line">{{aiText}}</view>
-        <view>所有数据仅保存在本机，不上传服务器。</view>
-        <view>本产品不替代专业心理治疗。</view>
-      </view>
-      <view class="link-sub privacy-link" bindtap="onOpenPrivacy">《用户隐私保护指引》</view>
-      <view class="crisis">
-        <b>遇到危机时，请让真实的人现在陪着你</b>
-        <view>· 全国 24 小时心理援助热线：400-161-9995</view>
-        <view>· 北京心理危机研究与干预中心：010-82951332</view>
-        <view>· 紧急情况请直接拨打 120 / 110</view>
-      </view>
-      <view class="me-foot" style="margin-top:36rpx;">愿你断得干净，把时间留给自己</view>
-      <button class="btn btn-primary" style="margin-top:32rpx;" bindtap="onCloseGear">关闭</button>
     </view>
   </view>
 

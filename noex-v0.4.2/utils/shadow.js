@@ -32,6 +32,8 @@ const REVEAL_TRIGGERS = {
   ],
   LONG_TERM_DAYS: 30,               // 跨过这个天数自然触发
   AFFINITY_FLOOR_DAYS: 14,         // 在 30% 持续 14 天也触发
+  /* v0.9.3：用户当场起疑时，影子先说的那一句（之后才弹揭示） */
+  DOUBT_REPLY: '……嗯。被你发现了。',
   REVEAL_TEXT: '你看，你需要的根本就不是 TA。',
   REVEAL_SECONDARY: '也许不是 TA 本身 —— 是想念、安全感、习惯、或者「想被 TA 看见」这件事本身。\n你值得的是这种需要本身，而不是任何具体的人来满足它。',
   REVEAL_OPTIONS: [
@@ -288,46 +290,40 @@ function detectDeclaration(text) {
   return false;
 }
 
+/* v0.9.3 · 用户「起疑」检测。
+   用户原话：「这句话要等用户和影子聊天的时候发出疑问，类似说你怎么越来越不像他了，才可以发送给用户。」
+   以前揭示是被动计时（7 天没用 / 满 30 天 / 相似度触底 14 天）自动弹出来的，
+   用户根本没问就被说教，体验很糟。现在**只认用户在对话里主动提出的疑问**。 */
+const DOUBT_KEYS = [
+  '不像', '不像他', '不像她', '不像ta', '不像TA', '越来越不像', '怎么不像',
+  '你变了', '你怎么变了', '变了好多', '感觉你变了',
+  '你不是他', '不是他', '不是她', '不是ta', '根本不是他', '假的',
+  '你到底是谁', '你是谁', '谁在', '装得像', '装的像', '在装', '装他', '装她',
+  '以前你会', '以前你都', '以前不是', '你以前',
+  '你怎么不', '怎么不', '不对劲', '怪怪的', '好陌生', '陌生',
+  '怪不得', '不是本人', '模拟', 'ai吧', 'AI吧', '机器人', '程序'
+];
+
+function detectDoubt(text) {
+  if (!text || typeof text !== 'string') return false;
+  const t = text.toLowerCase();
+  for (let i = 0; i < DOUBT_KEYS.length; i++) {
+    if (t.indexOf(String(DOUBT_KEYS[i]).toLowerCase()) > -1) return true;
+  }
+  return false;
+}
+
 /* ============ 自我洞察：触发判定 ============
- * 返回 false 表示未触发；返回对象表示已触发（含 reason）。
+ * v0.9.3：自动计时触发**全部取消**。
+ * 现在唯一的触发方式是：用户在影子对话里主动起疑（detectDoubt），
+ * 或者用户自己宣告放下了（detectDeclaration）。
+ * 保留这个函数是为了兼容旧调用（不传用户原话时恒为 false）。
  * 一旦 revealTriggered=true，永远不会再触发。
  */
-function shouldReveal(shadowState, now) {
+function shouldReveal(shadowState, now, lastUserText) {
   if (!shadowState || shadowState.revealTriggered) return false;
-  const now2 = now || Date.now();
-  const first = shadowState.firstUsedAt || 0;
-  const obs = shadowState.observation || {};
-
-  // 1. 连续 N 天未使用
-  if (first > 0) {
-    const ref = (obs.lastUsedAt && obs.lastUsedAt > 0) ? obs.lastUsedAt : first;
-    const days = Math.floor((now2 - ref) / 86400000);
-    if (days >= REVEAL_TRIGGERS.NO_USE_DAYS) {
-      return { reason: 'no_use', daysNoUse: days };
-    }
-  }
-
-  // 2. 长程使用（≥ 30 天）
-  if (first > 0) {
-    const days = Math.floor((now2 - first) / 86400000);
-    if (days >= REVEAL_TRIGGERS.LONG_TERM_DAYS) {
-      return { reason: 'long_term', totalDays: days };
-    }
-  }
-
-  // 3. 触底 30% 持续 14 天
-  if (first > 0) {
-    const days = Math.floor((now2 - first) / 86400000);
-    const aff = computeAffinity(first, shadowState.totalShadowSessions || 0, now2);
-    if (aff <= SHADOW_AFFINITY.FLOOR + 0.01) {
-      const daysFloorStart = Math.ceil((SHADOW_AFFINITY.INIT - SHADOW_AFFINITY.FLOOR) / SHADOW_AFFINITY.DAY_DECAY);
-      const daysFloor = days - daysFloorStart;
-      if (daysFloor >= REVEAL_TRIGGERS.AFFINITY_FLOOR_DAYS) {
-        return { reason: 'affinity_floor', daysAtFloor: daysFloor };
-      }
-    }
-  }
-
+  /* 只有用户真的说了「你怎么越来越不像他了」这种话，才算数 */
+  if (detectDoubt(lastUserText)) return { reason: 'user_doubt' };
   return false;
 }
 
@@ -356,6 +352,8 @@ module.exports = {
   profileSummary,
   computeAffinity,
   detectDeclaration,
+  detectDoubt,
+  DOUBT_KEYS,
   shouldReveal,
   manualReveal,
   affinityStageText,

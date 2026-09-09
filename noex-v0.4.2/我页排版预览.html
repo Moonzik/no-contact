@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>「我」页新排版预览 · NOEX v0.9.2</title>
+<style>
+  :root{
+    --bg:#faf9f4; --card:#fff; --ink:#26231e; --sub:#8f887b;
+    --faint:#b8b1a4; --line:#e9e4d8; --accent:#b5623c; --danger:#a5432e;
+    --serif:"Noto Serif SC","Songti SC","SimSun",serif;
+    --sans:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:40px 20px 64px; background:#efece4; color:var(--ink);
+    font-family:var(--sans); display:flex; flex-direction:column; align-items:center;
+  }
+  h1{font-family:var(--serif); font-size:22px; letter-spacing:2px; margin:0 0 6px;}
+  .lead{color:var(--sub); font-size:14px; margin:0 0 4px;}
+  .note{color:var(--faint); font-size:12.5px; margin:0 0 28px;}
+  .wrap{display:flex; gap:36px; flex-wrap:wrap; justify-content:center; align-items:flex-start;}
+  .col{display:flex; flex-direction:column; align-items:center;}
+  .col h2{font-size:14px; color:var(--sub); font-weight:600; letter-spacing:1px; margin:0 0 12px;}
+  .phone{
+    width:330px; background:var(--bg); border-radius:34px; overflow:hidden;
+    box-shadow:0 18px 44px rgba(38,35,30,.16); border:1px solid #ded8cb;
+    display:flex; flex-direction:column;
+  }
+  .notch{height:26px; background:var(--bg);}
+  .screen{padding:0 20px 26px; flex:1;}
+  .topbar{height:34px; display:flex; align-items:center; justify-content:center;
+    font-family:var(--serif); font-size:15px; letter-spacing:3px; color:var(--ink);}
+  .gearold{position:relative;}
+  .gearold::after{
+    content:"⚙"; position:absolute; right:0; top:-2px; font-size:17px; color:var(--sub);
+  }
+  /* 身份卡 */
+  .head{display:flex; align-items:center; gap:14px; background:var(--card);
+    border:1px solid var(--line); border-radius:16px; padding:18px 16px; margin-bottom:12px;}
+  .ava{width:62px;height:62px;border-radius:50%;border:2px solid var(--ink);
+    display:flex;align-items:center;justify-content:center;font-family:var(--serif);
+    font-size:22px;flex:0 0 auto;background:var(--bg);}
+  .nick{font-family:var(--serif);font-size:18px;letter-spacing:2px;}
+  .sub{font-size:12px;color:var(--faint);margin-top:5px;letter-spacing:1px;}
+  .chev{width:8px;height:8px;border-top:2px solid var(--faint);border-right:2px solid var(--faint);
+    transform:rotate(45deg);margin-left:auto;margin-right:3px;}
+  /* 卡片 */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:3px 16px;margin-bottom:12px;}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:12px;
+    padding:13px 0;border-bottom:1px solid var(--line);min-height:50px;}
+  .row:last-child{border-bottom:none;}
+  .row .l{font-size:14px;}
+  .row .l small{display:block;font-size:11.5px;color:var(--faint);margin-top:3px;}
+  .go{font-size:13.5px;color:var(--accent);flex:0 0 auto;padding-left:10px;}
+  .go-danger{color:var(--danger);}
+  .val{font-size:14px;color:var(--accent);}
+  /* 关于卡（新） */
+  .about-card{padding:16px 16px 4px;}
+  .about-head{font-family:var(--serif);font-size:16px;letter-spacing:2px;margin-bottom:9px;}
+  .about-line{font-size:12.5px;color:var(--sub);line-height:1.9;}
+  .ai{color:var(--accent);}
+  .row-sep{border-top:1px solid var(--line);margin-top:8px;}
+  /* 危机块 */
+  .crisis{background:#fbf3ee;border:1px solid #ead8cb;border-radius:14px;
+    padding:14px 16px;font-size:12.5px;color:#9a5d3a;line-height:1.85;}
+  .crisis b{color:#7a3a1e;}
+  .foot{text-align:center;color:var(--faint);font-size:11.5px;letter-spacing:2px;margin-top:20px;}
+  /* 旧的齿轮弹层 */
+  .old-layer{position:relative;}
+  .old-layer .mask{background:rgba(38,35,30,.4);border-radius:0 0 24px 24px;
+    padding:14px 18px 18px;color:#fff;font-size:12px;line-height:1.7;text-align:center;}
+  .old-layer .mask .t{font-family:var(--serif);font-size:14px;letter-spacing:2px;margin-bottom:8px;}
+  .old-layer .mask .ln{opacity:.9;}
+  .striked{text-decoration:line-through;opacity:.55;}
+  .tagnew{display:inline-block;background:var(--accent);color:#fff;font-size:10.5px;
+    border-radius:999px;padding:2px 8px;letter-spacing:1px;margin-left:6px;vertical-align:2px;}
+</style>
+</head>
+<body>
+
+<h1>「我」页新排版 · v0.9.2</h1>
+<p class="lead">右上角齿轮按钮已删除，里面的内容全部直接铺在页面上</p>
+<p class="note">左边是改之前，右边是改之后（示意排版，非实际截图）</p>
+
+<div class="wrap">
+
+  <!-- 改之前 -->
+  <div class="col">
+    <h2>改之前</h2>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="topbar gearold">我</div>
+
+        <div class="head">
+          <div class="ava">7</div>
+          <div>
+            <div class="nick">断联中</div>
+            <div class="sub">断联第 7 天</div>
+          </div>
+          <div class="chev"></div>
+        </div>
+
+        <div class="card">
+          <div class="row"><div class="l">戒断开始日<small>计数从这天起</small></div><div class="val">2026-09-03</div></div>
+          <div class="row"><div class="l">TA 的代号<small>只存在你的手机里</small></div><div class="val">可留空</div></div>
+        </div>
+
+        <div class="card">
+          <div class="row"><div class="l">导出数据<small>复制为 JSON 备份</small></div><div class="go">导出</div></div>
+          <div class="row"><div class="l">清空所有数据<small>不可恢复</small></div><div class="go go-danger">清空</div></div>
+        </div>
+
+        <div class="card">
+          <div class="row"><div class="l">关于断联日记<small>版本 · AI 引擎状态 · 危机热线</small></div><div class="go">查看</div></div>
+          <div class="row"><div class="l">用户隐私保护指引<small>你的数据怎么存 · 是否共享给 AI</small></div><div class="go">查看</div></div>
+        </div>
+
+        <div class="old-layer" style="margin-top:8px;">
+          <div class="card" style="padding:0;margin-bottom:0;overflow:hidden;">
+            <div class="mask">
+              <div class="t">关于断联日记</div>
+              <div class="ln">版本号 · AI 状态</div>
+              <div class="ln">危机热线三条</div>
+              <div class="ln">隐私指引入口</div>
+              <div class="ln" style="margin-top:6px;font-size:11px;opacity:.7;">← 全都在弹层里，不点开永远看不到</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="foot">断联日记 NOEX · v0.9.1</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 改之后 -->
+  <div class="col">
+    <h2>改之后 <span class="tagnew">v0.9.2</span></h2>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="topbar">我</div>
+
+        <div class="head">
+          <div class="ava">7</div>
+          <div>
+            <div class="nick">断联中</div>
+            <div class="sub">断联第 7 天</div>
+          </div>
+          <div class="chev"></div>
+        </div>
+
+        <div class="card">
+          <div class="row"><div class="l">戒断开始日<small>计数从这天起</small></div><div class="val">2026-09-03</div></div>
+          <div class="row"><div class="l">TA 的代号<small>只存在你的手机里</small></div><div class="val">可留空</div></div>
+        </div>
+
+        <div class="card">
+          <div class="row"><div class="l">导出数据<small>复制为 JSON 备份</small></div><div class="go">导出</div></div>
+          <div class="row"><div class="l">清空所有数据<small>不可恢复</small></div><div class="go go-danger">清空</div></div>
+        </div>
+
+        <div class="card about-card">
+          <div class="about-head">关于断联日记</div>
+          <div class="about-line">断联日记 NOEX · v0.9.2</div>
+          <div class="about-line ai">AI 智能体 · 云函数</div>
+          <div class="about-line">所有数据仅保存在本机，不上传服务器。</div>
+          <div class="about-line">本产品不替代专业心理治疗。</div>
+          <div class="row row-sep"><div class="l">用户隐私保护指引<small>你的数据怎么存 · 是否共享给 AI</small></div><div class="go">查看</div></div>
+        </div>
+
+        <div class="crisis">
+          <b>遇到危机时，请让真实的人现在陪着你</b>
+          <div>· 全国 24 小时心理援助热线：400-161-9995</div>
+          <div>· 北京心理危机研究与干预中心：010-82951332</div>
+          <div>· 紧急情况请直接拨打 120 / 110</div>
+        </div>
+
+        <div class="foot">愿你断得干净，把时间留给自己</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

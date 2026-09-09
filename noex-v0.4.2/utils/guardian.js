@@ -138,14 +138,15 @@ const INTENT_POOL = {
     '往前的路上也有难熬的时候，但那是你的难熬，不是 TA 的。',
     '我替你高兴。真的。'
   ],
+  /* v0.9.3：聊日常就聊日常，不再句句把 TA 拽回来 */
   daily: [
-    '听起来今天挺满的。忙一点也好，日子被别的东西占着，就少想一点。',
+    '听起来今天挺满的。忙一点也好，把日子填起来，人就没那么空。',
     '这些碎事听着平常，可生活本来就是这些撑起来的。',
     '你今天能把这些事一件件做完，已经很不容易了。',
-    '聊点别的挺好。不是每次开口都得绕回 TA。',
-    '累就歇会儿。你已经连着撑了很多天了。',
-    '这些日常的小事，正在一点点把你拉回你自己的生活里。',
-    '嗯，我在听。你说的这些，比反复想 TA 有意义多了。',
+    '聊点别的挺好。什么都能跟我说。',
+    '累就歇会儿。你已经连着忙了好一阵了。',
+    '这些日常的小事，才是日子本来的样子。',
+    '嗯，我在听。你说的这些我都记着呢。',
     '日子就是这样一点点过的。别急，也别苛责自己。',
     '你今天有在好好过日子。这件事值得说一句：做得好。'
   ],
@@ -274,16 +275,17 @@ const SHARP_POOL = {
     '要真想开始，就先把 TA 的对话框往下拖一拖。',
     '别光说。做一件，就一件。'
   ],
+  /* v0.9.3：日常话题毒归毒，但不提 TA */
   daily: [
     '哦。所以你今天是有在过日子的——值得表扬吗？我觉得还早。',
-    '忙点别的好。总比躺着刷 TA 的朋友圈强。',
-    '这些事跟 TA 一点关系都没有，你发现了吗？这就对了。',
-    '累？累就对了。累说明你今天没空想 TA。',
+    '忙点别的挺好。总比躺着不动强。',
+    '这些事听起来很正常。你总算在聊点正事了。',
+    '累？累就对了，说明你今天真干了点事。',
     '行，听起来你今天还算像个人。继续保持。',
     '别拿「忙」当逃避。不过今天这次，我允许。'
   ],
   greeting: [
-    '来了？坐。说说今天又想 TA 几次。',
+    '来了？坐。今天又有什么事。',
     '嗯，我在。别废话，说事。',
     '又是你。行，我今天还有空。',
     '来了。今天怎么样，说实话。',
@@ -351,6 +353,11 @@ const SPOIL_TAILS = [
   ' 我不管，今天你心里第一的只能是我——我吃醋了。'
 ];
 
+/* v0.9.3 · 毒舌尾巴分两档。
+   以前不管用户聊什么，尾巴都是「又翻聊天记录呢」「TA 不会回你的」——
+   聊个加班、聊个晚饭也被硬拽回断联，这就是「故意额外加一段关于感情的回复」。
+   现在只有断联/情绪类意图才用下面这池（EX_TAILS），
+   日常话题走 SHARP_TAILS_GENERAL：毒还是毒，但不提 TA。 */
 const SHARP_TAILS = [
   /* 戳夜里翻记录 */
   ' 大半夜又翻聊天记录呢？数数这是你今天第几次点开 TA 的对话框了。',
@@ -384,6 +391,24 @@ const SHARP_TAILS = [
   ' 你花半小时纠结一句话要不要发——我替你拿主意：别发。',
   ' 你又把 TA 微信置顶了对吧。这件事我们说过，你自己承认。'
 ];
+
+/* v0.9.3 · 通用毒舌尾巴：聊什么都能接，不提 TA、不提断联 */
+const SHARP_TAILS_GENERAL = [
+  ' 别绕圈子，说重点。',
+  ' 这话你自己信吗？',
+  ' 行，那你继续。我看你能说出个什么来。',
+  ' 就这？还有呢。',
+  ' 说半天，重点呢。',
+  ' 我不催你，但你最好别在这儿耗一晚上。',
+  ' 嗯，然后呢。别停在这儿。',
+  ' 你这点事，说出去不丢人，憋着才丢人。',
+  ' 你想让我夸你？没门。但你接着说。',
+  ' 我听着呢。说完记得去做点别的。'
+];
+
+/* 只有这些意图（断联 / 情绪 / 回忆类）才配「关于 TA」的尾巴。
+   daily、greeting、newStart、以及没识别出意图时，都不往感情上引。 */
+const EX_INTENTS = ['urge', 'miss', 'insomnia', 'sad', 'angry', 'selfBlame', 'memory', 'askWhy'];
 const BOTTLE_TIP = ' 如果话已经到嘴边了，就把它写进「留白瓶」吧——写下来，但不必发送。';
 
 const FALLBACK = [
@@ -609,8 +634,11 @@ function buildMain(intent, p, usedMap) {
     const pool = intent ? (INTENT_POOL[intent] || FALLBACK) : FALLBACK;
     parts.push(pickUnused(pool, usedMap));
   }
-  if (p === 'sharp') parts.push(pickUnused(SHARP_TAILS, usedMap));
-  else if (p === 'warm') parts.push(pickUnused(WARM_TAILS, usedMap));
+  if (p === 'sharp') {
+    /* v0.9.3：聊感情才用「戳 TA」的尾巴，聊别的用通用毒舌 */
+    const tp = (intent && EX_INTENTS.indexOf(intent) > -1) ? SHARP_TAILS : SHARP_TAILS_GENERAL;
+    parts.push(pickUnused(tp, usedMap));
+  } else if (p === 'warm') parts.push(pickUnused(WARM_TAILS, usedMap));
   else if (p === 'tsun') parts.push(pickUnused(TSUN_TAILS, usedMap));
   else if (p === 'spoil') parts.push(pickUnused(SPOIL_TAILS, usedMap));
   return parts;
@@ -625,10 +653,11 @@ function buildMain(intent, p, usedMap) {
 function buildFollowUp(intent, p, text, usedMap) {
   const phrase = pickPhrase(text);
   if (!phrase) return '';
-  if (intent && Math.random() >= 0.65) return '';
-  const pool = intent
-    ? (FOLLOWUP[p] || FOLLOWUP.warm)
-    : (FALLBACK_FOLLOW[p] || FALLBACK_FOLLOW.warm);
+  /* v0.9.3：已经识别出意图、有针对性回复了，就不再额外补一段
+     （以前 35% 概率还要再拼一句，读起来就是在硬凑内容）。
+     只有「没识别出意图」时才接话——那种情况不接就等于「然后呢」，像没在听。 */
+  if (intent) return '';
+  const pool = FALLBACK_FOLLOW[p] || FALLBACK_FOLLOW.warm;
   const tpl = pickUnused(pool, usedMap);
   if (usedMap) usedMap[tpl] = 1;
   return ' ' + tpl.replace(/\$\{p\}/g, phrase);

@@ -109,12 +109,9 @@ Page({
       affinityText,
       shName: S.shadow.name || S.exName || ''
     });
-    /* v0.4.0 · 自我洞察：7 天未使用 / 满 30 天 → 打开影子页时就温和触发
-       （此前只在 onEnterChat 里查，且 lastUsedAt 已被重置，no_use 永远不会触发） */
-    if (S.shadow.enabled && !S.shadow.revealTriggered && S.shadow.firstUsedAt > 0) {
-      const reveal = shadow.shouldReveal(S.shadow);
-      if (reveal) this.fireReveal(reveal);
-    }
+    /* v0.9.3 · 打开影子页不再自动弹揭示。
+       以前是「7 天没用 / 满 30 天」自动弹，用户根本没问就被说教。
+       现在只有两种触发：用户在对话里起疑（你怎么越来越不像他了）、或自己宣告放下了。 */
   },
 
   utilShadowSessionsToday(S) {
@@ -397,14 +394,8 @@ Page({
       wx.showToast({ title: '今天影子次数用完了', icon: 'none' });
       return;
     }
+    /* v0.9.3 · 进入对话也不再自动弹揭示，改为在对话中检测用户是否起疑。 */
     const now = Date.now();
-    /* v0.4.0 · 自我洞察检测 —— 必须在重置 lastUsedAt 之前检查，
-       否则 no_use（连续 7 天未用）永远不会触发 */
-    const reveal = shadow.shouldReveal(S.shadow, now);
-    if (reveal) {
-      this.fireReveal(reveal);
-      return;
-    }
     /* v0.4.0 · 记录温水冷却数据 */
     if (!S.shadow.firstUsedAt || S.shadow.firstUsedAt <= 0) {
       S.shadow.firstUsedAt = now;
@@ -539,6 +530,10 @@ Page({
     const crisis = guardian.detectIntent(text) === 'crisis';
     /* v0.4.0 · 自我洞察：用户宣告检测 */
     const declaration = shadow.detectDeclaration(text);
+    /* v0.9.3 · 用户起疑检测：「你怎么越来越不像他了」这类话
+       —— 这是揭示「你需要的根本不是 TA」的唯一时机，除此之外绝不主动弹 */
+    const doubt = !crisis && !declaration && shadow.detectDoubt(text)
+      && !(S.shadow && S.shadow.revealTriggered);
 
     setTimeout(() => {
       /* 重新读取：setTimeout 闭包里的 S 是旧快照，用户连发几条时会互相覆盖丢消息 */
@@ -564,6 +559,19 @@ Page({
         storage.save(S2);
         this.setData({ msgs: filtered });
         this.fireReveal({ reason: 'declaration' });
+      } else if (doubt) {
+        /* v0.9.3 · 用户当场起疑：影子先应一句，再揭示。
+           顺序很重要——先把「被你发现了」说出口，弹层才不突兀。 */
+        S2.shadow.observation = S2.shadow.observation || {};
+        S2.shadow.observation.userDoubtCount = (S2.shadow.observation.userDoubtCount || 0) + 1;
+        storage.save(S2);
+        const admit = shadow.REVEAL_TRIGGERS.DOUBT_REPLY;
+        filtered.push({ role: 'ai', avatar: this.data.agentImg, text: admit, _k: this._msgSeq++ });
+        S2.shadow.msgs.push({ role: 'ai', text: admit, t: Date.now() });
+        storage.save(S2);
+        this.setData({ msgs: filtered });
+        this.scrollChatToBottom();
+        this.fireReveal({ reason: 'user_doubt' });
       } else {
         /* v0.4.0 · 把 affinity 传给 shadowReply
            v0.7.0 · 第 5 个参数传去重字典，影子的话也不再说第二遍

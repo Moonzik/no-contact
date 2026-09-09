@@ -38,8 +38,24 @@ function canUse(what) {
   }
 }
 
-/* button open-type="chooseAvatar" 需要基础库 2.21.2+，低版本点了没反应 */
-function avatarSupported() { return canUse('button.open-type.chooseAvatar'); }
+/* 是不是跑在开发者工具的模拟器里 */
+function isDevtools() {
+  try {
+    if (typeof wx === 'undefined' || typeof wx.getSystemInfoSync !== 'function') return false;
+    const info = wx.getSystemInfoSync();
+    return !!(info && info.platform === 'devtools');
+  } catch (e) {
+    return false;
+  }
+}
+
+/* button open-type="chooseAvatar" 需要基础库 2.21.2+，低版本点了没反应。
+   v0.9.3：开发者工具模拟器里 chooseAvatar 也经常点了没反应（真机才生效），
+   所以模拟器环境一律降级到「从相册选」——保证在工具里也一定能测通上传。 */
+function avatarSupported() {
+  if (isDevtools()) return false;
+  return canUse('button.open-type.chooseAvatar');
+}
 /* input type="nickname" 同上，低版本只能手填 */
 function nicknameSupported() { return canUse('input.type.nickname'); }
 
@@ -213,6 +229,7 @@ module.exports = {
   requireLogin,
   goLogin,
   canUse,
+  isDevtools,
   avatarSupported,
   nicknameSupported,
   userDir,

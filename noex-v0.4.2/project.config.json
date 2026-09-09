@@ -29,6 +29,14 @@
       {
         "value": "AI接入指南.html",
         "type": "file"
+      },
+      {
+        "value": "我页排版预览.html",
+        "type": "file"
+      },
+      {
+        "value": "v0.9.3更新说明.html",
+        "type": "file"
       }
     ],
     "include": []
