@@ -84,6 +84,10 @@
   overflow: hidden;
   padding: 8rpx 4rpx 24rpx;
   box-sizing: border-box;
+  /* v0.9.7：同影子页——scroll-view 必须显式 flex column，align-self 才生效 */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 .row {
   display: flex;
@@ -99,10 +103,11 @@
 .row.ai {
   align-self: flex-start;
 }
+/* v0.9.9：同影子页——去掉 row-reverse，头像才会在最右侧 */
 .row.me {
   align-self: flex-end;
-  flex-direction: row-reverse;
   margin-left: auto;
+  justify-content: flex-end;
 }
 .row .ava {
   width: 64rpx;
@@ -245,17 +250,19 @@
   align-items: center;     /* 微信是 center 对齐，单行时不随内容上下抖 */
   gap: 12rpx;
 }
+/* v0.9.10：与影子页同步修复——min-height 对齐单行自然高度，行高显式化，
+   避免 auto-height 在两个高度之间跳动导致文字时而被裁 */
 .ta {
   flex: 1;
   background: var(--card);
   border: 1rpx solid var(--line);
   border-radius: 18rpx;
   padding: 14rpx 20rpx;
-  min-height: 40rpx;
-  max-height: 200rpx;
+  min-height: 72rpx;
+  max-height: 198rpx;
   box-sizing: border-box;
   font-size: 28rpx;
-  line-height: 1.4;
+  line-height: 42rpx;
 }
 /* 发送按钮：严格 64rpx 圆形，重置 button 默认 padding/font 撑大变椭圆 */
 .send-btn {

@@ -15,6 +15,8 @@ Page({
     personaDesc: '',
     msgs: [],
     text: '',
+    /* v0.9.10：原生 textarea 焦点中会忽略 value 更新，发送后用 wx:if 重建清空 */
+    taAlive: true,
     chips: CHIPS,
     status: '一直都在',
     day: 1,
@@ -120,10 +122,21 @@ Page({
   },
 
   onBlur(e) {
+    /* v0.9.10：刚发送清空后的 500ms 内，忽略迟到的 blur 回写 */
+    if (Date.now() - (this._clearedAt || 0) < 500) return;
     /* 失焦时也同步一次，防止某些机型 bindinput 漏触发 */
     if (e && e.detail && typeof e.detail.value === 'string') {
       this.setData({ text: e.detail.value });
     }
+  },
+
+  /* v0.9.10：发送后清空输入框（与影子页同款）。
+     原生 textarea 持有焦点时忽略 value 变化，只 setData 不够，
+     用 wx:if 卸掉重建一次（100ms）才真正清空。 */
+  clearInputBox() {
+    this._clearedAt = Date.now();
+    this.setData({ text: '', taAlive: false });
+    setTimeout(() => { this.setData({ taAlive: true }); }, 100);
   },
 
   onTapChip(e) {
@@ -149,7 +162,7 @@ Page({
     const S = storage.load();
     S.gMsgs.push({ role: 'me', text, t: Date.now() });
     storage.save(S);
-    this.setData({ text: '' });
+    this.clearInputBox();
 
     /* 把 me 消息 + 打字占位一起 push 到页面，缺一会导致用户看不到自己发的字 */
     const meMsg = { role: 'me', text, _k: this._msgSeq++ };

@@ -35,7 +35,6 @@
   width: 220rpx;
   height: 220rpx;
   border-radius: 50%;
-  filter: grayscale(1) opacity(0.85);
   border: 1rpx solid var(--line);
   background: #fff;
 }
@@ -257,6 +256,26 @@
   width: 88rpx;
   height: 88rpx;
 }
+/* v0.9.7：影子头像可点击更换 */
+.head-ava-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+.head-ava-edit {
+  position: absolute;
+  right: -6rpx;
+  bottom: -6rpx;
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #faf9f4;
+  font-size: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.head-ava-hover { opacity: 0.7; }
 .chat-head .right {
   margin-left: auto;
   font-size: 23rpx;
@@ -276,11 +295,20 @@
   overflow: hidden;
   padding: 24rpx 44rpx;
   box-sizing: border-box;
+  /* v0.9.7：scroll-view 必须显式声明 flex column，
+     否则 row.ai / row.me 的 align-self 全部失效，自己的消息也堆在左边 */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 .row { display: flex; gap: 20rpx; margin: 0 0 28rpx; max-width: 88%; }
 .row.sys { align-self: center; margin: 0 auto 14rpx; max-width: 100%; }
 .row.ai { align-self: flex-start; }
-.row.me { align-self: flex-end; flex-direction: row-reverse; margin-left: auto; }
+/* v0.9.9：去掉 row-reverse。
+   DOM 顺序本来就是「气泡 → 头像」，正常 row 方向下气泡在左、头像贴最右，正是微信的样子。
+   之前加了 row-reverse 把顺序倒过来，头像被甩到气泡左边，看着就反了。
+   justify-content:flex-end 兜底：万一 .msgs 的 flex 没生效，内容也还是靠右。 */
+.row.me { align-self: flex-end; margin-left: auto; justify-content: flex-end; }
 .row .ava {
   width: 64rpx; height: 64rpx;
   border-radius: 50%;
@@ -368,17 +396,22 @@
   align-items: center;     /* 单行时不随内容上下抖动 */
   gap: 12rpx;
 }
+/* v0.9.10：输入框高度不稳定修复。
+   旧值 min-height:40rpx 比单行自然高度（14+42+14≈70rpx）小，
+   auto-height 重算时高度在两个值之间来回跳，表现为"有时显示全有时显示不全"。
+   现在行高显式 42rpx、min-height 恰好等于单行总高（含 padding），
+   max-height 是行高的整数倍（4 行 = 14*2+42*4+2 ≈ 198rpx），高度只会逐行稳定变化。 */
 .ta {
   flex: 1;
   background: var(--card);
   border: 1rpx solid var(--line);
   border-radius: 18rpx;
   padding: 14rpx 20rpx;
-  min-height: 40rpx;
-  max-height: 200rpx;
+  min-height: 72rpx;
+  max-height: 198rpx;
   box-sizing: border-box;
   font-size: 28rpx;
-  line-height: 1.4;
+  line-height: 42rpx;
 }
 
 /* v0.9.0 · 发送按钮：与小白完全一致的 64rpx 严格圆形。

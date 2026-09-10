@@ -82,9 +82,14 @@ function get(host, path) {
   });
 }
 
-/* ── v0.9.3 · 手机号：把 getPhoneNumber 的 code 换成真实号码 ──
-   只有**企业主体**小程序才能拿到 code；个人主体点了会直接 fail，前端会提示手填。
-   需要两个环境变量：NOEX_APPID、NOEX_APPSECRET（mp 后台 → 开发管理 → 开发设置）。 */
+/* ── v0.9.8 · 手机号：把 getPhoneNumber 的 code 换成真实号码 ──
+   前置条件：
+   1) 小程序主体必须是**非个人**（企业 / 个体工商户等）。
+      v0.9.8 起本项目主体已变更为个体工商户，条件满足。
+   2) 云函数环境变量要配 NOEX_APPID、NOEX_APPSECRET
+      （mp 后台 → 开发管理 → 开发设置 → AppSecret）。
+   3) 该接口按次计费（有免费额度），用量见 mp 后台 → 付费管理。
+   拿不到就返回空，前端会退回「手动填写」，手机号本身是选填项。 */
 async function getPhone(code) {
   const appid = process.env.NOEX_APPID || '';
   const secret = process.env.NOEX_APPSECRET || '';

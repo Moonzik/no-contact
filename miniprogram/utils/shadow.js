@@ -1,6 +1,18 @@
 // utils/shadow.js — 影子 v0.4.0
+//
+// ⚠️ v0.9.9 起：**shadowReply 已从业务流程中停用**。
+//    影子的对话改由 AI 智能体生成（utils/ai.js 的 shadowChat + SHADOW_SYSTEM），
+//    本文件只保留语气画像、温水冷却、自我洞察这三块。
+//
+//    停用原因：智能体没配好时会回落到 shadowReply 的固定短句库，
+//    用户看到的就是一堆「嗯。」「……」——那不是"像 TA"，那是在敷衍，
+//    而且会让用户误以为影子本来就这水平。现在 AI 拿不到结果就直接说明原因，绝不伪造。
+//
+//    这些池子暂时留着不删：一是历史单元测试还在用，二是将来若要做
+//    「断网时的极简占位」还有参考价值。但**不要**再接到聊天流程里。
+//
 // 三个层次叠加：
-//   1. 基于聊天记录生成的语气画像 + 短句回复（v0.3.0 起）
+//   1. 基于聊天记录生成的语气画像（v0.3.0 起）
 //   2. 温水冷却：相似度按天数 + session 数衰减，21 天后触底（v0.4.0 起）
 //   3. 自我洞察触发器：在合适时刻温和地说出关键洞察（v0.4.0 起）
 //
@@ -9,6 +21,29 @@
 
 const SHADOW_MAX_DAY = 3;
 const SHADOW_MS = 20 * 60 * 1000; // 单次最长 20 分钟
+
+/* v0.9.7：fallback 兜底时复用 guardian 的话题识别（不引入性格尾巴） */
+let _guardian = null;
+function topicReply(text, rng, used) {
+  try {
+    if (!_guardian) _guardian = require('./guardian.js');
+    const t = String(text || '');
+    /* 先查影子补充关键词（guardian 没覆盖的场景） */
+    for (const k in SHADOW_EXTRA_KEYS) {
+      const arr = SHADOW_EXTRA_KEYS[k] || [];
+      for (let i = 0; i < arr.length; i++) {
+        if (t.indexOf(arr[i]) > -1 && SHADOW_TOPIC_POOL[k]) {
+          return pickUnused(SHADOW_TOPIC_POOL[k], used);
+        }
+      }
+    }
+    const topic = _guardian.detectTopic(text);
+    if (topic && SHADOW_TOPIC_POOL[topic]) {
+      return pickUnused(SHADOW_TOPIC_POOL[topic], used);
+    }
+  } catch (e) { /* 循环依赖或异常时退回原 fallback */ }
+  return null;
+}
 
 /* ============ 温水冷却参数 ============ */
 const SHADOW_AFFINITY = {
@@ -65,13 +100,19 @@ function pickUnused(arr, usedMap) {
 /* 影子语气分类（每次随机给一个变体，避免一眼能看出是机器人） */
 function shadowIntents() {
   return {
-    miss:  ['想你','想你了','好想','我还爱你','忘不了'],
+    miss:  ['想你','想你了','好想','我还爱你','忘不了','想他','想她','想ta','想TA','放不下'],
     ask:   ['还爱','爱过我','为什么','复合','回来','我们还能','做错了什么','你的意思'],
     angry: ['对不起','抱歉','你凭什么','恨你','骗子','渣'],
     bye:   ['再见','拜拜','走了','最后','告个别','再见了'],
     greet: ['在吗','你好','嗨','是我']
   };
 }
+
+/* v0.9.7：影子补充关键词（guardian.TOPIC_KEYS 没覆盖的生活场景，先于话题池） */
+const SHADOW_EXTRA_KEYS = {
+  sleep: ['睡','困','熬夜','失眠','早点休息'],
+  miss:  ['又想他了','又想她了','梦到','梦见了']
+};
 
 /* ============ 通用回复池（所有阶段都可用，低相似度时优先） ============ */
 /* v0.7.0：每格扩到 8 句。影子本来就短，格子太小会三两句就绕回来。 */
@@ -81,7 +122,27 @@ const SHADOW_POOL = {
   angry: ['对不起。','嗯，你说，我听着。','……我没资格解释。','嗯。是我的问题。','……你骂吧。','我知道我做得不好。','嗯，你说得对。','……我没话说。'],
   bye:   ['嗯，去吧。','照顾好自己。','……嗯。再见。','好。','那就这样吧。','……我会记得的。','你走吧，别回头。','嗯。'],
   greet: ['嗯。','在。','……是你啊。','嗯，我来晚了。','你来了。','……嗯，我在。','好久不见。','嗯，说吧。'],
-  fallback: ['嗯。','……','在听。','你说。','……嗯。','我在。','嗯，然后呢。','……我知道了。']
+  fallback: ['在听。','你说。','……嗯，然后呢。','我听着。','……继续说。','嗯，我在这。']
+};
+
+/* ============ v0.9.7 · 影子话题池（fallback 兜底用） ============
+ * 用户吐槽：影子回「嗯。」莫名其妙的语气词。
+ * 原因：fallback 池 8 条里 6 条是「嗯」系敷衍句。
+ * 现在兜底分两层：先按 guardian 的话题识别给出**贴题**的影子式短句
+ * （平淡、简短、有距离感，符合"模仿 TA"的克制人设），没命中才用原 fallback。
+ * key 与 guardian.TOPIC_KEYS 对齐。 */
+const SHADOW_TOPIC_POOL = {
+  food:    ['吃的什么。','……好好吃饭。','听起来不错。'],
+  work:    ['别太晚。','……工作要紧，你也一样。','今天累吗。'],
+  study:   ['……学得进去就好。','别给自己太大压力。'],
+  sleep:   ['早点睡。','……别熬了。','睡吧，我不说你了。'],
+  media:   ['……你还是喜欢这些。','看得怎么样。'],
+  out:     ['去哪儿了。','……出门挺好的。','路上小心。'],
+  pet:     ['……它还好吗。','替我摸摸它。'],
+  health:  ['……身体要紧。','不舒服就去看看。'],
+  people:  ['……你身边有人陪着就好。'],
+  money:   ['……该花的花，别亏待自己。'],
+  weather: ['出门带伞。','……这边也在下。']
 };
 
 /* ============ 高仿回复池（仅高相似度时使用，拼接用户口头禅） ============
@@ -196,6 +257,9 @@ function shadowReply(text, profile, affinity, rng, usedMap) {
         }
       }
     }
+    /* v0.9.7：意图没命中先试话题池（贴题短句），不再开口就「嗯。」 */
+    const tr = topicReply(text, rng, used);
+    if (tr) return { out: tr, tpl: tr };
     if (tier === 'high') {
       const tpl = pickUnused(SHADOW_POOL_HIGH.fallback, used);
       return { out: fillTemplate(tpl, profile && profile.top), tpl: tpl };

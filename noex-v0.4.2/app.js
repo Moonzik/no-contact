@@ -4,9 +4,9 @@ const ai = require('./utils/ai.js');
 
 App({
   globalData: {
-    version: '0.9.6',  // 2026-09-10 提审合规：__usePrivacyCheck__ 改回 true + 隐私授权弹窗（pages/privacy）
+    version: '0.9.10',  // 2026-09-11 影子去"亲密称呼/答非所问"（重写铁律 0 + 新增 0b 高压线）+ 修 prompt 重复输入真 bug（dropDupTail）+ 输入框高度稳定化 + 跨零点次数重置
     name: '断联日记 NOEX',
-    build: 'privacy-on-v9.6',
+    build: 'shadow-agent-v9.10',
     /* 从功能页点「去登录」过来时置 true，me 页 onShow 消费掉并展开登录卡 */
     autoOpenLogin: false,
     /* 隐私授权：onNeedPrivacyAuthorization 触发时存下 resolve，由 privacy 页消费 */

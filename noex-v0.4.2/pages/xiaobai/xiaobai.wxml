@@ -75,6 +75,7 @@
     </scroll-view>
     <view class="input-row">
       <textarea
+        wx:if="{{taAlive}}"
         class="ta"
         value="{{text}}"
         placeholder="想说什么都可以…"

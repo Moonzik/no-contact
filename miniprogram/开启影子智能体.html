@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>开启影子智能体 · 断联日记 NOEX</title>
+<style>
+  :root{
+    --bg:#faf7f2; --card:#ffffff; --ink:#3a332b; --sub:#7a7064; --faint:#b0a798;
+    --line:#e8e0d4; --accent:#9a5d3a; --ok:#4a7c59; --bad:#b4453c; --chip:#f2ece1;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+       line-height:1.8;font-size:15px}
+  .wrap{max-width:840px;margin:0 auto;padding:40px 24px 90px}
+  h1{font-size:26px;margin:0 0 6px;letter-spacing:1px}
+  .sub{color:var(--sub);font-size:14px;margin-bottom:26px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+        padding:24px 26px;margin:20px 0}
+  h2{font-size:18px;margin:0 0 14px;display:flex;align-items:center;gap:10px}
+  h3{font-size:15px;margin:22px 0 8px;color:var(--accent)}
+  .num{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;
+       font-size:14px;display:flex;align-items:center;justify-content:center;flex:none}
+  .num.done{background:var(--ok)}
+  .bug{background:#fdf1ef;border-left:3px solid var(--bad);padding:12px 16px;
+       border-radius:0 8px 8px 0;margin:12px 0;font-size:14px}
+  .fix{background:#f0f6f1;border-left:3px solid var(--ok);padding:12px 16px;
+       border-radius:0 8px 8px 0;margin:12px 0;font-size:14px}
+  .warn{background:#fff8e8;border-left:3px solid #c9962f;padding:12px 16px;
+        border-radius:0 8px 8px 0;margin:12px 0;font-size:14px}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--sub);font-weight:600;font-size:13px}
+  code{background:var(--chip);padding:1px 6px;border-radius:4px;font-size:13px}
+  .note{color:var(--sub);font-size:13px;margin-top:10px}
+  ol.step,ul.step{margin:0;padding-left:22px}
+  ol.step li,ul.step li{margin:10px 0}
+  .path{background:#2f2b25;color:#f0ebe2;border-radius:8px;padding:12px 16px;
+        font-size:14px;margin:10px 0;letter-spacing:.3px}
+  .path b{color:#e8c08a;font-weight:600}
+  .bad{color:var(--bad);font-weight:600}
+  .good{color:var(--ok);font-weight:600}
+  .stage{display:inline-block;background:var(--chip);color:var(--accent);
+        font-size:12px;padding:3px 10px;border-radius:20px;margin-left:8px;vertical-align:middle}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>开启影子智能体</h1>
+  <div class="sub">3 步 · 大约 15 分钟 · 花的是你已有的 DeepSeek 余额</div>
+
+  <!-- 0 -->
+  <div class="card">
+    <h2><span class="num">!</span>先说清楚：影子为什么不说话</h2>
+    <div class="bug">
+      <b>两个原因，都已修好。</b>
+      <ol class="step" style="margin-top:8px">
+        <li><b>云函数从来没部署过。</b>代码里配的是走云开发云函数，但 <code>noex-ai</code> 一直没上传，
+            于是影子每次都回落到一套写死的短句（「嗯。」「……」）—— 就是你看到的"乱七八糟"。</li>
+        <li><b>代码里还有个真 bug。</b><code>cloudInit()</code> 在"已经初始化过"时反而返回失败，
+            导致<b>第一次之后的每一次 AI 调用都被判定为云开发不可用</b>。
+            小白因为有本地规则兜底所以你没察觉，影子就直接废了。</li>
+      </ol>
+    </div>
+    <div class="fix">
+      <b>v0.9.9 已改：</b>
+      <ul class="step">
+        <li>修掉 <code>cloudInit</code> 那个 bug（顺带小白也终于能真正用上 AI 了）</li>
+        <li><b>影子取消本地兜底，改为纯智能体</b>。AI 拿不到结果就说清楚原因，<b>绝不再拿固定句库假装是 TA 在说话</b></li>
+        <li>强化模仿：样本给到 10 条，并把「像 TA」写成第一优先级</li>
+      </ul>
+      所以现在只要把云函数部署上，影子和小白就都活了。
+    </div>
+  </div>
+
+  <!-- 1 -->
+  <div class="card">
+    <h2><span class="num done">1</span>部署云函数<span class="stage">5 分钟</span></h2>
+
+    <div class="note">
+      ✅ <b>之前小白已经部署过 noex-ai 的话，这步直接跳过</b>——小白和影子用的是<b>同一个</b>云函数，
+      影子不需要单独部署，也不需要重新上传（云函数代码没改过）。<br>
+      ⚠️ 不要在云开发控制台里<b>新建</b>同名的 <code>noex-ai</code>——同名函数只能存在一个，新建会报
+      "函数已存在"之类的错误。要用新代码更新已有函数，只需在开发者工具里右键它 → 上传并部署（覆盖式更新）。
+    </div>
+
+    <ol class="step">
+      <li>开发者工具打开项目（目录 <code>C:\Users\XIAOMI\Desktop\noex</code>）</li>
+      <li>左侧文件树找到 <b>cloudfunctions → noex-ai</b></li>
+      <li><b>右键 noex-ai → 「上传并部署：云端安装依赖」</b>
+        <div class="note">⚠️ 选「云端安装依赖」那个，不要选"上传所有文件"。我们是零依赖，几秒就传完。</div>
+      </li>
+      <li>右下角提示"部署成功"即可</li>
+    </ol>
+
+    <div class="warn">
+      <b>如果右键看不到这个菜单</b>：说明还没开通云开发。先点工具栏的<b>「云开发」</b>按钮 →
+      开通 → 环境选 <code>cloud1</code>，然后再回来右键部署。<br>
+      如果菜单是灰的：确认 <code>project.config.json</code> 里有 <code>"cloudfunctionRoot": "cloudfunctions/"</code>。
+    </div>
+
+    <div class="note">
+      部署完确认一下云环境 ID 对不对：云开发控制台 → 环境 → 环境 ID，
+      应该和 <code>utils/ai-config.js</code> 里的 <code>env</code> 一致（现在是 <code>cloud1-d4gmglocfb7dc5a47</code>）。
+      <b>不一致就在 ai-config.js 里改</b>，改完重新编译。
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="card">
+    <h2><span class="num done">2</span>填 DeepSeek 的 Key<span class="stage">3 分钟</span></h2>
+
+    <p style="font-size:14px">云函数默认走的就是 DeepSeek（<code>api.deepseek.com</code> / <code>deepseek-chat</code>），
+    你之前充的 10 元余额正好能用。只需要在云函数环境变量里填 Key，<b>不用改代码</b>。</p>
+
+    <ol class="step">
+      <li>打开 <b>云开发控制台</b>：tcb.cloud.tencent.com（用浏览器比开发者工具里的云朵按钮好用）</li>
+      <li>左侧 <b>云函数</b> → 点 <code>noex-ai</code></li>
+      <li>顶部 <b>配置</b> 标签 → 往下滑到 <b>环境变量</b></li>
+      <li>点「编辑」→ 新增一条：
+        <div class="path">变量名：<b>NOEX_AI_KEY</b><br>变量值：<b>sk-你的DeepSeek密钥</b></div>
+      </li>
+      <li>保存。<b>改完环境变量不用重新部署</b>，下次调用自动生效</li>
+    </ol>
+
+    <div class="warn">
+      <b>Key 从哪来</b>：platform.deepseek.com 登录 → 左侧「API Keys」→ 创建 API key。
+      忘了的话重新创建一个旧的作废就行。<br>
+      <b>注意别用已泄露的 Key</b>，也别把 Key 写进小程序前端代码（上传到云函数环境变量才安全）。
+    </div>
+
+    <div class="fix">
+      <b>费用不用怕。</b>DeepSeek 大概 1 元能聊几百轮。你充的 10 元，
+      按每天几十条消息算，<b>够用几个月</b>。影子每次回复最多 140 token，很省。
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="card">
+    <h2><span class="num done">3</span>重新编译并验证<span class="stage">2 分钟</span></h2>
+
+    <ol class="step">
+      <li>开发者工具点<b>「编译」</b>（或 Ctrl+B）</li>
+      <li>进「影子」页 → 粘贴一段聊天记录 → 开始对话</li>
+      <li><b>第一次回复可能要等 3～8 秒</b>（云函数冷启动），之后就快了</li>
+    </ol>
+
+    <div class="fix">
+      <b>成功的样子</b>：影子说的话明显带着 TA 的味儿 ——
+      句子长短、口头禅、标点习惯都像，而不是统一的「嗯。」。<br>
+      <b>小白也会变</b>：那个 cloudInit bug 修好后，小白同样走 AI 了，会比之前聪明不少。
+    </div>
+  </div>
+
+  <!-- 排错 -->
+  <div class="card">
+    <h2><span class="num">?</span>界面提示 → 原因 → 怎么办</h2>
+    <p style="font-size:14px">影子现在会把失败原因直接说给你听，对照这张表处理：</p>
+    <table>
+      <tr><th style="width:34%">影子说的话</th><th>原因</th><th>怎么办</th></tr>
+      <tr><td>云函数 noex-ai 还没部署</td><td>第 1 步没做</td><td>右键 noex-ai → 上传并部署</td></tr>
+      <tr><td>云函数报错了，多半是没配 NOEX_AI_KEY</td><td>第 2 步没做</td><td>去云函数环境变量填 Key</td></tr>
+      <tr><td>云开发环境 ID 不对</td><td>env 和控制台不一致</td><td>改 <code>ai-config.js</code> 的 env，重新编译</td></tr>
+      <tr><td>云开发没初始化成功</td><td>工具里没开云开发 / 没选环境</td><td>点「云开发」按钮开通，选 cloud1</td></tr>
+      <tr><td>这次等太久没回上</td><td>首次冷启动或网络慢</td><td>再说一次，之后会快</td></tr>
+      <tr><td>网络没连上</td><td>断网</td><td>检查网络重试</td></tr>
+      <tr><td>影子需要智能体支持，现在还没开启</td><td>ai-config.js 的 provider 是 off</td><td>改成 <code>'cloud'</code></td></tr>
+    </table>
+    <div class="note">
+      想看更详细的报错：把 <code>utils/ai-config.js</code> 里的 <code>debug</code> 改成 <code>true</code>，
+      控制台会打印 AI 相关日志。
+    </div>
+  </div>
+
+  <!-- 说明 -->
+  <div class="card">
+    <h2><span class="num">·</span>这次改动的技术说明</h2>
+    <table>
+      <tr><th style="width:26%">改动</th><th>说明</th></tr>
+      <tr><td>影子改纯智能体</td><td>停用本地固定句库（<code>shadow.js</code> 的回复池）。AI 失败时如实说明原因，绝不伪造 TA 的语气</td></tr>
+      <tr><td>修 cloudInit</td><td>已初始化时错误地返回 false，导致除首次外全部 AI 调用失败</td></tr>
+      <tr><td>强化模仿</td><td>TA 的原话样本 6 → 10 条、每条 40 → 60 字；system prompt 新增第 0 条铁律「第一优先级是像 TA」</td></tr>
+      <tr><td>错误可分类</td><td>AI 失败带 code（off / not_deployed / env_bad / cloud_error / timeout / network），界面据此给可操作的提示</td></tr>
+      <tr><td>我的头像回右侧</td><td>两页 <code>.row.me</code> 去掉了 <code>row-reverse</code>。DOM 顺序本来就是「气泡→头像」，反转后头像被甩到了气泡左边</td></tr>
+    </table>
+    <div class="note">
+      版本 v0.9.9（build shadow-agent-v9.9）· 9 套测试 725 项全绿 · 三处目录已同步
+    </div>
+  </div>
+
+  <div class="note" style="text-align:center;margin-top:36px">
+    开启影子智能体 · 2026-09-11 · 对应代码版本 v0.9.9
+  </div>
+
+</div>
+</body>
+</html>

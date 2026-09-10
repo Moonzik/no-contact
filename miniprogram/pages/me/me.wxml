@@ -72,9 +72,12 @@
     </view>
   </view>
 
-  <!-- 危机求助方式：不折叠、不藏在弹层里 -->
+  <!-- 危机求助方式：不折叠、不藏在弹层里。
+       下面的号码是国家级公益求助渠道，不是本小程序提供的服务，
+       标注清楚是为了避免被误判为「本产品提供心理服务」。 -->
   <view class="crisis">
     <b>遇到危机时，请让真实的人现在陪着你</b>
+    <view class="crisis-note">以下是国家公益求助渠道，不由本小程序提供</view>
     <view>· 全国 24 小时心理援助热线：400-161-9995</view>
     <view>· 北京心理危机研究与干预中心：010-82951332</view>
     <view>· 紧急情况请直接拨打 120 / 110</view>
@@ -124,7 +127,9 @@
              maxlength="16"
              bindinput="onNickInput" />
 
-      <!-- 手机号：先给微信一键填写（需企业主体 + 云函数），拿不到就手填 -->
+      <!-- 手机号：微信一键填写。
+           v0.9.8：主体已变更为个体工商户，可以正常使用 getPhoneNumber。
+           拿不到时不阻塞登录——手机号是选填项，手填照样能用。 -->
       <view class="field-row">
         <input class="phone-input" type="number"
                value="{{tmpPhone}}"
@@ -136,7 +141,7 @@
                 bindgetphonenumber="onGetPhoneNumber" hover-class="phone-btn-hover">一键填写</button>
       </view>
       <view class="phone-hint" wx:if="{{!phoneSupported}}">
-        当前小程序主体不支持自动读取手机号，请手动填写（可留空）
+        当前微信版本不支持一键填写，可手动填写（选填）
       </view>
 
       <view class="tip">头像、昵称和手机号只保存在你自己的手机里，不会上传。</view>

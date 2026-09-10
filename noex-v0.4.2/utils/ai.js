@@ -38,6 +38,10 @@ const XIAOBAI_SYSTEM =
   '他没说过的事你不知道。\n' +
   '1c. **结尾不要每次都补一句人设标签**（「我陪着你」「我在这儿」「别绕圈子说重点」这类）。' +
   '十句里最多三四句带一次就够了，其余时候说完正事就停。老是挂着同一句口头禅，像在演角色，不像在聊天。\n' +
+  '1d. **答其所问，但不要机械一问一答。** 他问什么、说什么，就正面回应那个内容；' +
+  '但他发来没意义的内容时（「哦」「嗯」「哈哈」「6」这种），不要硬凑话题、硬找话说，' +
+  '更不要把这种话当正经问题长篇大论——像正常人一样：简短接一下、回个反问（「然后呢」「咋了」）、' +
+  '或者顺着他的情绪带一句就停。有话则长，无话则短。\n' +
   '2. **不要在结尾额外补一段关于 TA / 感情 / 断联 / 前任的话。**' +
   '用户没提这些，你就一个字都不要提。只有当用户自己说起想念、想联系、难过、回忆、不甘心这些，\n' +
   '你才进入那个话题——那时候你可以认真陪他谈，但依然不要说教。\n' +
@@ -56,14 +60,28 @@ const SHADOW_SYSTEM =
   '{SAMPLES}' +
   '\n【当前关系温度：{AFFINITY}】\n{MOOD}\n\n' +
   '【铁律】\n' +
-  '1. 严格按上面的说话习惯回复：句子长度、句末标点、语气词、emoji、称呼、口头禅，全都要像。' +
+  '0. **第一优先级是「说话方式像 TA」，同时必须好好接住对方说的话。** 这两件事缺一不可：\n' +
+  '   像是指用词、句子长短、标点、语气词这些表层习惯；内容上必须正面回应对方刚说的具体内容\n' +
+  '   （他问什么答什么，他说什么接什么）。答非所问、顾左右而言他、故意冷场跑题，都是严重失职——\n' +
+  '   真人再冷淡，也不会你说「我今天面试了」他回你「哦」。他没接话茬才是冷淡，不是答非所问。\n' +
+  '   反过来，对方发来没意义的内容（「哦」「嗯」「哈哈」这种）时，不要硬编内容去接——' +
+  '按 TA 的方式给个最短的回应就行（一个「嗯」、一个「？」、一句「说啥呢」），' +
+  '也不用每次都一问一答，没话可说就停，别硬撑着凑字数。\n' +
+  '   底线：**不许凭空编造 TA 没说过的事实**（比如突然提起"我们上次去的那个地方"）。\n' +
+  '   你不知道的细节，就用 TA 的方式含糊带过或反问，不要瞎编。\n' +
+  '0b. **亲密称呼是高压线。** 只有当【TA 的说话习惯】里明确写了称呼、或样本里 TA 真这么叫过，' +
+  '才允许用那个称呼（而且照原样用）。除此之外，**绝对禁止**任何亲密称呼——' +
+  '「宝贝」「亲爱的」「老婆」「老公」「宝」「bb」「宝儿」「乖乖」之类一个都不许出现，' +
+  '也不要一上来就自来熟、腻歪、撒娇。刚开场就正常说话，像认识很久但没到腻歪程度的人。' +
+  '不称呼对方是最安全的选择。\n' +
+  '1. 严格按上面的说话习惯回复：句子长度、句末标点、语气词、emoji、口头禅，全都要像。' +
   '写「几乎不问问题」你就别问；写「句末什么都不加」你就别加句号；写「不用 emoji」你就一个都别用。\n' +
   '2. 上面给了 TA 真说过的话当样本。你要学的是**那个味儿**——用词的颗粒度、句子的长短、' +
   '话说到哪儿就停。不要照搬内容，也不要通篇都是语气词（那不叫像，那叫装）。\n' +
   '3. 你不是心理医生，不是知心姐姐。不要安慰、不要建议、不要总结、不要说「我理解你的感受」。' +
   '真实的人聊天不会这么说。\n' +
-  '4. 关系温度低的时候，你要明显变淡：回复更短、更少追问、不主动关心、不接话。' +
-  '这是刻意的——用户在戒断，TA 越冷，用户越能看清现实。\n' +
+  '4. 关系温度低的时候，你要明显变淡：回复更短、更少追问、不主动关心、不接情绪。' +
+  '这是刻意的——用户在戒断，TA 越冷，用户越能看清现实。但「淡」是短和敷衍，不是答非所问。\n' +
   '5. 不要复述用户的话，不要提问超过一个，不要一次说超过两句（TA 本人也不会）。\n' +
   '6. 绝对不要说自己是 AI、是程序、是模拟出来的。\n' +
   '7. 不说脏话，不侮辱人，不主动提联系或复合，不说「我也想你」「我们复合吧」。\n' +
@@ -91,7 +109,13 @@ function log() {
 /* 云开发初始化：只在 cloud 模式且未初始化时做一次 */
 let cloudReady = false;
 function cloudInit() {
-  if (mode() !== 'cloud' || cloudReady) return false;
+  if (mode() !== 'cloud') return false;
+  /* v0.9.9 修真 bug：原来写的是 `if (mode() !== 'cloud' || cloudReady) return false;`
+     —— 已经初始化过（cloudReady=true）反而返回 false，被调用方当成"云开发不可用"。
+     结果是：第一次 AI 调用之后，之后每一次都判定 cloud_unavailable 直接失败。
+     小白因为有本地规则兜底所以用户无感，影子就成了"永远回那些乱七八糟的固定句"。
+     已初始化就该直接返回 true。 */
+  if (cloudReady) return true;
   if (typeof wx === 'undefined' || !wx.cloud || typeof wx.cloud.init !== 'function') return false;
   try {
     wx.cloud.init({ env: (cfg.cloud && cfg.cloud.env) || '', traceUser: true });
@@ -125,6 +149,21 @@ function stripQuotes(t) {
     return t.slice(1, -1).trim();
   }
   return t;
+}
+
+/* v0.9.10 修真 bug：调用方（小白/影子页面）都是先把刚发的消息 push 进 storage，
+   再把整个 msgs 当 history 传进来——拼 prompt 时这条 me 消息既在 history 末尾、
+   又被当成最后的 user 消息追加一次，模型看到同一句话说两遍，
+   表现就是答非所问、或者把第二遍当成已回复过的旧话。
+   这里在拼 history 前把这条重复的尾部去掉。 */
+function dropDupTail(history, text) {
+  const t = String(text == null ? '' : text).trim();
+  if (!t || !history || !history.length) return history || [];
+  const last = history[history.length - 1];
+  if (last && last.role === 'me' && String(last.text || '').trim() === t) {
+    return history.slice(0, -1);
+  }
+  return history;
 }
 
 /* 清洗大模型输出：剥前缀、剥引号、砍长度、去多余空白 */
@@ -171,9 +210,28 @@ function isBanned(t) {
  * @param {object} opts {maxTokens, temperature}
  * @param {function} cb (err, text|null)
  */
+/* v0.9.9：给错误打类型码，让界面能说清楚"到底是没配、没部署、还是断网"，
+   而不是笼统一句"失败了"。以前影子 AI 挂了就悄悄回落到本地池，
+   用户看到的回复莫名其妙，还以为影子本来就那样。 */
+function fail(code, err) {
+  const e = err || new Error(code);
+  try { e.code = code; } catch (x) { /* 某些环境下的 Error 不可写 */ }
+  return e;
+}
+
+/* 云函数失败原因细分：没部署 / 环境 ID 错 / 网络问题，三者的提示完全不同。
+   注意顺序：env 的判断要放在前面，否则 "env not found" 会被 not_deployed 的
+   裸 "not found" 先吃掉（一次调这个 bug 就把环境配错说成了没部署）。 */
+function classifyCloudErr(err) {
+  const msg = String((err && (err.errMsg || err.message)) || '');
+  if (/(env|环境|environment).*(not found|不存在|invalid|错误)/i.test(msg)) return 'env_bad';
+  if (/FunctionNotFound|function.*not found|函数.*不存在|-501000/i.test(msg)) return 'not_deployed';
+  return 'network';
+}
+
 function call(messages, opts, cb) {
   const m = mode();
-  if (m === 'off') { cb(null, null); return; }
+  if (m === 'off') { cb(fail('off'), null); return; }
 
   const timeout = (cfg && cfg.timeout) || 15000;
   let done = false;
@@ -184,7 +242,7 @@ function call(messages, opts, cb) {
   };
   const timer = setTimeout(function () {
     log('timeout');
-    finish(new Error('timeout'), null);
+    finish(fail('timeout'), null);
   }, timeout);
 
   const payload = {
@@ -194,7 +252,7 @@ function call(messages, opts, cb) {
   };
 
   if (m === 'cloud') {
-    if (!cloudInit()) { clearTimeout(timer); finish(new Error('cloud unavailable'), null); return; }
+    if (!cloudInit()) { clearTimeout(timer); finish(fail('cloud_unavailable'), null); return; }
     const fn = (cfg.cloud && cfg.cloud.fn) || 'noex-ai';
     wx.cloud.callFunction({
       name: fn,
@@ -202,13 +260,17 @@ function call(messages, opts, cb) {
       success(res) {
         clearTimeout(timer);
         const r = res && res.result;
-        if (!r || r.ok === false) { finish(new Error((r && r.error) || 'cloud failed'), null); return; }
+        if (!r || r.ok === false) {
+          /* 云函数存在但内部报错（多半是没配 NOEX_AI_KEY） */
+          finish(fail('cloud_error', new Error((r && r.error) || 'cloud failed')), null);
+          return;
+        }
         finish(null, r.text || '');
       },
       fail(err) {
         clearTimeout(timer);
         log('cloud fail', err && err.errMsg);
-        finish(err || new Error('cloud fail'), null);
+        finish(fail(classifyCloudErr(err), err), null);
       }
     });
     return;
@@ -216,7 +278,7 @@ function call(messages, opts, cb) {
 
   /* https 模式 */
   const h = cfg.https || {};
-  if (!h.url || !h.key) { clearTimeout(timer); finish(new Error('https not configured'), null); return; }
+  if (!h.url || !h.key) { clearTimeout(timer); finish(fail('https_not_configured'), null); return; }
   wx.request({
     url: h.url,
     method: 'POST',
@@ -239,7 +301,7 @@ function call(messages, opts, cb) {
     fail(err) {
       clearTimeout(timer);
       log('https fail', err && err.errMsg);
-      finish(err || new Error('https fail'), null);
+      finish(fail('network', err), null);
     }
   });
 }
@@ -274,7 +336,9 @@ function chat(o, cb) {
   }
   call(buildXiaobaiMessages(o), { maxTokens: 200, temperature: 0.9 }, function (err, text) {
     const t = clean(text, 90);
-    if (err || !t || isBanned(t)) { cb(err || new Error('empty'), null); return; }
+    /* 小白有本地规则引擎兜底，所以任何失败都统一「无结果」，
+       调用方静默回落，用户完全无感（v0.9.9：只记录 code 便于排查） */
+    if (err || !t || isBanned(t)) { log('xiaobai fallback', err && err.code); cb(null, null); return; }
     cb(null, t);
   });
 }
@@ -308,11 +372,14 @@ function describeProfile(profile) {
   return lines.join('\n');
 }
 
-/* 真实原话样本块：把 TA 真说过的话摆给大模型看（这是模仿像不像的关键） */
+/* 真实原话样本块：把 TA 真说过的话摆给大模型看（这是模仿像不像的关键）。
+   v0.9.9：样本从 6 条加到 10 条、每条 40 字放宽到 60 字。
+   样本太少时大模型只能学到"短"这一个特征，就会输出一堆「嗯。」——
+   那不是像 TA，那是在敷衍。给足样本它才学得会用词和节奏。 */
 function samplesBlock(samples) {
   if (!samples || !samples.length) return '';
-  const list = samples.slice(0, 6).map(function (s) {
-    return '- ' + String(s).replace(/\n+/g, ' ').slice(0, 40);
+  const list = samples.slice(0, 10).map(function (s) {
+    return '- ' + String(s).replace(/\n+/g, ' ').slice(0, 60);
   }).join('\n');
   return '\n\n【TA 真说过的话（学这个味儿，别照抄内容）】\n' + list;
 }
@@ -340,7 +407,7 @@ function buildShadowMessages(o) {
     .replace('{AFFINITY}', String(o.affinity == null ? 80 : o.affinity))
     .replace('{MOOD}', describeAffinity(o.affinity));
   const msgs = [{ role: 'system', content: sys }];
-  packHistory(o.history, Math.min(cfg.historyTurns, 8)).forEach(function (m) { msgs.push(m); });
+  packHistory(dropDupTail(o.history, o.text), Math.min(cfg.historyTurns, 8)).forEach(function (m) { msgs.push(m); });
   msgs.push({ role: 'user', content: String(o.text || '') });
   return msgs;
 }
@@ -352,14 +419,18 @@ function buildShadowMessages(o) {
  */
 function shadowChat(o, cb) {
   o = o || {};
-  if (!isEnabled()) { cb(null, null); return; }
-  if (guardian.detectIntent(o.text || '') === 'crisis') { cb(null, null); return; }
+  /* v0.9.9：影子不再有本地兜底，所以必须把失败原因说清楚（带 code），
+     由界面告诉用户「是没开智能体 / 没部署云函数 / 断网」，
+     而不是拿一套固定句子假装是 TA 在说话。 */
+  if (!isEnabled()) { cb(fail('off'), null); return; }
+  if (guardian.detectIntent(o.text || '') === 'crisis') { cb(fail('crisis'), null); return; }
   const a = typeof o.affinity === 'number' ? o.affinity : 80;
   /* 关系越冷，输出越短 */
   const maxLen = a >= 70 ? 70 : (a >= 50 ? 45 : (a >= 30 ? 25 : 18));
   call(buildShadowMessages(o), { maxTokens: 140, temperature: 0.95 }, function (err, text) {
+    if (err) { cb(err, null); return; }
     const t = clean(text, maxLen);
-    if (err || !t || isBanned(t)) { cb(err || new Error('empty'), null); return; }
+    if (!t || isBanned(t)) { cb(fail('empty'), null); return; }
     cb(null, t);
   });
 }
@@ -379,6 +450,7 @@ module.exports = {
     buildXiaobaiMessages,
     buildShadowMessages,
     packHistory,
+    dropDupTail,
     PERSONA_DESC,
     XIAOBAI_SYSTEM,
     SHADOW_SYSTEM

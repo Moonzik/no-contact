@@ -127,10 +127,13 @@
   <!-- chat mode -->
   <block wx:elif="{{mode === 'chat'}}">
     <view class="chat-head">
-      <image class="ava-grey" src="{{agentImg}}" />
+      <view class="head-ava-wrap" bindtap="onPickShadowAvatar" hover-class="head-ava-hover">
+        <image class="ava-grey" src="{{agentImg}}" mode="aspectFill" />
+        <view class="head-ava-edit">换</view>
+      </view>
       <view>
         <view class="n">{{shadowName}}</view>
-        <view class="s">AI 影子 · 非真人</view>
+        <view class="s">AI 影子 · 非真人 · 点头像可换</view>
       </view>
       <view class="right">
         本次剩余 <b>{{remain}}</b>
@@ -144,11 +147,11 @@
           <view class="sys-text">{{m.text}}</view>
         </view>
         <view class="row ai" id="m{{m._k}}" wx:elif="{{m.role === 'ai-temp'}}">
-          <image class="ava-grey" src="{{m.avatar}}" />
+          <image class="ava" src="{{m.avatar}}" mode="aspectFill" />
           <view class="bubble typing"><view></view><view></view><view></view></view>
         </view>
         <view class="row ai" id="m{{m._k}}" wx:elif="{{m.role === 'ai'}}">
-          <image class="ava-grey" src="{{m.avatar}}" />
+          <image class="ava" src="{{m.avatar}}" mode="aspectFill" />
           <view class="col">
             <view class="bubble">{{m.text}}</view>
             <view class="tip" wx:if="{{m.tip}}">{{m.tip}}</view>
@@ -164,6 +167,7 @@
     <view class="composer">
       <view class="input-row">
         <textarea
+          wx:if="{{taAlive}}"
           class="ta"
           value="{{text}}"
           placeholder="想说的、没说完的，都可以…"

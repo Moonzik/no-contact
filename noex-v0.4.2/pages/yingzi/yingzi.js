@@ -40,6 +40,9 @@ Page({
     msgs: [],
     remain: '--:--',
     text: '',
+    /* v0.9.10：textarea 是原生组件，持有焦点时可能忽略 value 更新，
+       发送后字留在框里。用 wx:if 让它短暂重建（100ms）强制清空 */
+    taAlive: true,
     leftToday: 0,
     remainingSessionMs: shadow.SHADOW_MS,
 
@@ -78,6 +81,12 @@ Page({
       }
     } catch (e) { h = 0; }
     this.setData({ winH: h || 0 });
+    /* v0.9.7：读用户给影子单独设的头像（没设过用默认） */
+    try {
+      const S0 = storage.load();
+      const av = S0.shadow && S0.shadow.avatar;
+      if (av) this.setData({ agentImg: av });
+    } catch (e) { /* ignore */ }
   },
 
   onShow() {
@@ -90,6 +99,25 @@ Page({
 
   onUnload() {
     if (this._tyingTimer) clearInterval(this._tyingTimer);
+  },
+
+  /* v0.9.7：给影子单独换头像（存 shadow.avatar，与"我"的头像互不影响） */
+  onPickShadowAvatar() {
+    const S = storage.load();
+    const old = (S.shadow && S.shadow.avatar) || '';
+    user.pickFromAlbum((p) => {
+      if (!p) return;
+      user.saveAvatar(p, old, (final) => {
+        if (!final) return;
+        const S2 = storage.load();
+        S2.shadow = S2.shadow || {};
+        /* 换了新图后旧图才清理；首次设置（old 为空）不动文件 */
+        S2.shadow.avatar = final;
+        storage.save(S2);
+        this.setData({ agentImg: final });
+        wx.showToast({ title: '影子头像已更新', icon: 'none', duration: 1600 });
+      });
+    });
   },
 
   refresh() {
@@ -421,7 +449,9 @@ Page({
   onEnterChat() {
     if (user.requireLogin('进入影子对话需要登录一次。')) return;
     const S = storage.load();
-    const used = S.shadow.sessionsToday || 0;
+    /* v0.9.10：先过一遍日期滚动，防止 App 跨零点挂着没刷新时，
+       onEnterChat 直接读到昨天的 sessionsToday（多扣/少扣次数） */
+    const used = this.utilShadowSessionsToday(S);
     if (used >= shadow.SHADOW_MAX_DAY) {
       wx.showToast({ title: '今天影子次数用完了', icon: 'none' });
       return;
@@ -541,7 +571,7 @@ Page({
     if (user.requireLogin('和影子说话需要登录一次。登录只是留个头像昵称，对话仍然只在你手机里。')) return;
     const text = (raw || '').trim();
     if (!text) return;
-    this.setData({ text: '' });
+    this.clearInputBox();
     const S = storage.load();
     S.shadow.msgs.push({ role: 'me', text, t: Date.now() });
     storage.save(S);
@@ -605,13 +635,10 @@ Page({
         this.scrollChatToBottom();
         this.fireReveal({ reason: 'user_doubt' });
       } else {
-        /* v0.4.0 · 把 affinity 传给 shadowReply
-           v0.7.0 · 第 5 个参数传去重字典，影子的话也不再说第二遍
-           v0.9.0 · 先算好本地兜底，再尝试 AI；AI 没配/失败就用本地的 */
-        S2.usedReplies = S2.usedReplies || {};
-        const localReply = shadow.shadowReply(
-          text, S2.shadow.profile, this.data.affinity, null, S2.usedReplies
-        );
+        /* v0.9.9 · 影子改为**纯智能体**：不再用本地固定句库冒充 TA 说话。
+           以前 AI 没配置时会回落到一套写死的短句（「嗯。」「……」），
+           用户看到的就是一堆莫名其妙的语气词，还以为影子本来就那样。
+           现在 AI 拿不到结果就直接说明原因，绝不伪造。 */
         const tip =
           this._userCount > 0 && this._userCount % 3 === 0
             ? '提醒：这是AI生成的影子，不是真的TA。'
@@ -627,10 +654,14 @@ Page({
           /* AI 迟迟不回时至少保留原本的打字停顿，不会"啪"地一下弹出来 */
           const wait = Math.max(0, baseDelay - (Date.now() - t0));
           setTimeout(() => {
-            this.appendShadowMsg(aiText || localReply, tip);
+            if (aiText) {
+              this.appendShadowMsg(aiText, tip);
+            } else {
+              this.appendSysNotice(this.aiFailText(err));
+            }
           }, wait);
         });
-        return; /* appendShadowMsg 内部会自己滚到底 */
+        return; /* 上面的两个 append 内部都会自己滚到底 */
       }
       this.scrollChatToBottom();
     }, 800 + Math.random() * 900);
@@ -649,11 +680,66 @@ Page({
     this.scrollChatToBottom();
   },
 
+  /* v0.9.9：智能体失败原因 → 人话。
+     影子的本质是"模仿真人"，所以宁可不说话，也绝不能用固定句库冒充 TA。
+     把真实原因告诉用户，他才知道该去部署云函数还是检查网络。 */
+  aiFailText(err) {
+    const code = (err && err.code) || '';
+    if (code === 'off' || code === 'https_not_configured') {
+      return '影子需要智能体支持，现在还没开启。按《开启影子智能体》部署云函数后就能用了。';
+    }
+    if (code === 'not_deployed') {
+      return '云函数 noex-ai 还没部署，影子暂时说不了话。';
+    }
+    if (code === 'env_bad') {
+      return '云开发环境 ID 不对，连不上。检查 ai-config.js 里的 env 是不是控制台显示的那个。';
+    }
+    if (code === 'cloud_unavailable') {
+      return '云开发没初始化成功，检查开发者工具里有没有选对云环境。';
+    }
+    if (code === 'cloud_error') {
+      return '云函数报错了，多半是没配 NOEX_AI_KEY（在云函数环境变量里填）。';
+    }
+    if (code === 'timeout') {
+      return '这次等太久没回上，再说一次试试。';
+    }
+    if (code === 'network') {
+      return '网络没连上，检查一下再说一次。';
+    }
+    if (code === 'crisis') {
+      return '先停一下。如果现在很难受，可以打 400-161-9995，24 小时有人接。';
+    }
+    return '影子这次没接上，稍后再试一次。';
+  },
+
+  /* v0.9.9：系统提示（居中灰字）。
+     刻意**不写进** shadow.msgs —— 错误提示不该进对话历史，
+     否则下次请求会把一堆"云函数没部署"塞给大模型，污染上下文。 */
+  appendSysNotice(text) {
+    if (!text) return;
+    const filtered = this.data.msgs.filter((m) => m.role !== 'ai-temp');
+    filtered.push({ role: 'sys', text: text, _k: this._msgSeq++ });
+    this.setData({ msgs: filtered });
+    this.scrollChatToBottom();
+  },
+
   onChatBlur(e) {
+    /* v0.9.10：刚发送清空后的 500ms 内，忽略迟到的 blur 回写，
+       否则旧文本会被写回 data，输入框看起来"清不掉" */
+    if (Date.now() - (this._clearedAt || 0) < 500) return;
     /* 失焦时同步一次，防止某些机型 bindinput 漏触发 */
     if (e && e.detail && typeof e.detail.value === 'string') {
       this.setData({ text: e.detail.value });
     }
+  },
+
+  /* v0.9.10：发送后清空输入框。
+     只 setData({text:''}) 不够——原生 textarea 在焦点中会忽略 value 变化。
+     先写空 data，再把组件用 wx:if 卸掉重建（taAlive），值就真的空了。 */
+  clearInputBox() {
+    this._clearedAt = Date.now();
+    this.setData({ text: '', taAlive: false });
+    setTimeout(() => { this.setData({ taAlive: true }); }, 100);
   },
 
   /* v0.4.0 · 触发自我洞察面板 */

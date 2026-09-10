@@ -23,6 +23,7 @@ function section(t) { console.log('\n-- ' + t + ' --'); }
 const wxLog = [];
 let cloudResult = null;   // {ok, text} | {ok:false, error}
 let cloudShouldFail = false;
+let cloudFailErr = { errMsg: 'mock fail' };  // v0.9.9：可换成 FunctionNotFound 以测「没部署」分支
 let httpResult = null;
 let httpShouldFail = false;
 let cloudInitCalled = 0;
@@ -32,7 +33,7 @@ global.wx = {
     init: () => { cloudInitCalled++; },
     callFunction: (o) => {
       wxLog.push(['cloud', o.name, JSON.stringify(o.data).slice(0, 60)]);
-      if (cloudShouldFail) { o.fail && o.fail({ errMsg: 'mock fail' }); return; }
+      if (cloudShouldFail) { o.fail && o.fail(cloudFailErr); return; }
       o.success && o.success({ result: cloudResult });
     }
   },
@@ -77,11 +78,13 @@ section('1. 出厂默认（provider=off）');
   check('mode() 返回 off', ai.mode() === 'off');
   check('isEnabled() 为 false', ai.isEnabled() === false);
 
-  let r1 = 'unset', r2 = 'unset';
+  let r1 = 'unset', r2 = 'unset', e2 = null;
   ai.chat({ text: '我想他了', persona: 'warm', history: [] }, (e, t) => { r1 = t; });
-  ai.shadowChat({ text: '在吗', profile: {}, affinity: 80, history: [] }, (e, t) => { r2 = t; });
+  ai.shadowChat({ text: '在吗', profile: {}, affinity: 80, history: [] }, (e, t) => { e2 = e; r2 = t; });
   check('off 模式 chat 直接回 null（不阻塞）', r1 === null, r1);
   check('off 模式 shadowChat 直接回 null', r2 === null, r2);
+  /* v0.9.9：影子没有本地兜底了，必须把 code 传出去，界面才好提示"去部署云函数" */
+  check('off 模式 shadowChat 错误码为 off', e2 && e2.code === 'off', e2 && e2.code);
   check('off 模式完全没有发起任何请求', wxLog.length === 0, JSON.stringify(wxLog));
 
   /* 非法值也当 off，绝不因为配置写错就悄悄联网 */
@@ -150,19 +153,21 @@ section('4. cloud 模式');
   check('调用了名为 noex-ai 的云函数', wxLog.length === 1 && wxLog[0][1] === 'noex-ai', JSON.stringify(wxLog));
   check('云开发被初始化', cloudInitCalled > 0);
 
-  /* 云函数返回错误 */
+  /* 云函数返回错误。
+     v0.9.9：小白有本地规则引擎兜底，所以失败时**静默**（err=null，out=null），
+     用户完全无感；失败原因只进 debug 日志。影子没有兜底，错误码靠 shadowChat 传出（下面单独测）。 */
   cloudResult = { ok: false, error: 'NOEX_AI_KEY 未配置' };
   let err1 = null, out1 = 'unset';
   ai.chat({ text: '你好', persona: 'warm', history: [] }, (e, t) => { err1 = e; out1 = t; });
   check('云函数报错 → 返回 null（交给本地兜底）', out1 === null, out1);
-  check('云函数报错 → 有 error', err1 && err1.message);
+  check('云函数报错 → 小白静默回落不抛 err', err1 === null, String(err1));
 
   /* 调用失败（网络 / 未开通云开发） */
   cloudShouldFail = true;
   let err2 = null, out2 = 'unset';
   ai.chat({ text: '你好', persona: 'warm', history: [] }, (e, t) => { err2 = e; out2 = t; });
   check('callFunction fail → 返回 null', out2 === null);
-  check('callFunction fail → 有 error', !!err2);
+  check('callFunction fail → 小白静默回落不抛 err', err2 === null, String(err2));
 
   /* 返回违规内容 → 不采用 */
   cloudShouldFail = false;
@@ -180,8 +185,56 @@ section('4. cloud 模式');
   setTimeout(() => {
     check('超时后仍然会回调（不会永久挂起）', done4 === true);
     check('超时耗时接近设定值', Date.now() - t0 >= 35, Date.now() - t0);
-    step5();
+    step4b();
   }, 300);
+}
+
+/* ════════════════════════════════════════════
+   4b. 影子错误码（v0.9.9：影子取消本地兜底，
+       失败原因必须准确，界面才能给出可操作的提示，
+       而不是拿固定句库假装是 TA 在说话）
+   ════════════════════════════════════════════ */
+function step4b() {
+  section('4b. 影子错误码分类');
+  resetCfg();
+  cfg.provider = 'cloud';
+  cfg.timeout = 1000;
+  cloudShouldFail = false;
+
+  /* 云函数存在但内部报错（多半是没配 NOEX_AI_KEY） */
+  cloudResult = { ok: false, error: 'NOEX_AI_KEY 未配置' };
+  let e1 = null, t1 = 'unset';
+  ai.shadowChat({ text: '在吗', profile: {}, affinity: 80, history: [] }, (e, t) => { e1 = e; t1 = t; });
+  check('云函数报错 → 文本为 null', t1 === null, t1);
+  check('云函数报错 → code=cloud_error', e1 && e1.code === 'cloud_error', e1 && e1.code);
+
+  /* 云函数压根没部署 */
+  cloudShouldFail = true;
+  cloudFailErr = { errMsg: 'FunctionNotFound: function not found' };
+  let e2 = null;
+  ai.shadowChat({ text: '在吗', profile: {}, affinity: 80, history: [] }, (e) => { e2 = e; });
+  check('没部署云函数 → code=not_deployed', e2 && e2.code === 'not_deployed', e2 && e2.code);
+
+  /* 云环境 ID 写错 */
+  cloudFailErr = { errMsg: 'env not found' };
+  let e4 = null;
+  ai.shadowChat({ text: '在吗', profile: {}, affinity: 80, history: [] }, (e) => { e4 = e; });
+  check('环境 ID 不对 → code=env_bad', e4 && e4.code === 'env_bad', e4 && e4.code);
+
+  /* 普通网络失败 */
+  cloudFailErr = { errMsg: 'mock fail' };
+  let e3 = null;
+  ai.shadowChat({ text: '在吗', profile: {}, affinity: 80, history: [] }, (e) => { e3 = e; });
+  check('普通网络失败 → code=network', e3 && e3.code === 'network', e3 && e3.code);
+
+  /* 成功路径仍然正常 */
+  cloudShouldFail = false;
+  cloudResult = { ok: true, text: '嗯，还好。' };
+  let t5 = 'unset';
+  ai.shadowChat({ text: '在吗', profile: {}, affinity: 80, history: [] }, (e, t) => { t5 = t; });
+  check('影子成功 → 返回文本', typeof t5 === 'string' && t5.length > 0, t5);
+
+  step5();
 }
 
 /* ════════════════════════════════════════════
@@ -235,6 +288,8 @@ function step6() {
     check('最后一条是用户消息', msgs[msgs.length - 1].role === 'user');
     check('历史 role 映射正确', msgs[2].role === 'user' && msgs[3].role === 'assistant');
     check('system 要求紧扣用户的话', sys.indexOf('答非所问') > -1);
+    check('小白 1d 答其所问但不机械', ai._internal.XIAOBAI_SYSTEM.indexOf('答其所问，但不要机械一问一答') > -1);
+    check('小白 1d 无意义内容不硬凑', ai._internal.XIAOBAI_SYSTEM.indexOf('不要硬凑话题') > -1);
   }
 
   {
@@ -253,6 +308,36 @@ function step6() {
     check('影子 system 含关系温度', sys.indexOf('当前关系温度：75') > -1, sys.slice(0, 0) || '');
     check('影子 system 含阶段说明', sys.indexOf('高仿期') > -1);
     check('影子 prompt 要求学味儿不照搬', sys.indexOf('别照抄') > -1);
+  }
+
+  /* v0.9.10：影子新铁律（去亲密称呼 / 去答非所问） */
+  {
+    const sys = ai._internal.SHADOW_SYSTEM;
+    check('影子铁律 0b 禁亲密称呼', sys.indexOf('亲密称呼是高压线') > -1);
+    check('影子铁律 0b 列了常见称呼', sys.indexOf('宝贝') > -1 && sys.indexOf('亲爱的') > -1);
+    check('影子铁律 0b 允许样本里真用过的称呼', sys.indexOf('真这么叫过') > -1);
+    check('影子铁律 0 禁答非所问', sys.indexOf('答非所问、顾左右而言他') > -1);
+    check('影子不再鼓励跑题敷衍', sys.indexOf('东一句西一句') === -1);
+    check('影子铁律 0 要求正面接住内容', sys.indexOf('必须好好接住对方说的话') > -1);
+    check('影子无意义内容不硬编', sys.indexOf('不要硬编内容去接') > -1);
+    check('影子不机械一问一答', sys.indexOf('一问一答') > -1);
+  }
+
+  /* v0.9.10：dropDupTail —— 调用方把刚发的消息也塞进了 history，拼 prompt 前要去重 */
+  {
+    const d = ai._internal.dropDupTail;
+    const h = [{ role: 'me', text: '在吗' }, { role: 'ai', text: '嗯' }, { role: 'me', text: '我今天面试了' }];
+    check('dropDupTail 去掉重复的尾部 me 消息', d(h, '我今天面试了').length === 2);
+    check('dropDupTail 不动不重复的 history', d(h, '别的话').length === 3);
+    check('dropDupTail 空文本原样返回', d(h, '').length === 3);
+    check('dropDupTail 空数组不炸', d([], 'x').length === 0);
+    /* 端到端：buildShadowMessages 里 history 尾部与 text 相同 → 不重复出现两次 user 消息 */
+    const msgs = ai._internal.buildShadowMessages({
+      text: '我今天面试了', profile: { avgLen: 6 }, affinity: 80,
+      history: [{ role: 'me', text: '早' }, { role: 'me', text: '我今天面试了' }]
+    });
+    const dupCount = msgs.filter((m) => m.role === 'user' && m.content === '我今天面试了').length;
+    check('buildShadowMessages 同句只出现一次', dupCount === 1, dupCount);
   }
 
   /* 无指纹时的老画像兜底 */
@@ -367,9 +452,18 @@ function step8() {
 
     check('yingzi 引入了 ai 模块', /require\(['"][^'"]*utils\/ai\.js['"]\)/.test(yz));
     check('yingzi 引入了 voiceprint', /require\(['"][^'"]*utils\/voiceprint\.js['"]\)/.test(yz));
-    check('yingzi 用 (aiText || localReply) 兜底', /aiText \|\| localReply/.test(yz));
+    /* v0.9.9：影子改为纯智能体。
+       以前 AI 没配好时会回落到本地固定句库，用户看到一堆「嗯。」还以为影子本来就那样。
+       现在必须：① 不再出现本地兜底；② 失败时走系统提示。 */
+    check('yingzi 不再用本地句库兜底', !/shadow\.shadowReply/.test(yz));
+    check('yingzi AI 失败时给系统提示', /appendSysNotice/.test(yz) && /aiFailText/.test(yz));
     check('yingzi 画像先按发言人分离', /pickSpeakerLines/.test(yz));
     check('yingzi 画像含 voice 指纹', /voice\s*=\s*vp/.test(yz) || /legacy\.voice = vp/.test(yz));
+    /* v0.9.10：发送后输入框必须真正清空（原生 textarea 焦点中忽略 value 更新） */
+    check('yingzi 发送后重建输入框清空', /clearInputBox/.test(yz) && /taAlive/.test(yz));
+    const xbjs = fs.readFileSync(path.join(ROOT, 'pages/xiaobai/xiaobai.js'), 'utf8');
+    const xbwxml = fs.readFileSync(path.join(ROOT, 'pages/xiaobai/xiaobai.wxml'), 'utf8');
+    check('xiaobai 发送后重建输入框清空', /clearInputBox/.test(xbjs) && /taAlive/.test(xbjs) && /wx:if="\{\{taAlive\}\}"/.test(xbwxml));
 
     /* 影子聊天区布局（本轮修的 UI） */
     const yzw = fs.readFileSync(path.join(ROOT, 'pages/yingzi/yingzi.wxml'), 'utf8');

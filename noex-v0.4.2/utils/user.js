@@ -58,7 +58,11 @@ function avatarSupported() {
 }
 /* input type="nickname" 同上，低版本只能手填 */
 function nicknameSupported() { return canUse('input.type.nickname'); }
-/* button open-type="getPhoneNumber"：需要企业主体，个人主体点了会 fail */
+/* button open-type="getPhoneNumber" 能不能用，取决于两件事：
+   1) 基础库支持 —— 这里是能力检测，能测出来；
+   2) 主体必须是非个人（企业 / 个体工商户等）—— 这条运行时才知道，
+      个人主体点了会直接 fail。v0.9.8 起主体已是个体工商户，可正常使用；
+      万一仍失败，前端一律退回「手动填写」，不阻塞登录。 */
 function phoneSupported() {
   return canUse('button.open-type.getPhoneNumber');
 }
@@ -68,10 +72,11 @@ function phoneSupported() {
  * 必须走云函数（需要 appid + secret），没配就回调空，调用方提示手填。
  */
 function fetchPhone(code, cb) {
-  const done = (p) => { if (typeof cb === 'function') cb(p || ''); };
+  /* cb(phone, err)：phone 为空即失败，err 只用于开发者排查，不展示给用户 */
+  const done = (p, err) => { if (typeof cb === 'function') cb(p || '', err || ''); };
   try {
     if (typeof wx === 'undefined' || !wx.cloud || typeof wx.cloud.callFunction !== 'function') {
-      done('');
+      done('', 'wx.cloud 不可用（云开发未初始化？）');
       return;
     }
     wx.cloud.callFunction({
@@ -79,12 +84,17 @@ function fetchPhone(code, cb) {
       data: { action: 'phone', code: code },
       success(res) {
         const r = res && res.result;
-        done(r && r.phone);
+        if (r && r.phone) { done(r.phone); return; }
+        done('', (r && r.error) || '云函数未返回手机号');
       },
-      fail: () => done('')
+      fail: (e) => {
+        const msg = String((e && (e.errMsg || e.message)) || 'callFunction 失败');
+        done('', msg.indexOf('not exist') > -1 || msg.indexOf('-501000') > -1
+          ? '云函数 noex-ai 未部署' : msg);
+      }
     });
   } catch (e) {
-    done('');
+    done('', String((e && e.message) || e));
   }
 }
 
@@ -135,6 +145,25 @@ function goLogin() {
 /** 从相册/拍照选一张当头像——chooseAvatar 不可用时的兜底路径 */
 function pickFromAlbum(cb) {
   const done = (p) => { if (typeof cb === 'function') cb(p || ''); };
+  /* v0.9.7：失败不再静默——隐私指引未过审时相册接口也会被平台拦截，
+     必须告诉用户原因，否则表现为「点了没反应」。 */
+  const explain = (r) => {
+    const msg = String((r && r.errMsg) || '');
+    if (/privacy|Privacy|授权|auth/i.test(msg)) {
+      try {
+        wx.showToast({
+          title: '隐私指引还没在后台生效，暂时选不了，过审后恢复',
+          icon: 'none',
+          duration: 3000
+        });
+      } catch (e2) { /* ignore */ }
+    } else if (!/cancel/i.test(msg)) {
+      try {
+        wx.showToast({ title: '相册打不开，稍后再试', icon: 'none', duration: 2200 });
+      } catch (e2) { /* ignore */ }
+    }
+    done('');
+  };
   try {
     if (typeof wx === 'undefined') { done(''); return; }
     if (typeof wx.chooseMedia === 'function') {
@@ -147,7 +176,7 @@ function pickFromAlbum(cb) {
           const f = r && r.tempFiles && r.tempFiles[0];
           done(f && f.tempFilePath);
         },
-        fail: () => done('')
+        fail: explain
       });
       return;
     }
@@ -159,7 +188,7 @@ function pickFromAlbum(cb) {
           const p = r && r.tempFilePaths && r.tempFilePaths[0];
           done(p);
         },
-        fail: () => done('')
+        fail: explain
       });
       return;
     }

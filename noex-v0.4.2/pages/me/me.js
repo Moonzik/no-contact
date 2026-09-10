@@ -135,9 +135,9 @@ Page({
       this._avatarTimer = setTimeout(() => {
         this._avatarTimer = null;
         wx.showToast({
-          title: '没弹出微信头像？用下面那个「从相册选」',
+          title: '没弹出来？多半是隐私指引还没在后台生效，过审后自动恢复',
           icon: 'none',
-          duration: 2600
+          duration: 2800
         });
       }, 1200);
     } catch (e) { /* ignore */ }
@@ -166,12 +166,21 @@ Page({
   },
 
   /* 微信头像按钮报错（基础库不支持 / 隐私指引没配 / 授权被拒）。
-     这里不再让用户对着一个没反应的圆点干瞪眼，直接转相册。 */
+     v0.9.7：隐私类报错不再转相册——指引没过审时相册同样被平台拦，
+     转过去也是白转，直接把原因说清楚。其他错误才转相册。 */
   onAvatarError(e) {
     this._clearAvatarTimer();
-    const msg = (e && e.detail && (e.detail.errMsg || e.detail.errno)) || '';
+    const msg = String((e && e.detail && (e.detail.errMsg || e.detail.errno)) || '');
+    if (/privacy|auth|授权/i.test(msg)) {
+      wx.showToast({
+        title: '隐私指引还没在后台生效，过审后就能选微信头像',
+        icon: 'none',
+        duration: 3000
+      });
+      return;
+    }
     wx.showToast({
-      title: /privacy|auth|授权/i.test(String(msg)) ? '隐私指引未配置，先用相册选' : '改用相册选头像',
+      title: '改用相册选头像',
       icon: 'none',
       duration: 2200
     });
@@ -201,23 +210,37 @@ Page({
   },
 
   /* 微信一键填手机号。
-     注意：getPhoneNumber 需要**企业主体**小程序，个人主体点了会 fail；
-     而且拿到的是 code，必须后端（这里是云函数）用 appid/secret 才能换成真实号码。
-     所以这里拿不到就明确告诉用户手填，不做假象。 */
+     v0.9.8：主体已变更为个体工商户，getPhoneNumber 可用。
+     流程：点按钮 → 微信弹授权 → 拿到 code → 云函数用 appid/secret 换真实号码。
+     手机号是选填项，任何一步失败都不阻塞登录，退回手填即可。 */
   onGetPhoneNumber(e) {
     const d = (e && e.detail) || {};
     const code = d.code;
+    const errmsg = String((d && d.errMsg) || '');
+
     if (!code) {
-      wx.showToast({ title: '没拿到手机号，请手动填写（可留空）', icon: 'none', duration: 2400 });
+      /* 用户主动拒绝，或隐私指引未生效。区分一下，别让用户以为是坏了 */
+      const denied = errmsg.indexOf('deny') > -1;
+      wx.showToast({
+        title: denied ? '已取消，可手动填写（选填）' : '暂时读不到，请手动填写（选填）',
+        icon: 'none',
+        duration: 2200
+      });
       return;
     }
-    user.fetchPhone(code, (phone) => {
+
+    wx.showLoading({ title: '读取中', mask: true });
+    user.fetchPhone(code, (phone, err) => {
+      wx.hideLoading();
       if (phone) {
         this.setData({ tmpPhone: phone });
         wx.showToast({ title: '已填入手机号', icon: 'none' });
-      } else {
-        wx.showToast({ title: '需要配置云函数才能自动读取，请先手填', icon: 'none', duration: 2400 });
+        return;
       }
+      /* 换号失败基本都是云函数没部署或没配 NOEX_APPID/NOEX_APPSECRET。
+         用户侧只说「手动填」，具体原因打进控制台，方便排查。 */
+      if (err) console.warn('[NOEX] 手机号换取失败：', err);
+      wx.showToast({ title: '一键填写暂不可用，请手动填写（选填）', icon: 'none', duration: 2400 });
     });
   },
 

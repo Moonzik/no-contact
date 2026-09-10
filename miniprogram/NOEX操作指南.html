@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="WddRhH2C2kZTUTFeCFPBrQ">
+<head data-page-node-id="B0UOd6caObOwFSXqHgEB0z">
+<meta charset="UTF-8" data-page-node-id="QTvIUIiJjwktDTN1rIqL1B">
+<meta name="viewport" content="width=device-width, initial-scale=1" data-page-node-id="YqjTLLFffWfAgC0N82HyWN">
+<title>断联日记 NOEX · 全流程操作指南</title>
+<style>
+  :root{
+    --bg:#faf7f2; --card:#ffffff; --ink:#3a332b; --sub:#7a7064; --faint:#b0a798;
+    --line:#e8e0d4; --accent:#9a5d3a; --ok:#4a7c59; --bad:#b4453c; --chip:#f2ece1;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+       line-height:1.8;font-size:15px}
+  .wrap{max-width:860px;margin:0 auto;padding:40px 24px 90px}
+  h1{font-size:27px;margin:0 0 6px;letter-spacing:1px}
+  .sub{color:var(--sub);font-size:14px;margin-bottom:26px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+        padding:24px 26px;margin:20px 0}
+  h2{font-size:18px;margin:0 0 14px;display:flex;align-items:center;gap:10px}
+  h3{font-size:15px;margin:22px 0 8px;color:var(--accent)}
+  h4{font-size:14px;margin:16px 0 6px;color:var(--ink)}
+  .num{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;
+       font-size:14px;display:flex;align-items:center;justify-content:center;flex:none}
+  .num.done{background:var(--ok)}
+  .bug{background:#fdf1ef;border-left:3px solid var(--bad);padding:12px 16px;
+       border-radius:0 8px 8px 0;margin:12px 0;font-size:14px}
+  .fix{background:#f0f6f1;border-left:3px solid var(--ok);padding:12px 16px;
+       border-radius:0 8px 8px 0;margin:12px 0;font-size:14px}
+  .warn{background:#fff8e8;border-left:3px solid #c9962f;padding:12px 16px;
+        border-radius:0 8px 8px 0;margin:12px 0;font-size:14px}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--sub);font-weight:600;font-size:13px}
+  code{background:var(--chip);padding:1px 6px;border-radius:4px;font-size:13px}
+  .note{color:var(--sub);font-size:13px;margin-top:10px}
+  ol.step,ul.step{margin:0;padding-left:22px}
+  ol.step li,ul.step li{margin:10px 0}
+  pre{background:#fbf8f3;border:1px solid var(--line);border-radius:10px;
+      padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.75;
+      white-space:pre-wrap;word-break:break-word;margin:10px 0}
+  .path{background:#2f2b25;color:#f0ebe2;border-radius:8px;padding:12px 16px;
+        font-size:14px;margin:10px 0;letter-spacing:.3px}
+  .path b{color:#e8c08a;font-weight:600}
+  .bad{color:var(--bad);font-weight:600}
+  .good{color:var(--ok);font-weight:600}
+  .chk{list-style:none;padding:0;margin:12px 0}
+  .chk li{padding-left:30px;position:relative;margin:9px 0;font-size:14px}
+  .chk li::before{content:"";position:absolute;left:0;top:6px;width:16px;height:16px;
+        border:1.5px solid var(--line);border-radius:4px;background:#fff}
+  .stage{display:inline-block;background:var(--chip);color:var(--accent);
+        font-size:12px;padding:3px 10px;border-radius:20px;margin-left:8px;vertical-align:middle}
+  .big{border:2px solid var(--accent)}
+  .big>h2{font-size:20px}
+</style>
+</head>
+<body data-page-node-id="ay1zkFE71WXr7yQIdDDggO">
+<div class="wrap" data-page-node-id="cIkQ2SRpY9VeeibxlkKasY">
+
+  <h1 data-page-node-id="sAFyi25Ikce6SQPuz6O6BB">NOEX 全流程操作指南</h1>
+  <div class="sub" data-page-node-id="3uocd4aRuXUtzb5WsQxoVQ">从现在 → 上线 → 个人转个体工商户 → 变现 · 按顺序做，别跳步</div>
+
+  <!-- ================= 速查 ================= -->
+  <div class="card" data-page-node-id="QHYvBzLwr7PEwtbpAENF3z">
+    <h2 data-page-node-id="H03fpFS5KCbYMu3SpqRHE9"><span class="num" data-page-node-id="xGoLKFPsF0yzuElUnfhI0s">·</span>一页速查：一共 7 步</h2>
+    <table data-page-node-id="yQO2ZFh7jsiByBg9dCRWY2">
+      <tr data-page-node-id="qP625HBc3IECXaEQbjgItW"><th style="width:36px" data-page-node-id="x1ox6CUlHN8WFEEsbmd2ot">#</th><th data-page-node-id="0rBsf7EVj7XeNySpYFW4CI">做什么</th><th style="width:90px" data-page-node-id="yab1zkv5qHh7mwoO2DXoCI">耗时</th><th style="width:80px" data-page-node-id="7HQytJ1PFmQn3SPv8GDkoR">花钱</th></tr>
+      <tr data-page-node-id="HQrl3NA6Bm6LuhLeinLpUc"><td data-page-node-id="nYiTqt3ix0Cn2IxOyCnegE">1</td><td data-page-node-id="RrzHeHCTqhCelF7tDIlHG2">装新版开发者工具，导入项目</td><td data-page-node-id="eFPJDvDlvlchzJ8l5sv2ui">20 分钟</td><td data-page-node-id="yg4hW0Jnwrqm8QMVMPkKLz">免费</td></tr>
+      <tr data-page-node-id="UXFkuHWTjCCL4ZOE5YL3Ee"><td data-page-node-id="qbRENorbQCCuIvYGERGdao">2</td><td data-page-node-id="AvZorBQPr8kyQxobSW6jbU">上传代码 v0.9.8</td><td data-page-node-id="wy2ncLHga66PQhENPCbNyc">5 分钟</td><td data-page-node-id="IdmcQR7WwLqe3e1WJuXymD">免费</td></tr>
+      <tr data-page-node-id="4EL86UOYPBRHwlRjN76du9"><td data-page-node-id="j00bfiJ9ZPt7nV2Hhv5qjh">3</td><td data-page-node-id="ConRIVoB3C06HrM8WO17iG">提交审核 + 填隐私指引</td><td data-page-node-id="Iy8NImbxnEWNoCwbhE1AQb">1～3 天</td><td data-page-node-id="wBXzgT0GUzPmC7BWM3gluN">免费</td></tr>
+      <tr data-page-node-id="ehrUFiY7M3DtG3ZHwNGn5z"><td data-page-node-id="paH2KUhwFgnr1Z16dNJAJo">4</td><td data-page-node-id="cmm8MIfrRafqhUsT2BZKIw"><b data-page-node-id="bT1Kuiia3V4iLhtzo88yUj">办个体工商户执照</b>（还没有的话）</td><td data-page-node-id="fsXJy6fqAmwLQA9I3umWsy">1～3 天</td><td class="good" data-page-node-id="amWIDQVW6TWl8jEzc3c15k">免费</td></tr>
+      <tr data-page-node-id="qmUpSziM56w8bbbjIeu6zQ"><td data-page-node-id="8RFKjHi2PayFCwMvD1XS4e">5</td><td data-page-node-id="LBIe4gOvt28zDUOvIbXHOp">办公证书（个人变更强制要求）</td><td data-page-node-id="IRPEYJRBPYghSbeUloNwER">3～7 天</td><td data-page-node-id="LijWgq3PzgHtH1ApiauDwR">300～500</td></tr>
+      <tr data-page-node-id="RlvOrGmzick6CljYHUjiBC"><td data-page-node-id="du7B696NHXQmrB29p8KeiI">6</td><td data-page-node-id="LNhye4HHZoK34MtZnbJvmZ">微信后台发起主体变更</td><td data-page-node-id="zmnoSZVWT3xPteHXxUEsnS">1～3 天</td><td data-page-node-id="EKHFij6w0oCYPJQZtSIZUj">300</td></tr>
+      <tr data-page-node-id="6sNPkXXI82CBLVg44obFoU"><td data-page-node-id="ZjI8XpNYBa4gTgqMuBbVkH">7</td><td data-page-node-id="3rsIxaptmnZvWILtsP7guQ"><b data-page-node-id="L4S1MErbpfTR2vsyW11uZ3">立刻重新备案</b>（别拖）</td><td data-page-node-id="lZ0kfnXy6rch1mSOD6miET">1～20 天</td><td data-page-node-id="qVBQSH1ymwrwCTM1bVJ7ry">免费</td></tr>
+    </table>
+    <div class="warn" data-page-node-id="CZjMvcHDkBA9RG0izn9SOC">
+      <b data-page-node-id="26NOY6VDwlwpbNLFrDMhNs">顺序不能反，而且要并行。</b>第 3 步提交审核后，<b data-page-node-id="jN2wixnII0WMDFb9U2NNUN">立刻同时启动第 4 步（办执照）和第 5 步（公证）</b>。
+      公证是整条链路最慢的一环（3～7 天），等审核结果出来才去办，就白白多等一周。
+    </div>
+  </div>
+
+  <!-- ================= 阶段 1 ================= -->
+  <div class="card" data-page-node-id="KnUwd7XfNE4Am0DPXKGYkM">
+    <h2 data-page-node-id="VBd8m4vifB3cydnribyD2M"><span class="num done" data-page-node-id="0HTBiFRIu7xC5xzAoguBQd">1</span>装新版开发者工具 + 导入项目<span class="stage" data-page-node-id="R2ue7vKvOpjEGDF1OUGH4d">20 分钟</span></h2>
+
+    <div class="bug" data-page-node-id="9ue7xu3jLF2EVFCAVfNP42">
+      <b data-page-node-id="sTqnAkAW69bCoRDNqkK08G">为什么必须装新版</b>：你现在装的是 <code data-page-node-id="xffHCt1MbsAjy9Sr4Ttr98">1.06.2303220</code>（2023 年 3 月），
+      而我们用的隐私授权 API 是 2023 年 9 月才出的。老工具不认识它，
+      所以才会报「目录无效 / 文件夹名无效」这种莫名其妙的错。
+    </div>
+
+    <ol class="step" data-page-node-id="73yGSZHCvsKiac5Ro7uh9v">
+      <li data-page-node-id="HQctM97bcw2esOzTHYEf4N"><b data-page-node-id="lcY5mE0Zxye1aGDQZrmSv3">完全关掉</b>现在打开的旧版开发者工具</li>
+      <li data-page-node-id="8mmLW0zsyzsCahvtON7ea3">双击桌面上的 <code data-page-node-id="8LwmvnGzYsnLgsDyEbmLQc">wechat_devtools_2.02.2608070.exe</code> 安装
+        <div class="note" data-page-node-id="rA10DG2uS6dqCEbCIsNqwn">直接覆盖安装，<b data-page-node-id="tnD52Hxe2nTRlz4tU3iEn4">不用卸载旧的</b>，项目列表和登录状态会保留。</div>
+      </li>
+      <li data-page-node-id="hjfJW6NAH8IxxE5FlDkHOG">打开新工具 → 点中间大 <b data-page-node-id="VQcUwzZtyWV5GQULNLvPAB">「＋」</b> → 顶部切换到 <b data-page-node-id="DCAFjBAGyL5St3GTkUJQDE">「导入项目」</b>
+        <div class="note" data-page-node-id="X9Vrxn1SWd7xKk1Emr09Kl">⚠️ 默认是「新建项目」，两个长得像，选错了也会报错。</div>
+      </li>
+      <li data-page-node-id="aKGhXCe08XiNhVH1kN1YoF">目录填这个（直接复制）：
+        <div class="path" data-page-node-id="yjDVjF1Mkw3qhHIxwCuNbx">C:\Users\XIAOMI\Desktop\<b data-page-node-id="tr3YGXWQJEGQWgRerCGgJn">noex</b></div>
+        <div class="note" data-page-node-id="G75EhwsGFTvHgZBpFIMZ5g">要选的是<b data-page-node-id="SjSQEXy8lNQCPKrPCOYRM6">刚好包含 app.json 和 project.config.json 的那一层</b>，也就是 noex 本身。选到 pages、utils 这类子目录会报「不是小程序项目」。</div>
+      </li>
+      <li data-page-node-id="ZFjAO61Ozn87vj8c7XIt6E">AppID 一般会自动带出 <code data-page-node-id="iKrLHbBBtXm2BImZDDYWGL">wx583936dd0c951ff5</code>，没带就手填</li>
+      <li data-page-node-id="zOnQq3QUjObw9DFDb1npGS">后端服务选「<b data-page-node-id="9Nobi2OHUbkYAmV9NZkC8C">不使用云服务</b>」→ 点导入</li>
+    </ol>
+
+    <div class="fix" data-page-node-id="KmxBjzOpJsChcHUPf91Aen"><b data-page-node-id="7ZdWMDNo9jiev4ndLVAGZG">成功标志</b>：能看到模拟器显示小程序界面。报错就把截图发我。</div>
+  </div>
+
+  <!-- ================= 阶段 2 ================= -->
+  <div class="card" data-page-node-id="NemP2j5qhEZDTmK7ZwQZXv">
+    <h2 data-page-node-id="aMbD3BT6GxKmaKszmicTWT"><span class="num done" data-page-node-id="MJGAvaBQ2bEFcFduoYARGG">2</span>上传代码 v0.9.8<span class="stage" data-page-node-id="AwVDVdcZSa2ME0kZ1BMMvA">5 分钟</span></h2>
+
+    <ol class="step" data-page-node-id="MqvYJg5hSDZkuL3HFqD96o">
+      <li data-page-node-id="BypkGHgfRC4dRkNtNJt7RY">顶部菜单栏 <b data-page-node-id="kNJLCmIPj2fd6fRYEw2vse">「工具 → 上传」</b>
+        <div class="note" data-page-node-id="ByxP733kJvKPrpFe7dXzw8">底部的上传按钮在某些版本会被折叠，从菜单栏进最稳。</div>
+      </li>
+      <li data-page-node-id="jLw8qvLCj5bQWTzipOknDS"><b data-page-node-id="5SYLNChWVT5IeFbV3A9xQe">版本号</b>填 <code data-page-node-id="9N8mZ0bisP2QFqYTiudoFX">1.0.0</code>（对外展示用，首次上线填这个合适）</li>
+      <li data-page-node-id="aaydNjzJ7PwsY9bCzui79D"><b data-page-node-id="wjR1kAmpI0R5F0XMtxdQ5g">项目备注</b>复制下面这段（审核员会看）：</li>
+    </ol>
+
+    <pre data-page-node-id="08U0jOmqJVGyNsHAHh3cJs">断联日记 NOEX —— 分手断联期的自我陪伴工具
+
+【功能说明】
+1. 今天：显示断联天数、每日一句鼓励语、打卡记录
+2. 小白：白狐狸形象的陪伴者，4 种性格可选，像普通朋友一样聊天，不主动说教
+3. 影子：粘贴微信聊天记录后，模仿对方语气，陪你把没说完的话说完
+4. 留白瓶：写下想说但不会发出去的话存起来，永远不会被发送
+5. 我：微信头像+昵称登录、关于、隐私保护指引、公益求助渠道
+
+【本版更新】
+- 完善《用户隐私保护指引》与隐私授权弹窗
+- 优化对话贴合度：用户说什么就回什么，不再生硬往情感话题上靠
+- 修复聊天消息布局，优化头像显示
+
+【体验说明】
+- 无需登录即可体验全部主要功能（今天 / 小白 / 影子 / 留白瓶浏览）
+- 仅「往留白瓶写字」「个人资料」需要微信头像昵称授权
+- 所有数据仅保存在用户手机本地，不上传服务器
+- 不涉及任何付费、交易、社交匹配功能</pre>
+
+    <div class="warn" data-page-node-id="0Fb0lMTkFuyLf7VHtfXtYM">
+      最后那句「不涉及付费、交易、社交匹配」<b data-page-node-id="OB2sPgWpj6dFq8sbqAQwO1">别删</b> —— 审核员最怕这类，主动声明能明显加快过审。
+      这是提审话术，不是永久承诺：上线之后想加什么都行。
+    </div>
+  </div>
+
+  <!-- ================= 阶段 3 ================= -->
+  <div class="card" data-page-node-id="0Ik1lTPFNHgnj48cavBvNC">
+    <h2 data-page-node-id="iFGH1Kgo4usWfC2gXiX9sI"><span class="num done" data-page-node-id="nGkBCAb2ShqFPMAAh8ccSd">3</span>提审 + 填隐私指引<span class="stage" data-page-node-id="mBQqFtAVluQJqKzKgaXXRd">1～3 天</span></h2>
+
+    <div class="bug" data-page-node-id="0vg3yMYgMCY7anF6XHjhsi">
+      <b data-page-node-id="k5mRHkzr0etoLKl88SYUlJ">两个入口，只有第二个对你有效。</b>
+      <table style="margin-top:8px" data-page-node-id="1zHXWmOIovs97F2DAd6TxG">
+        <tr data-page-node-id="v0A98Ei3rDP0E5R763jdLK"><th data-page-node-id="DOrMwVb3yawIcE0zxA2bAy">入口</th><th data-page-node-id="B5lCtcJCGMsn3X81LrgnXZ">能不能用</th></tr>
+        <tr data-page-node-id="YLVDY62GPiy8LHT1qhzB9T"><td data-page-node-id="UaZLnHEsCRgnWawLYSr7bn">设置 → 服务内容声明</td><td class="bad" data-page-node-id="4ftPAnJfevBif6SzIIzRBE">❌ 只对<b data-page-node-id="VH3ToeTCzb5t5Da6C1altz">已上线</b>的小程序生效。你现在填了没反应，页面会一直空白，别在这浪费时间。</td></tr>
+        <tr data-page-node-id="V0YR8zybB4rWUlyN8T3v77"><td data-page-node-id="phnZRqj2sUyzKmovS79hdf">管理 → 版本管理 → 提交审核 → <b data-page-node-id="6vsKhwsvpqCezqYMNsjHyM">页面最底部</b></td><td class="good" data-page-node-id="qSHhHiWwpxAf37A7jK5ZPE">✅ 走这条。微信会扫你的代码，自动列出必填权限。</td></tr>
+      </table>
+    </div>
+
+    <h3 data-page-node-id="SyFcPlVvP4VtsffiHx49Xv">3.1 提交审核</h3>
+    <div class="path" data-page-node-id="ZJhx3czuzGoatMU63aNolU">mp.weixin.qq.com → <b data-page-node-id="ylIKyVoCuFCjMPk6cDJhDw">管理 → 版本管理</b> → 开发版本里找到刚传的 1.0.0 → <b data-page-node-id="vD9bPwnt76P8M97lpNPAwV">提交审核</b></div>
+    <ul class="step" data-page-node-id="mXl0zEF5LGyIOdDtTTDulI">
+      <li data-page-node-id="SAjhWE12pdvYt3l0RujZ6r">测试账号：选「<b data-page-node-id="QRZazeORwazqmcPh5MYViO">无需测试账号</b>」（我们没强制登录）</li>
+      <li data-page-node-id="eipFWbum5C5eK38GHnVeG8">滚到<b data-page-node-id="ulRX0nfGUESr0zSeKtehlo">页面最底部</b>，找「用户隐私保护指引设置」→ 选「<b data-page-node-id="gpZecVl3FzfFdUQovYpMsz">采集用户隐私</b>」</li>
+    </ul>
+
+    <h3 data-page-node-id="LFiw8UIGS6mMVWYK8kPxJB">3.2 勾这 6 项（官方名称照抄，别自己编）</h3>
+    <table data-page-node-id="HXgQw8KI3kvwk8xJ5jUKc7">
+      <tr data-page-node-id="REtWLR86jw9Ss8rccAeMIo"><th style="width:38%" data-page-node-id="UlkEogrwtcLuvaAzlRCsXN">官方权限名称</th><th data-page-node-id="uuIak3kQIKd8TtBJIAKziE">用途描述（直接复制）</th></tr>
+      <tr data-page-node-id="qdVHDE3I7qH1X1s638ok0e"><td data-page-node-id="oGoGh6xTKRNZKDV2uvRcA3">收集你的昵称、头像</td><td data-page-node-id="BDAzWDpKDtNFmimQSec8VO">用于登录后在个人主页展示你的头像与昵称</td></tr>
+      <tr data-page-node-id="JTjdAzmqVyRfCODDCkpVZi"><td data-page-node-id="mBAugET6h62s2Tjd5MF3tp">收集你的手机号</td><td data-page-node-id="4o5Nv3pyF2qIzbjhivZMMM">用于登录时完善账号信息、便于找回断联记录</td></tr>
+      <tr data-page-node-id="TyTEyeO1H7Gg1Avf788OqM"><td data-page-node-id="H4C3RYU8UbYqlp4njziQcE">收集你选中的照片或视频信息</td><td data-page-node-id="Zf1HhCuNMnkxeDor8RDP3y">用于从相册选择图片并设置为个人头像</td></tr>
+      <tr data-page-node-id="xBXk5sjNkLBiMxY7XpHeCx"><td data-page-node-id="2jTrYSq9ruvXs6rrqMq3OL">访问你的摄像头</td><td data-page-node-id="rlBTcOnIvL99CELRTLHkd9">用于拍摄照片后设置为个人头像</td></tr>
+      <tr data-page-node-id="72YYuCDZvV2xkKRvwqVCD6"><td data-page-node-id="4fDXQxK8KLrkZERYcbn7tq">读取你的剪切板</td><td data-page-node-id="1nfEjFHrHdIzPJelTByM7m">用于粘贴你从微信复制的聊天记录，生成影子对话</td></tr>
+      <tr data-page-node-id="GGcj7MDnERAbXEapwECqjn"><td data-page-node-id="mP3eSAzmfYpFktjr6JUA6s">收集你选中的文件</td><td data-page-node-id="bz1BFAXaEJB4pvExOHREDK">用于从聊天会话中选择聊天记录文件并导入</td></tr>
+    </table>
+    <div class="warn" data-page-node-id="Q6lsqxAObHoGwbk7QSbwW5"><b data-page-node-id="4VEyffbB16vtbR5Yvp4LAd">别多勾</b>：位置、通讯录、运动、蓝牙、设备信息都不要勾 —— 代码里没用，多勾反而被追问。</div>
+
+    <h3 data-page-node-id="V8qBn0vaDi92mRnxmCsAUt">3.3 三个最容易漏的必填项</h3>
+    <ul class="step" data-page-node-id="73xKw44rUbwvVRCZIjKz53">
+      <li data-page-node-id="ICOisY7qXeU3nSS7Fx3GuU"><b data-page-node-id="BWJfJDHCFi7KDN3R6uaWSx">联系方式邮箱</b>：没有就现注册一个（QQ 邮箱就行）。<span class="note" data-page-node-id="syBp0mVjSCHeK7Y4njlDra">这栏空着会直接驳回。</span></li>
+      <li data-page-node-id="dA40uc54e70daTOFJzZyjP"><b data-page-node-id="BYpAtXvn2t0mY1dVAllI5G">存储期限</b>填这句：
+        <div class="path" data-page-node-id="IKUPKhs9d6j0xutNZASSUQ">仅存储于用户设备本地，卸载小程序即删除；开发者服务器不保存任何个人信息</div>
+      </li>
+      <li data-page-node-id="DdP8BmV1lLulxTE9IPW0D7">还有一空：<b data-page-node-id="gNReDo27hEdjcrHCQIw3UB">「再次以 ____ 方式告知」</b> → 填 <b data-page-node-id="fjnrMvdYEqnImbYdVjKZqs">弹窗</b>
+        <div class="note" data-page-node-id="BgpCJMFYN14DWSOAiXghGA">别填短信/电话/邮件 —— 你没有这些推送能力，等于承诺做不到的事。我们代码里确实有弹窗页，前后对得上。</div>
+      </li>
+    </ul>
+
+    <h3 data-page-node-id="81ripgjj2rBtRG2cVsDBPy">3.4 SDK 信息那栏</h3>
+    <div class="fix" data-page-node-id="7AHfcatgYHZKsP55bs8Djx">
+      项目<b data-page-node-id="oxUiArlMoQE7rAIYuZKk2e">零第三方 SDK</b>（无插件、无 npm 依赖、无自定义组件）。
+      SDK 信息填「<b data-page-node-id="qVwr0XmMD5U4BX6PkGAxhz">无</b>」或「未使用第三方 SDK」；是否使用插件 → <b data-page-node-id="DGr3sGoYA2CSdgyPjKjkyH">否</b>；基础库版本 → <code data-page-node-id="TZJAOlAMrIW9uaVQ81NJqB">2.32.3</code>。
+    </div>
+
+    <div class="note" data-page-node-id="LDDo514luCJA3Jod2eWlX3">
+      提交后等 1～2 个工作日。<b data-page-node-id="VJnoxSmpj8cellSJENiV0P">这段时间里真机上的头像/昵称/手机号是用不了的</b>（平台拦截，代码绕不过），属正常现象。
+    </div>
+  </div>
+
+  <!-- ================================================================ -->
+  <!--              阶段 4：个人 → 个体工商户（大章节）                  -->
+  <!-- ================================================================ -->
+  <div class="card big" data-page-node-id="WcD1EWswuX25ZJh8AwHME9">
+    <h2 data-page-node-id="tmoXMrV3sjjWDjC4lH9Wh9"><span class="num" data-page-node-id="votNoxsB8ybI7e6VV3qQi3">4</span>个人 → 个体工商户（完整流程）<span class="stage" data-page-node-id="MzCAWUUCZVLqBVcsG3Fm6E">1～2 周</span></h2>
+
+    <div class="fix" data-page-node-id="nNRDShTWVUH9MeIcelBgq3">
+      <b data-page-node-id="0oHpTBLddnV4L3z467ME1S">先说结论：不用重做小程序。</b><br data-page-node-id="hqHsdhF5cDkLGPBdDhLXWy">
+      微信主体变更的官方条件只写了「<b data-page-node-id="9MAkIw2YpM3Jwia0ghneRA">目标</b>主体不支持为个人类型」——禁止的是"变成个人"，
+      <b data-page-node-id="Ky8bachTV61k1GnoHGkvny">没禁止"从个人变出去"</b>。所以 AppID、名称「断联日记 NOEX」、代码、用户数据<b data-page-node-id="JCx3Rrzn4og6mqmWmxfNal">全部保留</b>。<br data-page-node-id="0EySPl4y4pZQNknnDPuggU">
+      要花的只有：办执照（免费）+ 公证书（300～500）+ 微信审核费 300。
+    </div>
+
+    <div class="warn" data-page-node-id="g9ISMJaI8kuyGHw9wDrHcY">
+      <b data-page-node-id="GW9S85CQKYHBBcyVKBCfrm">整条链路一共四小步</b>：办执照 → 办公证 → 微信发起变更 → 重新备案。<br data-page-node-id="eMkrofx9kPElNprAKXXcEL">
+      其中<b data-page-node-id="HQPywULYn94pw5q78Knrga">公证最慢</b>（3～7 天），<b data-page-node-id="9SvxeL0qRf16RUdVxkNmHE">备案最容易漏</b>（漏了会被下架）。下面逐个说。
+    </div>
+
+    <!-- 4.1 -->
+    <h3 data-page-node-id="LYgHBmI1ngcEuzlD7sLkpM">4.1 办理个体工商户营业执照<span class="stage" data-page-node-id="gFcEoYIJq4pYYMd98Ugpzt">1～3 天 · 政府已免费</span></h3>
+
+    <div class="fix" data-page-node-id="sw6GJ5wBSfliYlivHdt5TU">
+      <b data-page-node-id="Wno0MQhCpLiPurCa04ZbQB">好消息：个体工商户设立登记的行政收费已全面取消，官方不收钱。</b>
+      线上全程电子化，多数地区 <b data-page-node-id="H5d5H1vAN583DmTGmap3KF">1 个工作日内办结</b>，快的当场拿证、2 小时办结也有。
+    </div>
+
+    <h4 data-page-node-id="61JpquTflDyzaJMiEiKa6d">去哪办</h4>
+    <table data-page-node-id="ln7wbS5NBpAUEU45peaOoX">
+      <tr data-page-node-id="PePntnghSwXLnEMWt0Ceoa"><th style="width:30%" data-page-node-id="djY8vrynsDgpCmaVobLnSL">渠道</th><th data-page-node-id="JnVHX1bgAvUP9hlguV7Vxr">怎么走</th></tr>
+      <tr data-page-node-id="cBTC0SZhjaEHvYHeB4Y0iU"><td data-page-node-id="xNqWnDdQGcltDVUc4FDvcS"><b data-page-node-id="p5CO6mGpHTw90seC8yZETl">线上（推荐）</b></td><td data-page-node-id="4ldRta3qfIDgGBETRMKwsJ">本省政务服务网 → 搜「个体工商户设立登记」/「企业登记全程电子化」。各省也有自己的 APP（随申办、粤商通、皖事通等）</td></tr>
+      <tr data-page-node-id="Orq5YI4Vf7n1KrEEzZ6NL7"><td data-page-node-id="ch6Ad33k7Mq01vbBWCvMPs">线下</td><td data-page-node-id="n9x2S6ZWGi3xlqGW5UvVn0">经营场所所在地的<b data-page-node-id="mHQEbNUzjpU0PYTLIEzWix">市场监管所</b>或行政服务中心 → 取号办「注册登记类」，很多地方当场出证</td></tr>
+    </table>
+
+    <h4 data-page-node-id="GOJQpCTtlXqKwZZhHxovNa">要准备的材料</h4>
+    <ul class="step" data-page-node-id="2HrArl1AbELPNqzikHCFWu">
+      <li data-page-node-id="AD8hQIlo9NaonXdLFFNMO6">经营者<b data-page-node-id="zNwEy6SMYVEcGdZZNOF08F">身份证原件</b>（线上要正反面照片 + 刷脸实名）</li>
+      <li data-page-node-id="CPQLovHrVfkOME3LVpsFCW"><b data-page-node-id="S0eAOyiI5kKMNdCM6tcCyE">经营场所使用证明</b>，三选一：
+        <ul class="step" data-page-node-id="6S2ZzU0158QbHmWzOBDcsF">
+          <li data-page-node-id="rCWfHH5ZgriUy8nKyjdyLh">自有房产 → 房产证复印件</li>
+          <li data-page-node-id="eUG60W4pSLVXim1VfTevuX">租赁 → 租赁合同 + 房东房产证复印件</li>
+          <li data-page-node-id="t1Y1rhzhzmIQd6bmCsbRYo">住宅 / 没商用地址 → 居委会或物业开的<b data-page-node-id="Nk7B63dH4Cuo0IBQgrGp60">场所使用证明</b>（多数地区认可，先问一句）</li>
+        </ul>
+      </li>
+      <li data-page-node-id="jW4AmB4PTcXrBrNIVBT1C1">《个体工商户设立登记申请书》—— 线上会自动生成，线下窗口填</li>
+      <li data-page-node-id="oMsw5ifuyG9c99MXshI4gp">名称（可自主申报，也能不设字号直接叫「XX市XX区某某经营部」）</li>
+    </ul>
+
+    <div class="note" data-page-node-id="It4tRIAz31Eo26T3DMoOA8">
+      <b data-page-node-id="F3nVEbCnserqIVqc1hVRSQ">纯线上、没有实体经营场所的情况</b>：2025 年 7 月起施行的新规允许把「网络经营场所」登记为经营场所，
+      但需要<b data-page-node-id="VVZcN7gx81sIeZyQAQNQGg">电商平台出具的场所使用证明</b>（淘宝、京东、拼多多这类会给；微信小程序一般不提供这种证明）。
+      能不能用，办之前打当地市场监管所电话问一下最稳。
+    </div>
+
+    <h4 data-page-node-id="rfJkgeJihFzAXKmTGHqmom">⚠️ 三个关键决策（写错会直接影响后面）</h4>
+
+    <div class="bug" data-page-node-id="9HkfshmVq8ZW8zOimgGkog">
+      <b data-page-node-id="p82bQDJzMhNk43bQeMdCjL">① 经营范围怎么写 —— 这是整件事里最要命的一栏</b><br data-page-node-id="F0W51Pkg59W4iShJyFqvOE"><br data-page-node-id="w1Qw16p93SUmyY6mLyMpIW">
+      <b data-page-node-id="ckwGDp0JwTm9a4CAunvB9H">推荐勾选</b>（在系统的规范库里勾，别自己造词）：
+      <table style="margin-top:8px" data-page-node-id="fWH6w593Lo2gQ9Oo1kc3Rz">
+        <tr data-page-node-id="HwO4AYRJKZe5kt2NSa8a1V"><th data-page-node-id="2DemBqOtkd0eJo3eWjZZa6">经营范围条目</th><th data-page-node-id="lu0au0RQglsLzaOGsupz71">为什么需要</th></tr>
+        <tr data-page-node-id="WtNsw3QqISXKpVfTNLN82P"><td data-page-node-id="zolrGmjji9ACm1lmJE8nnF">技术服务、技术开发、技术咨询、技术交流、技术转让、技术推广</td><td data-page-node-id="LUDDF7H5efKBL8KEThy2Qv">核心项，对应「做软件/小程序」</td></tr>
+        <tr data-page-node-id="kwfIk95uC8VHPlvEMNyLog"><td data-page-node-id="ta5tOepiG5MSlpCNm04VEV">软件开发</td><td data-page-node-id="sDu6jICxQ386JGLVlX98t1">同上，更直白</td></tr>
+        <tr data-page-node-id="G5JsfsgX5R93bZJWdi6Ypi"><td data-page-node-id="jfyA7H7C9hDJA1lc4RthAo">信息技术咨询服务</td><td data-page-node-id="EfMJowHpQZpwDxeFPMKQUv">覆盖工具型服务</td></tr>
+        <tr data-page-node-id="xaDM7UyBIfhn4uegbaElLp"><td data-page-node-id="CE7H5NzrZuHhNrwJd4Dg6s">互联网数据服务</td><td data-page-node-id="sHBDcmzlow2RPNSeFADvZp">覆盖数据存储、记录类功能</td></tr>
+        <tr data-page-node-id="seDUhZJkk6RNbdRQWrNtdk"><td data-page-node-id="AIV0i6BC11ZsE9Tk1AJbzb">广告设计、代理</td><td data-page-node-id="ckbKP0W0gltRuuqeQ1qTAv">以后开流量主接广告用得上</td></tr>
+        <tr data-page-node-id="FG9AfCijh5LTzCS9QtrDz3"><td data-page-node-id="Dui8SetwhngOX8bANH24Zo">日用百货销售 / 文具用品零售</td><td data-page-node-id="qCkBJcLDqHdr53COGpGram">以后卖实体周边用得上</td></tr>
+      </table>
+      <br data-page-node-id="Gmq8nQM1LT7774QPCq8Pze">
+      <b class="bad" data-page-node-id="5xeuODDllg1iWDlLMDMcWB">❌ 绝对不要写</b>：心理咨询、健康咨询、教育咨询、情感咨询、婚恋服务<br data-page-node-id="8qtQ4s3UWBaGXShQecOy84"><br data-page-node-id="vAeZKKY7x4WMCO6hhwV4dN">
+      <b data-page-node-id="x1Uuz7y0zHH4k02RVBapgt">为什么</b>：执照上一旦写了「心理咨询」，微信就<b data-page-node-id="dbJRPXXDdEH3qG0Miy5hq0">一定会</b>来要 3 位持证咨询师的资质证明；
+      <b data-page-node-id="SUjK42ixSaCL2mZiwPLvBl">不写，平台根本不会往这个方向查你</b>。<br data-page-node-id="nWlZH7IavaYRWmPONCPYf9">
+      经营范围的原则是<b data-page-node-id="jbJ6mFCd8aMhE6hxOseAju">够用就好，别贪多</b> —— 多写一项，就多一条被追问的路径。
+    </div>
+
+    <div class="warn" data-page-node-id="0xGL3fHoHqAbV5XQkNYT0m">
+      <b data-page-node-id="bdEu4FDvoNY5f73wjEUING">② 名称里也别带敏感词</b><br data-page-node-id="J7GblIobsAm4YQbH73lViX">
+      格式是「行政区划 + 字号 + 行业 +（个体工商户）」，比如
+      <code data-page-node-id="aFwjQd1rj3Qu3dhug1oZna">XX市XX区断联日记网络技术工作室（个体工商户）</code>。<br data-page-node-id="tksBJpLMu2DCH2E0cbJufK">
+      名称中<b data-page-node-id="HOOea57RoDjU6lArFTvKjb">不要出现</b>「心理」「咨询」「情感」「医疗」这类字 —— 平台扫名称，和你实际做什么无关。
+    </div>
+
+    <div class="bug" data-page-node-id="dP45FqSGnop8SQPw875FgU">
+      <b data-page-node-id="bDGI7TqS1Fs7RYiJd8wdpv">③ 经营者姓名必须是你本人</b><br data-page-node-id="w69nZHBiq7bX5476GXaFI4">
+      这是微信主体变更的<b data-page-node-id="R2Sl91Fm1HbtD10p01sQqI">硬条件</b>：个体户执照上的经营者姓名，
+      必须和小程序原个人主体的身份证姓名<b data-page-node-id="mlVplIxHXHh3apnLBhpAjq">完全一致</b>。<br data-page-node-id="Rbw3NpwRM6KltpxMeA5CjV">
+      如果执照写的是家人或朋友的名字 → <b data-page-node-id="fsgo9rUqPSrJI9xSYf8ZsY">100% 驳回</b>，300 元审核费也不退。
+    </div>
+
+    <h4 data-page-node-id="2IqB2O5RuTWTqr4obXCkGF">拿到执照之后（别漏）</h4>
+    <ul class="step" data-page-node-id="gGvYCIH1EEuSSOG7tepMjZ">
+      <li data-page-node-id="eA5PiYbQTpwjPSi81AEuCK"><b data-page-node-id="lm2Sq6bAtw0t0xJjYXc5ww">30 日内必须做税务登记</b>，否则可能罚款。多数地区线上就能办，也可以在税务大厅</li>
+      <li data-page-node-id="yY0TQWHTtbuwOJSeKwP9Hm">电子营业执照：微信搜「<b data-page-node-id="hWM6nnAxdYQaDGehQHvMJm">电子营业执照</b>」小程序可以直接领，与纸质执照同等法律效力</li>
+      <li data-page-node-id="CNGnwpIIDZukXssOJCAmi4">刻章：非必需，但以后开对公账户会用到（部分地区免费刻）</li>
+    </ul>
+
+    <div class="fix" data-page-node-id="TNDad2Sx3NeqEX8GoHKqgz">
+      <b data-page-node-id="erEUmpls1tetX7F6CkUZL8">顺带一个定心丸</b>：按 2025 年 7 月新规，个体工商户以后<b data-page-node-id="sge1c1RQxMEwHWbMkjR54J">可以转型为公司并保留原统一社会信用代码和成立日期</b>。
+      所以现在办个体户不是"死路"—— 以后真要做大了转企业，主体能延续。
+    </div>
+
+    <!-- 4.2 -->
+    <h3 data-page-node-id="aBUtEUi0NICsXUPJWY9l8g">4.2 办公证书<span class="stage" data-page-node-id="geU7Rx34KMmg0hfx4OYGFh">3～7 天 · 300～500 元</span></h3>
+
+    <div class="bug" data-page-node-id="irH8bSHyJpHgiDaWb7JMN7">
+      <b data-page-node-id="yc1VtgkbjyHuBeDSnMnECw">为什么个人变更必须要公证</b>：正常情况下个体户变更可以法人扫脸验证。
+      但你的<b data-page-node-id="vyHqhZ1LdqF8ekYGMXXU9I">原主体是个人</b>，没有"法人"可扫，所以必须用公证书来证明"这个小程序确实是你本人的"。
+    </div>
+
+    <ol class="step" data-page-node-id="ulFOSnDJuz1VmzpH0jEEEX">
+      <li data-page-node-id="X2MP1BRXVGH9NyGdrkeGX7">找当地公证处（或支付宝/微信搜「<b data-page-node-id="dn7q1Ew1YzzHA1yLemVvFZ">公证云</b>」线上办，快一些）</li>
+      <li data-page-node-id="Vx8FnNwyRme1rWxoD12BfU">公证事项：<b data-page-node-id="ldnBS6lhUny7uhzWjgjCRD">声明书公证</b> / <b data-page-node-id="kz6SvSKGObQMRDVaYJ2oCc">小程序主体变更声明</b></li>
+      <li data-page-node-id="VCFafWY38zEnpssRCBAD1W">带这些材料：
+        <ul class="step" data-page-node-id="3YSWtXZzRCZ1BMT7R6sjgA">
+          <li data-page-node-id="f0kPI8klOmzFeftRa091rv">身份证原件</li>
+          <li data-page-node-id="I58IjUz4LhJMx9gh7L6vCZ"><b data-page-node-id="Ls3pJoyAtnnOFeqEFxU3f2">个体工商户营业执照</b>原件（刚办下来的）</li>
+          <li data-page-node-id="T0hephkwuyGZW5KyqLyj4a">小程序信息页截图（mp 后台 → 设置 → 基本设置 → 主体信息）</li>
+        </ul>
+      </li>
+      <li data-page-node-id="PFTQD3IcOZ9BWmj3mFRxMD">跟公证员说明用途：<b data-page-node-id="Qm3H3NlATnK2by0CaT9CbR">用于微信小程序主体从个人变更为个体工商户</b></li>
+      <li data-page-node-id="vxVwMgiqVjSTuIhwkvrKWg">拿到公证书（纸质 + 电子版都要）</li>
+    </ol>
+
+    <div class="note" data-page-node-id="MIvvFVxFr8zVyFulDtfhCy">
+      费用各地不同，一般 300～500 元。线上公证便宜些，但有些地区微信不认，
+      办之前先问一句"能不能用于腾讯小程序主体变更"。
+    </div>
+
+    <!-- 4.3 -->
+    <h3 data-page-node-id="GUHezniAGEI1Nib6rmOk6M">4.3 微信后台发起主体变更<span class="stage" data-page-node-id="ESUFzf2SnMOdOP51y0tuKE">1～3 天 · 300 元</span></h3>
+
+    <h4 data-page-node-id="WDmDfilxsotC4lvHEeIBFc">先自查这三条（不满足会被驳回）</h4>
+    <ul class="step" data-page-node-id="m3Ldp3nMQQgXGhro4TmrPz">
+      <li data-page-node-id="tDt14c4D19kdrbPmDHrADw">个体户执照的<b data-page-node-id="YYNIknjD5miXpWQNajEXeU">经营者姓名 = 你本人</b>（上面 ③ 说过了，最大的驳回原因）</li>
+      <li data-page-node-id="sjJThVbonOgowWiA8R93sg">营业执照在有效期内、状态正常</li>
+      <li data-page-node-id="QcYEGSL8LoDh2ylsCsWBiV">小程序无未完成的违规处罚、无进行中的交易</li>
+    </ul>
+
+    <h4 data-page-node-id="UaQqw09elor1plZBQyXWy6">操作路径</h4>
+    <div class="path" data-page-node-id="GEvGlrRR7B2upPIZajMG2r">mp.weixin.qq.com → <b data-page-node-id="i473lFSBI6CiP3lcnMdQaZ">设置 → 基本设置 → 主体信息 → 小程序主体变更</b></div>
+
+    <ol class="step" data-page-node-id="wllFtWEtO0NDnqVFf9LQYN">
+      <li data-page-node-id="OYPInnFQgipWRcckbsQgoY">目标主体类型选「<b data-page-node-id="6EZFnAveYTpu9XlGjCTCqa">个体工商户</b>」</li>
+      <li data-page-node-id="vROnszV7hwaKVsQccX3xWd">填<b data-page-node-id="4B3ZFSS0BEAIFI41EedgAB">统一社会信用代码</b>、执照上的<b data-page-node-id="ObIHCUPX7nBSvXf2i7AIAH">名称</b>（照抄执照，一个字别差）</li>
+      <li data-page-node-id="mXKJVLG9GqRHADtDfOKeK2">上传三样：<b data-page-node-id="SjuPUCyB2t2X31fBKLaGUT">营业执照照片</b> + <b data-page-node-id="1rLjaKfOYdxO9AHFLlOkPv">经营者身份证正反面</b> + <b data-page-node-id="mWffNb2Gv3II3xatapDxrf">公证书</b></li>
+      <li data-page-node-id="5aiZshrd7D58CW8XvDtRBN">验证方式：会提示不能扫脸 → 走<b data-page-node-id="h65qAzqVxQbHPEjtQKnwe9">公证书</b>通道（就是 4.2 办的）</li>
+      <li data-page-node-id="vpsDE4as1TWEOavVSbzRU6">按提示完成验证、签署变更协议</li>
+      <li data-page-node-id="AY3hoS0JVIXzFaQuvLG664">支付 <b data-page-node-id="NIpyURLM3Dd0c2A9EPwWKw">300 元审核费</b>
+        <div class="note" data-page-node-id="cCTFsto6BnebPn552CkFvx">⚠️ 这笔钱<b data-page-node-id="X0OXz70zlNPSDJdIH4ieZ2">审核失败也不退</b>，所以先把材料核对清楚再交。</div>
+      </li>
+      <li data-page-node-id="pnToizcsKh8SmsKqUDe9NN">提交，等 1～3 个工作日</li>
+    </ol>
+
+    <div class="fix" data-page-node-id="PaNnuYM1q851WCfj76cP1q">
+      <b data-page-node-id="HvhCJFcDgGyZZovuYPpHtg">成功标志</b>：主体信息页显示的是你的个体户名称，主体类型变成「个体工商户」。
+    </div>
+
+    <!-- 4.4 -->
+    <h3 data-page-node-id="T6P9WGRFSjGRzDoNiCxGPJ">4.4 立刻重新备案<span class="stage" data-page-node-id="njxNtCb1X4SjG6StGzVm0f">1～20 天 · 免费</span></h3>
+
+    <div class="bug" data-page-node-id="c0IoNCYHxcrZfXEkWqjv0o">
+      <b data-page-node-id="rKivB3ugm1PNdFPVIOGX3a">这是最容易被忽略、后果最严重的一步。</b><br data-page-node-id="Y251CD3mYMg4xhtkSdwLdq">
+      主体变更 = 统一社会信用代码变了。官方<b data-page-node-id="iGdUokMrWBjoCixyFfRLcB">不支持直接修改备案</b>，
+      必须<b data-page-node-id="TpbaFoQaPoy23T6nfFPWPG">先注销原备案，再用新主体重新申请</b>。<br data-page-node-id="7xopMEQEREvrLkJXPoZTuc"><br data-page-node-id="HojRXmCjIj1XImvBgfxOYu">
+      中间存在<b data-page-node-id="htIzzZBHZg196qzHFdcU1f">备案真空期</b>，而<b data-page-node-id="f9iAVXWE4YTVI2P4sw7sN1">未备案的小程序会被下架</b>。
+    </div>
+
+    <ol class="step" data-page-node-id="d4GNUpwLbxVXhpPlS7yU18">
+      <li data-page-node-id="U1Q6lyAj4pns3OPHON8eDz">主体变更通过后，<b data-page-node-id="uCoGsMKx2xupffsU86MlxI">当天</b>就去备案（别拖）</li>
+      <li data-page-node-id="8N34TBxaBDbNizDnzyxAn9"><div class="path" data-page-node-id="Z8fTLDfnRJTErrH62ZkuID">mp.weixin.qq.com → <b data-page-node-id="g2y58SGZMORuK660BakHgb">设置 → 小程序备案</b></div></li>
+      <li data-page-node-id="nFgn4MXvr4eqBX6DbEQrmf">先<b data-page-node-id="ozPGSTn8ZEOh81YYlHoa3u">注销</b>原来的个人备案</li>
+      <li data-page-node-id="gRaRNTcPoBpBFT3bfjsMGD">再用个体户主体<b data-page-node-id="Feg6F5O4dtdjqSy7BsoBER">重新提交</b>备案申请</li>
+      <li data-page-node-id="MHlF0GAZ8nWTgg33m62Kf2">填服务内容时，<b data-page-node-id="w4FNHHHDaE5oQmfs5GlmgF">类目选「工具 → 效率」</b>（见下面红线章节）</li>
+      <li data-page-node-id="hrDRTujiIrCWRd2xliPtzc">等审核（各省管局速度不同，一般 1～20 天）</li>
+    </ol>
+
+    <div class="warn" data-page-node-id="4BgRkHVHC0JfKr1TjqSI29">
+      <b data-page-node-id="mGv4Z7YKjn2YQxRmduxTEE">备案期间小程序可能被下架</b>，属正常流程，备案通过后会自动恢复。
+      这段时间别慌，也别重复提交。
+    </div>
+  </div>
+
+  <!-- ================= 阶段 5 ================= -->
+  <div class="card" data-page-node-id="SlJwNwyABFUJGhg2nTyoPb">
+    <h2 data-page-node-id="2Q6LzxIdpziYcijDAUWMee"><span class="num done" data-page-node-id="331LjEtApjMrw39f7giw1t">5</span>变更后还要做三件事<span class="stage" data-page-node-id="G9dCOu9o68QlyYrRHZGhE9">半天</span></h2>
+
+    <h3 data-page-node-id="ACxBJDkRFPzMp8ePmO9C7X">5.1 重选服务类目（原类目已失效）</h3>
+    <div class="path" data-page-node-id="CWJWDjcmJVv4HYgSUTj4aj">mp.weixin.qq.com → <b data-page-node-id="vVpojRkkVFNMMfvMl1XHqo">设置 → 基本设置 → 服务类目</b> → 删除旧的 → 重新添加</div>
+    <table data-page-node-id="0ebmrTIpKlVWOpblgHW9OE">
+      <tr data-page-node-id="AgDdvtfnTzEUFsuCI2p6ll"><th data-page-node-id="03ZtSEnHlzzz1WO457RrVv">选什么</th><th data-page-node-id="uHPL1f5XMjI04ZragD5l96">说明</th></tr>
+      <tr data-page-node-id="plHSIw6mOm6LuZNjHStkRV"><td class="good" data-page-node-id="BNhgLXgEnlZjuY447ahf3m">✅ 工具 → 效率</td><td data-page-node-id="9MG0iuOWK7c9pPbtO2xtwC"><b data-page-node-id="s8BZmoxj5XiTlK3r14mtlM">首选</b>。我们实际做的就是记录、打卡、聊天工具。</td></tr>
+      <tr data-page-node-id="FiXzGGViXTRq4bEIiAD5FK"><td data-page-node-id="E7L5g1eiW0dPJHGJqDgKES">生活服务 → 其他</td><td data-page-node-id="BaiduNWrPeDtADDt4eHiI0">备选，如果「工具-效率」被驳回就换这个。</td></tr>
+      <tr data-page-node-id="xjkIZV8JmbDY4dSpSin8aL"><td class="bad" data-page-node-id="E8MSDiBGa9A7H2UERrGXJp">❌ 社交 → 社区/论坛、笔记</td><td data-page-node-id="sCrHQjFc1rkqm3G6gnPxYf">需要《增值电信业务经营许可证》，你没有。</td></tr>
+      <tr data-page-node-id="baACpfNtvMmk8w35N0FPAg"><td class="bad" data-page-node-id="IUejFgaxbqlJYtsrIsY5PY">❌ 商业服务 → 心理咨询</td><td data-page-node-id="e1x1ZOczMByDirINGnQ7aA">需要 3 位持证咨询师 + 合作协议，你没有。</td></tr>
+    </table>
+
+    <h3 data-page-node-id="iC2MLCKAvT0LqkaVzsJUC5">5.2 更新隐私指引的主体信息</h3>
+    <p style="font-size:14px" data-page-node-id="3EvteFuQjukTxk8hbQ4rdI">主体变了，隐私指引里的主体信息要同步更新，再提交过审一次（1～2 个工作日）。勾选项和之前一样，还是那 6 项。</p>
+
+    <h3 data-page-node-id="y9XM1XTcCxF51EAOhuYhyT">5.3 重新提审</h3>
+    <p style="font-size:14px" data-page-node-id="GwBuLPRP2zxAHCSRc27wNd">类目和隐私指引都过审后，重新提交一次代码审核。代码不用改，直接用现有的 1.0.0 版本提交。</p>
+  </div>
+
+  <!-- ================= 红线 ================= -->
+  <div class="card" data-page-node-id="KMInhPPJzIHMiP0kqfVX2z">
+    <h2 data-page-node-id="ODqR7YgOlHQC9OHs4VhFuk"><span class="num" data-page-node-id="33urm0YD87WbbxQqgqrR99">!</span>合规红线：写任何文案前先过一遍</h2>
+
+    <div class="bug" data-page-node-id="ehn0JiVZa7ODxYvpq6ucAQ">
+      <b data-page-node-id="fpHEgAgZFjani9AuRON8In">个体户 ≠ 能做情感咨询。</b><br data-page-node-id="IN5TJbcJbl56WZh4eU1Sb5">
+      微信心理咨询类目硬门槛：执照经营范围明确含「心理咨询/健康咨询」
+      + <b data-page-node-id="mvgoCEnfJTZfAijm2hYdKb">3 位持证咨询师</b>资格认证 + 3 人的合作协议或劳动合同。你没有，换什么主体都过不了。<br data-page-node-id="xSRKBs9XYAbE8nbnUxhAkU"><br data-page-node-id="1R7j71BRSwNH01NkyBdF7z">
+      <b data-page-node-id="TX6xjtGqcMHDHkkQrAs0yB">真实翻车案例</b>：有个「情绪陪伴」小程序功能完全没问题，
+      只因名称/描述里出现「心理咨询」四个字，被机器判定"可能涉及医疗行为"，
+      半年被罚两次后封号。<b data-page-node-id="EF4W8BFytTQ9bgBeLyYVXH">机器扫关键词，不管你实际功能是什么。</b>
+    </div>
+
+    <table data-page-node-id="KJIqjCS5KLBWzkUeUB3o8j">
+      <tr data-page-node-id="BlGjNHBavCBML4DL05SPZu"><th style="width:50%" data-page-node-id="JGQ9CcFndPDY0rraWJLXNr">❌ 禁用词</th><th data-page-node-id="RyJ8nrtqIz9lpHPyIDApaT">✅ 替代表达</th></tr>
+      <tr data-page-node-id="WnglyLVAwZCTbp2crx2vgU"><td class="bad" data-page-node-id="uTgWyspGvH5cgXSJEFBwrN">咨询、疏导、疗愈、治愈</td><td data-page-node-id="XYwaXX9InZFgIsJdFKAgTP">记录、陪伴、撑住、说说话</td></tr>
+      <tr data-page-node-id="CxHkTxQApStxNMZYLCxDeX"><td class="bad" data-page-node-id="ZgfmjX8V8WBoBFWbCUTh8r">抑郁、焦虑症、心理治疗</td><td data-page-node-id="3sTYQUSrla61vXBfWzm0jY">情绪低落、难受、撑不住</td></tr>
+      <tr data-page-node-id="O8NNpREw2WgUgFaMmrs2eG"><td class="bad" data-page-node-id="QQKbI6JHyaJNqKk39zsOfi">挽回、恋爱教学、挽回指导</td><td data-page-node-id="VacU2qCiytnGXHoxITFjUj">断联记录、情绪日记</td></tr>
+      <tr data-page-node-id="peBxD7SIy8F7EBHk683SSd"><td class="bad" data-page-node-id="DPSsn1EgPg4y4GcVo3xmaO">最、第一、唯一、全网、天花板</td><td data-page-node-id="0jAKzswncbNDQuSgIve40A">很、挺、特别（极限词也别用）</td></tr>
+      <tr data-page-node-id="nQZap48IhxKM604d1ATedD"><td class="bad" data-page-node-id="ZmCLxcwJ7YFYSOL74MLH0L">100%、永久、根治、保证</td><td data-page-node-id="TkBbZfMfYPAVMez4DhzhHd">通常、大多、慢慢来</td></tr>
+    </table>
+
+    <div class="warn" data-page-node-id="j39NL9CFqq8Z9BbYOTA7bh">
+      <b data-page-node-id="PbLkJ7H4M6OQFJgWawmoYs">这套红线对执照同样适用</b>：经营范围、个体户名称、小程序名称、版本描述、小红书简介，
+      <b data-page-node-id="D743TpfIVOpCpzSQ5QPwnk">五个地方口径要完全一致</b> —— 都是「工具 + 记录 + 陪伴」，都不出现心理/咨询类词。
+      任何一处露馅，机器都可能串起来判定。
+    </div>
+
+    <div class="note" data-page-node-id="GJCyZtrzPDgauHAezjBJAK">
+      代码侧已经清理过一遍：每日一句的「疗愈不是直线」改成了「好起来不是直线」；
+      「我」页的公益求助热线<b data-page-node-id="JFcc0EyWlNMl17LRj5wbcx">保留</b>（这是安全底线不能删），
+      但加了一行小字「以下是国家公益求助渠道，不由本小程序提供」，用来撇清"本产品在提供心理服务"。
+    </div>
+  </div>
+
+  <!-- ================= 变现 ================= -->
+  <div class="card" data-page-node-id="Xf71KAa77UlRPaDC6CTrVl">
+    <h2 data-page-node-id="Dgos8x2jynjhdSWhpMDuEQ"><span class="num" data-page-node-id="kHKvqdh0JKY4JMZvHNePf0">$</span>上线后的变现节奏</h2>
+
+    <h3 data-page-node-id="QjA8jpNDiuuBst7Fbxkp4M">第一阶段：攒人（上线 ~ 1 个月）</h3>
+    <p style="font-size:14px" data-page-node-id="7Jhk4BuO1fbCdAxf6k1Xu7">什么都别想，专心发内容拉人。小红书连载图（60 张已做好）现在就能开始发，每周 2 期。</p>
+
+    <h3 data-page-node-id="qLuzDCTGgOAlj9afokIIdx">第二阶段：开流量主（UV 达标后）</h3>
+    <ul class="step" data-page-node-id="XxIrpGiEpTH4mJdInCoDfT">
+      <li data-page-node-id="t8mGWMw0FJuaFiYXtr0hYN">门槛：累计独立访客 UV 达标（官方口径 1000，有说 2026 已降至 500，<b data-page-node-id="j2BME0guayoefUSy6eDkrL">以你后台提示为准</b>）</li>
+      <li data-page-node-id="trqOfRAsQV7b4aVMAwTM8K">路径：<b data-page-node-id="lzGM1fpWGflNVOYR4UHENs">mp 后台 → 推广 → 流量主</b> → 签协议 → 绑银行卡</li>
+      <li data-page-node-id="UBaW0CtNWFIHLA6qyHVlIZ">收益参考：激励视频 eCPM 50～120 元 &gt; 插屏 15～40 元 &gt; Banner 最低</li>
+    </ul>
+    <div class="warn" data-page-node-id="HqTHnRaw2mABL0dSm3T1s8">
+      情感类产品用户处在情绪低谷，<b data-page-node-id="G4cvAA0WwDQvldfJ5QsNOJ">广告要克制</b>。建议只开激励视频（用户主动点才出现），
+      别上插屏弹窗 —— 伤留存，得不偿失。
+    </div>
+
+    <h3 data-page-node-id="HLK7P2pBuHaNC4UIWHCdu0">第三阶段：付费（个体户才能做）</h3>
+    <p style="font-size:14px" data-page-node-id="iyAHYpYAbMwVF9CQH65iCh">个体户主体可以开通微信支付了，这时候才能做会员/解锁。</p>
+    <div class="bug" data-page-node-id="KxFJMPr2be6ZsmDn4L8Hcb">
+      <b data-page-node-id="XIAPSvG7xPd98cU6tbyJcg">iOS 端不能卖虚拟商品</b>（苹果 IAP 规定）。所以会员类虚拟商品在 iPhone 上是受限的，
+      设计付费功能时要把这条算进去 —— 建议付费点设计成<b data-page-node-id="yfm8zd84j8ctmNDQOsz058">实体周边 / Android 专属</b>，
+      或者干脆靠广告 + 小红书引流到私域变现。
+    </div>
+  </div>
+
+  <!-- ================= 常见驳回 ================= -->
+  <div class="card" data-page-node-id="ehsN2btIZQdF4BKuY4OEqB">
+    <h2 data-page-node-id="cm1k7rXyIPSHOx8V4Ez1wB"><span class="num" data-page-node-id="hvRsjdDqFTWrlZkBUR9gL1">?</span>常见驳回原因对照</h2>
+    <table data-page-node-id="9Hn7vDsxZQJFze3ZByJScI">
+      <tr data-page-node-id="9bYWjnYFwBhBBCgtCCapMz"><th style="width:46%" data-page-node-id="ZSVVoa56AJcRu0pBQ3kuqo">驳回话术</th><th data-page-node-id="2ilbzNn8jHnXRMn5nSDqOp">怎么改</th></tr>
+      <tr data-page-node-id="tLFh73Adqjgur9QPvNqfGg"><td data-page-node-id="ohCcbH5MLqu1n3W4FFrkp8">涉及 XX 接口，请完善隐私指引</td><td data-page-node-id="2lYGgIpIgj3QSWGoBwGWLc">平台又扫出新权限了，<b data-page-node-id="IEKQjwwumfGB8VCBbQ9s84">补在提审页面（入口 2）</b>，别去设置页</td></tr>
+      <tr data-page-node-id="OPwRM8zgGArnz3pWcsggi7"><td data-page-node-id="Fiy9VFIA1wBLFBA5hXXLja">服务类目与实际内容不符</td><td data-page-node-id="OH7xDGEQGNIgddnn4KbN47">类目改成「工具 → 效率」，删掉社交/心理相关类目</td></tr>
+      <tr data-page-node-id="HohzJaG1Pme6saPwVLvyIp"><td data-page-node-id="tEk9L11RyqyvZe7y1K5CXi">可能涉及医疗行为</td><td data-page-node-id="RpfRFrXA3VL8dyq7kF4gUJ">全文搜「咨询/疗愈/治愈/抑郁」，全部换掉。名称、简介、版本描述、<b data-page-node-id="OXfRRy5fHqntOTvaK2pNPT">执照经营范围</b>都要查</td></tr>
+      <tr data-page-node-id="AcLeWbs4n9D8hubXoTEJF9"><td data-page-node-id="dwTnDXA8tHeryqMASFHM3m">主体变更：经营者信息不一致</td><td data-page-node-id="UxSRnylM7pIH97lq2TnsCk">执照经营者姓名必须与原个人主体本人一致，不一致只能换执照</td></tr>
+      <tr data-page-node-id="McCiG1YzgkdWxqP8gHTXAL"><td data-page-node-id="MsJl2Vr9Ajdr6aFwxxpQg7">功能不完整/页面空白</td><td data-page-node-id="CEvs0Ck2TznYNRUqUZ1243">说明测试路径即可，我们所有页面免登录可进</td></tr>
+      <tr data-page-node-id="s86YPODDwbNAjKBwAWVPqN"><td data-page-node-id="wX9ni706qVbNgT19O2Bjs5">用途描述不明确</td><td data-page-node-id="CqRPuvaHOnFDGQa3B4QElS">别写「使用」「开发」这种词，用上面表格里的描述</td></tr>
+      <tr data-page-node-id="w8zDlxIpjD6DVy9C1xAC76"><td data-page-node-id="vtzPW81piljgzXu6SFAulx">缺少联系方式</td><td data-page-node-id="wLliJzZc7Aya4DzO4U3a0O">填一个真实邮箱</td></tr>
+    </table>
+  </div>
+
+  <!-- ================= 已就绪 ================= -->
+  <div class="card" data-page-node-id="MjrPJQb0piJ4tp68Xy3lFX">
+    <h2 data-page-node-id="Z2K0x61srHlRzmIcju2ubu"><span class="num done" data-page-node-id="BGkZCAzxnzmqAhqWZzuxgE">✓</span>代码侧已经就绪，不用你操心</h2>
+    <ul class="chk" data-page-node-id="umujbm4xEZ0oEBChFACdZ8">
+      <li data-page-node-id="nucqOsBYScJhy4MgtipSY2">版本 v0.9.8，9 套测试 717 项全绿</li>
+      <li data-page-node-id="A9pjuuys2yjfGLMnnlxFDL">隐私校验已开启 + 授权弹窗已配好</li>
+      <li data-page-node-id="Go9qRxYO9HffxBalc5Hc3d">手机号一键填写已按个体户标准恢复（失败会退回手填，不阻塞）</li>
+      <li data-page-node-id="UOaiNeVhwfJxGBP7pZwlE6">聊天气泡布局已修（自己在右、对方在左）</li>
+      <li data-page-node-id="xGO2n426OCabsPE95X6J8H">影子头像可单独设定、比例已修成微信标准</li>
+      <li data-page-node-id="rZTgTmi1YZ610pCvp1h5LM">小白/影子回复已贴题化，不再硬往情感上靠</li>
+      <li data-page-node-id="c4178AdCMOE4Mz1a1CLINH">敏感词已清理（疗愈 → 好起来，危机热线加免责标注）</li>
+      <li data-page-node-id="EhiZfyTN22kHxkVFj063E8">零第三方 SDK，主包 627K（上限 2MB）</li>
+      <li data-page-node-id="Wk3bo0zV4LFepnHecFSBl2">AI 默认走本地规则引擎，<b data-page-node-id="WbCOdxUQKPirzB7Tmx7H0m">不涉及生成式 AI 备案</b></li>
+    </ul>
+    <div class="note" data-page-node-id="ul8wGC8cWotNYOVyJqGGHF">
+      ⚠️ 一个前提：手机号「一键填写」要真正生效，需要你部署云函数 <code data-page-node-id="jL95zNoMpDuXuE97myhWWl">noex-ai</code>
+      并配好 <code data-page-node-id="mcaejqVPuzogN5KK79KOHI">NOEX_APPID</code>、<code data-page-node-id="FhPs0D2DrLCmaPIyH85LMo">NOEX_APPSECRET</code> 两个环境变量（见 AI接入指南.html）。
+      没部署的话点了会提示手填，<b data-page-node-id="16dq2uIy9NSyQEJm3dtzJl">不影响登录</b>，手机号本来就是选填。
+    </div>
+  </div>
+
+  <div class="note" style="text-align:center;margin-top:36px" data-page-node-id="YCJXwWQLDDYkYmlPlrcGkU">
+    NOEX 全流程操作指南 · 2026-09-11 · 对应代码版本 v0.9.8
+  </div>
+
+</div>
+</body>
+</html>
