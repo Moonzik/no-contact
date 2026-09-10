@@ -1,0 +1,21 @@
+<!-- 隐私授权弹窗：开启 __usePrivacyCheck__ 后，调用相册/头像/剪贴板前必须由用户点「同意」 -->
+<view class="p-mask" catchtouchmove="onNoop">
+  <view class="p-card">
+    <view class="p-title">用户隐私保护提示</view>
+    <view class="p-body">
+      感谢你使用「断联日记 NOEX」。在使用前，请先阅读并同意
+      <text class="p-link" bindtap="openContract">《用户隐私保护指引》</text>。
+    </view>
+    <view class="p-note">
+      我们只在你主动操作时会用到这些能力：选头像/选图片（相册）、粘贴聊天记录（剪贴板）。
+      聊天记录只保存在你自己的手机上，不会上传服务器。
+    </view>
+    <button
+      id="agree-btn"
+      class="p-btn p-btn-main"
+      open-type="agreePrivacyAuthorization"
+      bindagreeprivacyauthorization="onAgree"
+    >同意并继续</button>
+    <button class="p-btn p-btn-ghost" bindtap="onDisagree">不同意</button>
+  </view>
+</view>

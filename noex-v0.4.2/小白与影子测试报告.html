@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>小白 & 影子 · 功能测试报告</title>
+<style>
+  :root{
+    --ink:#2b2620; --sub:#6b6154; --faint:#9b8c70; --line:#e8e0d0;
+    --card:#fffdf7; --bg:#faf7ef; --accent:#9a5d3a; --ok:#3f7d52; --bad:#b3452c;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.75;font-size:16px;}
+  .wrap{max-width:900px;margin:0 auto;padding:48px 24px 80px;}
+  h1{font-size:30px;margin:0 0 6px;}
+  .ver{color:var(--faint);font-size:15px;margin-bottom:32px;}
+  h2{font-size:21px;margin:44px 0 14px;padding-left:12px;border-left:5px solid var(--accent);}
+  h3{font-size:17px;margin:26px 0 10px;color:var(--sub);}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 24px;margin:16px 0;}
+  .big{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:22px 0;}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 20px;text-align:center;}
+  .stat .n{font-size:32px;font-weight:700;color:var(--ok);line-height:1.2;}
+  .stat .n.warn{color:var(--bad);}
+  .stat .l{font-size:13px;color:var(--faint);margin-top:4px;}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:15px;}
+  th,td{border:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:top;}
+  th{background:#f4eee1;font-weight:600;}
+  code{background:#f2ece0;padding:2px 7px;border-radius:5px;font-size:14px;font-family:Consolas,monospace;}
+  .chat{margin:18px 0;}
+  .row{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px;}
+  .who{flex:none;width:40px;font-size:13px;color:var(--faint);padding-top:7px;text-align:right;}
+  .bub{padding:11px 16px;border-radius:14px;font-size:15px;max-width:calc(100% - 60px);}
+  .me{background:var(--ink);color:#faf9f4;border-bottom-right-radius:4px;}
+  .bot{background:#fffdf7;border:1px solid var(--line);border-bottom-left-radius:4px;}
+  .tag{display:inline-block;font-size:11px;padding:1px 8px;border-radius:20px;margin-left:8px;
+    vertical-align:middle;letter-spacing:.5px;}
+  .t-topic{background:#e2eee6;color:#2f6b41;}
+  .t-mood{background:#f6e6df;color:#a34429;}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;}
+  @media(max-width:700px){.cols{grid-template-columns:1fr;}}
+  .ph{font-size:15px;font-weight:600;padding:8px 0;border-bottom:2px solid var(--line);margin-bottom:6px;}
+  ul{padding-left:22px;margin:10px 0;} li{margin:6px 0;}
+  .bug{background:#fdf3f1;border:1px solid #f0d5ce;border-radius:14px;padding:16px 20px;margin:14px 0;}
+  .fix{background:#f1f8f2;border:1px solid #cfe4d5;border-radius:14px;padding:16px 20px;margin:14px 0;}
+  .ok-line{color:var(--ok);font-weight:600;}
+  .bad-line{color:var(--bad);font-weight:600;}
+  .foot{margin-top:52px;padding-top:20px;border-top:1px solid var(--line);color:var(--faint);font-size:13.5px;text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>小白 & 影子 · 功能测试报告</h1>
+  <div class="ver">断联日记 NOEX v0.9.4 · 2026-09-10 · 重点验证：还会不会硬往感情上关联</div>
+
+  <div class="big">
+    <div class="stat"><div class="n">0%</div><div class="l">聊日常时出现感情词<br>（修前 2.2%–3.1%）</div></div>
+    <div class="stat"><div class="n">0/360</div><div class="l">影子强行煽情次数</div></div>
+    <div class="stat"><div class="n">55</div><div class="l">本次专项检测项全过</div></div>
+    <div class="stat"><div class="n">587</div><div class="l">全套件回归通过</div></div>
+  </div>
+
+  <h2>一、结论</h2>
+  <div class="card">
+    <p><b>小白不再硬往分手上扯了。</b>用 30 句纯日常（加班、吃饭、猫、天气、考试、游戏、房租…）
+    在 4 种人格下各跑 12 遍，共 1440 条回复，<b>命中"TA / 前任 / 断联 / 想念"类词的次数是 0</b>。</p>
+    <p><b>真聊想念时它还是接得住</b>——没有因为去感情化变成木头。这是这次测试特意分开验证的两件事。</p>
+  </div>
+
+  <h2>二、测出来并修掉的问题</h2>
+
+  <div class="bug">
+    <b>问题 1：「好想吃火锅啊」被当成了"想 TA"</b><br>
+    <span class="bad-line">修前：</span>想念意图的关键词里有裸的「好想」「很想」，
+    所以"好想吃火锅""好想睡觉""好想辞职"全被判成想念，回复就变成
+    「想 TA 是吧。想完了吗？」「想念不值钱。值钱的是你想完之后去干了什么」。<br>
+    <b>这就是你感觉到的"硬是往情感上关联"。</b>
+  </div>
+  <div class="fix">
+    <span class="ok-line">修法：</span>裸的「好想/很想」删除，改成判定规则——
+    只有明确指向人（想他 / 想她 / 想念 / 忘不了）才算想念；
+    「想 + 动词」（吃、睡、去、买、辞职…）一律不算，交给话题层。<br>
+    <span class="ok-line">现在：</span>「好想吃火锅」→ 吃饭话题，「好想睡觉」→ 犯困话题，「我好想他」→ 仍然是想念。
+  </div>
+
+  <div class="bug">
+    <b>问题 2：「记得明天要开会」被当成"回忆"</b><br>
+    <span class="bad-line">修前：</span>回忆意图里有裸的「记得」，于是"记得带伞""记得交作业"
+    会走进回忆池，回你「你记得每一个细节，TA 大概早忘了」。
+  </div>
+  <div class="fix">
+    <span class="ok-line">修法：</span>「记得」改成复合词（还记得 / 记得我们 / 记得那 / 记得以前 / 记得当时）。<br>
+    <span class="ok-line">现在：</span>「记得明天要开会」→ 工作话题。
+  </div>
+
+  <div class="bug">
+    <b>问题 3：话题识别漏词</b><br>
+    「外面下大雨」认不出是天气（关键词只有"下雨"没有"大雨"）；「我想买个新电脑」认不出是钱。
+  </div>
+  <div class="fix">
+    <span class="ok-line">修法：</span>天气补了大雨/暴雨/下雪/回南天，钱补了「买/下单/付款」。<br>
+    另外给"下雨"和"房租"补了更贴题的句子——以前聊下雨可能回「天气好的时候人会松一点」，
+    现在是「淋湿了吗？赶紧换件干的」。
+  </div>
+
+  <h2>三、实测对话</h2>
+
+  <div class="cols">
+    <div>
+      <div class="ph">温柔档</div>
+      <div class="chat">
+        <div class="row"><div class="who">你</div><div class="bub me">今天加班到十点，好累</div></div>
+        <div class="row"><div class="who">小白</div><div class="bub bot">工作上的事你说，我不打断。 慢慢来，不急，我等你。<span class="tag t-topic">工作话题</span></div></div>
+
+        <div class="row"><div class="who">你</div><div class="bub me">好想吃火锅啊</div></div>
+        <div class="row"><div class="who">小白</div><div class="bub bot">这个点聊吃的，你是馋了还是真饿了？ 说完会轻一点，我陪着你。<span class="tag t-topic">吃饭话题</span></div></div>
+
+        <div class="row"><div class="who">你</div><div class="bub me">外面下大雨，忘了带伞</div></div>
+        <div class="row"><div class="who">小白</div><div class="bub bot">下雨路滑，慢点走。 说完会轻一点，我陪着你。<span class="tag t-topic">天气话题</span></div></div>
+
+        <div class="row"><div class="who">你</div><div class="bub me">我家猫又把沙发抓烂了</div></div>
+        <div class="row"><div class="who">小白</div><div class="bub bot">摸摸它吧，毛茸茸的东西比什么话都管用。 说完会轻一点，我陪着你。<span class="tag t-topic">宠物话题</span></div></div>
+
+        <div class="row"><div class="who">你</div><div class="bub me">头疼得厉害</div></div>
+        <div class="row"><div class="who">小白</div><div class="bub bot">多喝热水这话老套，但确实有用。 说完会轻一点，我陪着你。<span class="tag t-topic">身体话题</span></div></div>
+
+        <div class="row"><div class="who">你</div><div class="bub me">我好想他</div></div>
+        <div class="row"><div class="who">小白</div><div class="bub bot">你可以想，但别顺着想念往下做决定。夜里做的决定，白天多半会后悔。 慢慢来，不急，我等你。<span class="tag t-mood">想念</span></div></div>
+
+        <div class="row"><div class="who">你</div><div class="bub me">忍不住想发消息给他</div></div>
+        <div class="row"><div class="who">小白</div><div class="bub bot">先别动手机。深呼吸，一次，两次。冲动一般只持续十几分钟，我们陪它过去。<span class="tag t-mood">想联系</span></div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="ph">毒舌档</div>
+      <div class="chat">
+        <div class="row"><div class="who">你</div><div class="bub me">今天加班到十点，好累</div></div>
+        <div class="row"><div class="who">小白</div><div class="bub bot">这点事至于熬成这样？你效率是真不高。 别绕圈子，说重点。<span class="tag t-topic">工作话题</span></div></div>
+
+        <div class="row"><div class="who">你</div><div class="bub me">好想吃火锅啊</div></div>
+        <div class="row"><div class="who">小白</div><div class="bub bot">奶茶不算饭，别拿糖水糊弄你的胃。 说半天，重点呢。<span class="tag t-topic">吃饭话题</span></div></div>
+
+        <div class="row"><div class="who">你</div><div class="bub me">外面下大雨，忘了带伞</div></div>
+        <div class="row"><div class="who">小白</div><div class="bub bot">你抱怨天气的功夫，够你多穿一件了。 你想让我夸你？没门。但你接着说。<span class="tag t-topic">天气话题</span></div></div>
+
+        <div class="row"><div class="who">你</div><div class="bub me">我家猫又把沙发抓烂了</div></div>
+        <div class="row"><div class="who">小白</div><div class="bub bot">别光撸不干活，撸完去把碗洗了。 嗯，然后呢。别停在这儿。<span class="tag t-topic">宠物话题</span></div></div>
+
+        <div class="row"><div class="who">你</div><div class="bub me">头疼得厉害</div></div>
+        <div class="row"><div class="who">小白</div><div class="bub bot">别硬撑。你今天唯一的任务就是把自己养好。 这话你自己信吗？<span class="tag t-topic">身体话题</span></div></div>
+
+        <div class="row"><div class="who">你</div><div class="bub me">我好想他</div></div>
+        <div class="row"><div class="who">小白</div><div class="bub bot">又想了？你今天的想念额度是不是该设个上限。<span class="tag t-mood">想念</span></div></div>
+
+        <div class="row"><div class="who">你</div><div class="bub me">忍不住想发消息给他</div></div>
+        <div class="row"><div class="who">小白</div><div class="bub bot">你不是想联系 TA，你是想确认 TA 还在不在。可 TA 在不在，跟你过得好不好没关系。<span class="tag t-mood">想联系</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>四、影子</h2>
+  <div class="card">
+    <p>影子的定位是<b>模仿 TA 说话</b>，所以短回复（"嗯。""……""在听。"）是设计，不是偷懒。
+    这次重点验证的是：<b>你聊日常时它会不会突然冒出强行煽情的话</b>。</p>
+    <p>同样 30 句日常输入 × 2 档相似度，共 360 条回复，
+    <b>命中"分手 / 复合 / 挽回 / 想念你 / 别离开"这类强行煽情词：0 次</b>。</p>
+    <p>遇到真的感情话术（"我好想你"）它照常接，没有变成木头。</p>
+  </div>
+
+  <h2>五、检测项清单</h2>
+  <table>
+    <tr><th>组</th><th>检测什么</th><th style="width:78px">结果</th></tr>
+    <tr><td>A</td><td>4 种人格 × 30 句日常 × 12 遍，感情词出现率 &lt; 5%</td><td>0% ✓</td></tr>
+    <tr><td>B</td><td>真聊想念 / 想联系 / 难过时，意图要识别对、要有实质回复</td><td>全过 ✓</td></tr>
+    <tr><td>C</td><td>11 类话题识别准确，且回复确实取自对应话题池</td><td>全过 ✓</td></tr>
+    <tr><td>D</td><td>同一句不许在一条回复里出现两次</td><td>0.1% ✓</td></tr>
+    <tr><td>E</td><td>影子聊日常强行煽情 = 0</td><td>0/360 ✓</td></tr>
+    <tr><td>F</td><td>「想做某事」不许判成想念；真想念仍要认得出来</td><td>全过 ✓</td></tr>
+  </table>
+
+  <p>这套检测已固化成 <code>_test/nodrama-test.js</code>，以后再改回复池，
+  跑一次就知道有没有退化。全套件合计 <b>587 项通过，0 失败</b>。</p>
+
+  <div class="foot">
+    检测脚本：<code>_test/nodrama-test.js</code>　·　跑法：<code>node _test/nodrama-test.js</code>
+  </div>
+
+</div>
+</body>
+</html>

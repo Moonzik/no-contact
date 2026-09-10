@@ -17,6 +17,7 @@ Page({
     showLogin: false,
     tmpAvatar: '',
     tmpNick: '',
+    tmpPhone: '',
     /* 基础库能力：决定用微信头像昵称，还是降级到手选 */
     avaSupported: true,
     nickSupported: true,
@@ -34,6 +35,7 @@ Page({
       version: this.readVersion(),
       avaSupported: user.avatarSupported(),
       nickSupported: user.nicknameSupported(),
+      phoneSupported: user.phoneSupported(),
       /* v0.9.3：模拟器里 chooseAvatar 点不动，页面上直接给出「从相册选」的提示语 */
       devtools: user.isDevtools()
     });
@@ -118,7 +120,8 @@ Page({
     this.setData({
       showLogin: true,
       tmpAvatar: u.avatar || '',
-      tmpNick: u.nick || ''
+      tmpNick: u.nick || '',
+      tmpPhone: u.phone || ''
     });
   },
 
@@ -191,6 +194,33 @@ Page({
     this.setData({ tmpNick: (e && e.detail && e.detail.value) || '' });
   },
 
+  onPhoneInput(e) {
+    /* 只留数字，避免粘贴进来带空格/横杠 */
+    const v = String((e && e.detail && e.detail.value) || '').replace(/\D/g, '').slice(0, 11);
+    this.setData({ tmpPhone: v });
+  },
+
+  /* 微信一键填手机号。
+     注意：getPhoneNumber 需要**企业主体**小程序，个人主体点了会 fail；
+     而且拿到的是 code，必须后端（这里是云函数）用 appid/secret 才能换成真实号码。
+     所以这里拿不到就明确告诉用户手填，不做假象。 */
+  onGetPhoneNumber(e) {
+    const d = (e && e.detail) || {};
+    const code = d.code;
+    if (!code) {
+      wx.showToast({ title: '没拿到手机号，请手动填写（可留空）', icon: 'none', duration: 2400 });
+      return;
+    }
+    user.fetchPhone(code, (phone) => {
+      if (phone) {
+        this.setData({ tmpPhone: phone });
+        wx.showToast({ title: '已填入手机号', icon: 'none' });
+      } else {
+        wx.showToast({ title: '需要配置云函数才能自动读取，请先手填', icon: 'none', duration: 2400 });
+      }
+    });
+  },
+
   onProfileSave() {
     const raw = this.data.tmpNick || '';
     const avatar = this.data.tmpAvatar || '';
@@ -205,12 +235,13 @@ Page({
     S.user = {
       nick: user.cleanNick(raw) || '断联中',
       avatar: avatar,
+      phone: this.data.tmpPhone || '',
       loginAt: Date.now(),
       viaWx: false
     };
     storage.save(S);
     this.setData({ showLogin: false });
-    wx.showToast({ title: '已登录', icon: 'none' });
+    wx.showToast({ title: this.data.logged ? '已保存' : '登录成功', icon: 'none' });
     this.refresh();
 
     /* 走一次微信登录确认身份；将来接了服务器，在这里把 code 换成 openid 即可 */

@@ -242,14 +242,24 @@
 .sheet-p-danger { color: var(--danger); }
 
 /* 头像选择（button open-type="chooseAvatar" 必须做样式重置）
-   v0.8.1：同 .ava-wrap，改成 absolute 铺满，避免 image 撑成椭圆 */
-.ava-pick {
+   v0.9.3：外层 wrap 定死正方形 + button 绝对定位铺满 + 圆角 50%，
+   三保险锁成正圆。之前只给 button 设 border-radius:50%，
+   button 的默认盒模型会被内容撑变形，看起来就是椭圆。 */
+.ava-pick-wrap {
   position: relative;
-  width: 168rpx;
-  height: 168rpx;
+  width: 184rpx;
+  height: 184rpx;
+  margin: 0 auto 24rpx;
+}
+.ava-pick {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   padding: 0;
-  margin: 0 auto 24rpx;
+  margin: 0;
   background: var(--card);
   border: 1rpx dashed var(--line);
   box-sizing: border-box;
@@ -258,6 +268,7 @@
   flex: none;
   font-size: 24rpx;
   color: var(--faint);
+  min-height: 0;
 }
 .ava-pick::after { display: none; }
 .ava-pick-img {

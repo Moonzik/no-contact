@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="g4MNQJSWr3cseereA6GiSz">
+<head data-page-node-id="cB2qo1sL7tSBjvlGGwPRdm">
+<meta charset="UTF-8" data-page-node-id="xSZvPsPMyvarT796z8rOod">
+<meta name="viewport" content="width=device-width, initial-scale=1" data-page-node-id="erdeayjEWlCuPUtImDCneH">
+<title>断联日记 NOEX · v0.9.6 提审合规说明</title>
+<style>
+  :root{
+    --bg:#faf7f2; --card:#ffffff; --ink:#3a332b; --sub:#7a7064; --faint:#b0a798;
+    --line:#e8e0d4; --accent:#9a5d3a; --ok:#4a7c59; --bad:#b4453c; --chip:#f2ece1;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:48rpx 0 0;background:var(--bg);color:var(--ink);
+       font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+       line-height:1.8;font-size:15px}
+  .wrap{max-width:760px;margin:0 auto;padding:0 24px 80px}
+  h1{font-size:26px;margin:40px 0 6px;letter-spacing:1px}
+  .sub{color:var(--sub);font-size:14px;margin-bottom:32px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+        padding:24px 26px;margin:20px 0}
+  h2{font-size:18px;margin:0 0 14px;display:flex;align-items:center;gap:10px}
+  .num{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;
+       font-size:14px;display:flex;align-items:center;justify-content:center;flex:none}
+  .bug{background:#fdf1ef;border-left:3px solid var(--bad);padding:12px 16px;
+       border-radius:0 8px 8px 0;margin:12px 0;font-size:14px}
+  .fix{background:#f0f6f1;border-left:3px solid var(--ok);padding:12px 16px;
+       border-radius:0 8px 8px 0;margin:12px 0;font-size:14px}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--sub);font-weight:600;font-size:13px}
+  .chip{display:inline-block;background:var(--chip);border-radius:999px;
+        padding:2px 12px;margin:3px 4px 3px 0;font-size:13px;color:var(--sub)}
+  code{background:var(--chip);padding:1px 6px;border-radius:4px;font-size:13px}
+  .note{color:var(--sub);font-size:13px;margin-top:10px}
+  .step{margin:0;padding-left:22px}
+  .step li{margin:8px 0}
+  .warn{background:#fff8e8;border-left:3px solid #c9962f;padding:12px 16px;
+        border-radius:0 8px 8px 0;margin:12px 0;font-size:14px}
+</style>
+</head>
+<body data-page-node-id="yyud1S5cj9qeFJQo9Ttdm8">
+<div class="wrap" data-page-node-id="SFko9X3BHO8Stpcwpn5Trx">
+
+  <h1 data-page-node-id="Ihsw9mfdvmfh1YTTVcI9n6">v0.9.6 · 提审合规</h1>
+  <div class="sub" data-page-node-id="29RfZleDnKqRdiCHGFlVXE">2026-09-10 · 隐私校验开关改回开启 + 补隐私授权弹窗 · build <code data-page-node-id="9HwkdGbVFb62C3P3EKPcDF">privacy-on-v9.6</code></div>
+
+  <div class="card" data-page-node-id="zBvWScQu2aLROM4y8iD4Hf">
+    <h2 data-page-node-id="Lk9DshlsKK79MhZndKfWKo"><span class="num" data-page-node-id="8DEzVTcXFzManrBi2MH3Vj">1</span>改了什么</h2>
+    <table data-page-node-id="Rtc8tDB0FisKwME6CndEyj">
+      <tr data-page-node-id="WUJ04LLbWJVn4kpXPqhIpR"><th style="width:38%" data-page-node-id="07lvLggCN5e6mBQDGAYCnI">项目</th><th data-page-node-id="6GQLTszxHSDUQBRI64ObMf">变化</th></tr>
+      <tr data-page-node-id="fLZ5zlS1nhLfkrAVtxhN5x">
+        <td data-page-node-id="EnJDIfhEhTAGqp5De5Tfvs"><code data-page-node-id="7bEpm5YZs758msrZ2Lr9cQ">app.json</code> → <code data-page-node-id="aw9g5BSY3svcKljqB243kz">__usePrivacyCheck__</code></td>
+        <td data-page-node-id="1vfWo0NAPUidDLK5eeqW7x"><span style="color:var(--bad);text-decoration:line-through;opacity:.75" data-page-node-id="BNIcqFL3RFOV4SU3u9Ec81">false（本地调试用）</span>
+            <br data-page-node-id="OLtvgZzcQvnBQn20J66T1O">→ <span style="color:var(--ok);font-weight:600" data-page-node-id="sbMf3dOFBzOI0hdIExZFAk">true（提审必需）</span></td>
+      </tr>
+      <tr data-page-node-id="1CVzb10xMWi7Udaioizjwz">
+        <td data-page-node-id="GCHanni2Ar29vpIc6HbH35">隐私授权弹窗</td>
+        <td data-page-node-id="bw83tjH6wHphJUxk7KrxSY">新增 <code data-page-node-id="E0lSCHITTZo9yIDX0ndSww">pages/privacy/privacy</code>：半透明卡片，含「同意并继续」/
+            「不同意」与《用户隐私保护指引》全文入口</td>
+      </tr>
+      <tr data-page-node-id="4tCU5yQI39tjNPHsQTDbOa">
+        <td data-page-node-id="rCVPCxXcttGUt55lLSUFuR">全局授权接管</td>
+        <td data-page-node-id="zeBMKE6tNXHNy51b0Rzd2i"><code data-page-node-id="DXRxQi7FX8oUQAEQDZm0b8">app.js</code> 注册 <code data-page-node-id="SzmK454ikK7p7quE2vrzM1">wx.onNeedPrivacyAuthorization</code>，
+            任一隐私接口被调用前自动弹窗；用户左滑返回也会把授权请求消费掉，不会卡死</td>
+      </tr>
+      <tr data-page-node-id="cxC3AxFsipw41huHqbMuej">
+        <td data-page-node-id="fbiTFd6RhsgF1dX1zT16VF">版本号</td>
+        <td data-page-node-id="mynaivVg7W3fqPbpMQsQYg">0.9.5 → <b data-page-node-id="S6jcwubuGHXnv5luXk2LyO">0.9.6</b></td>
+      </tr>
+    </table>
+
+    <div class="bug" data-page-node-id="65mVVLHOOp40cy8gGouswg">
+      <b data-page-node-id="GmD2qksRs8VX2Bu7cM3lfI">为什么不能只改开关</b><br data-page-node-id="sBTjaJGftlWSPpp7KxaJKi">
+      开关一开，微信就不再自动放行隐私接口，而是要求用户先点「同意」。
+      如果只把开关改成 true、不做弹窗，头像、相册、剪贴板会<b data-page-node-id="OcUCYUnnGEAdtphJIl5M6Z">直接失败</b>，
+      表现就是「点了没反应」——正是之前修过的问题。所以两个必须一起上。
+    </div>
+  </div>
+
+  <div class="card" data-page-node-id="04l95m1kCaTR3jQ97Cltcv">
+    <h2 data-page-node-id="T7lxeqLAdXdszZCw3aim6y"><span class="num" data-page-node-id="675V4xFjGFMV8xGs3A54fq">2</span>你现在必须做的：去 mp 后台配置隐私指引</h2>
+    <div class="bug">
+      <b>⚠️ 路径已更正，请以《隐私指引填写指南.html》为准</b><br>
+      小程序<b>还没上线</b>时，「设置 → 服务内容声明」这个入口<b>不生效</b>
+      （填了不生效、页面一直是空白）。<br>
+      正确入口是：<b>管理 → 版本管理 → 提交代码审核 → 页面最底部的「用户隐私保护指引设置」</b>。<br>
+      下方表格里的权限名称也请改用官方准确措辞（如「收集你选中的照片或视频信息」而非「相册」），
+      逐项用途描述见《隐私指引填写指南.html》。
+    </div>
+    <div class="warn" data-page-node-id="SMLur6wDGAeHdHclnxsgru">
+      <b data-page-node-id="ytmo8akk6eQ7mbE12un3tQ">顺序很重要：</b>先在后台把《用户隐私保护指引》提交并<b data-page-node-id="vt25I7WyinqfGpfBcnzWVq">过审</b>，再提审小程序。
+      指引没过审就提审，会被直接驳回。
+    </div>
+    <ol class="step" data-page-node-id="uW8GDglHHtxybvDCoQLTF3">
+      <li data-page-node-id="xqWOjAvrzZB73PPUCL0cn8">打开 <b data-page-node-id="ow6CdLWyNuEsWRBaBOIH7J">mp.weixin.qq.com</b> → 登录 → 左侧「<b data-page-node-id="kQeDvc0rsC3H0hgy9gqdFg">设置</b>」→「<b data-page-node-id="OzP9Iy3FZBXNC702Fk2jBu">服务内容声明</b>」→
+          找到「<b data-page-node-id="Mhpm53qTZeEDuxRQjut1xN">用户隐私保护指引</b>」，点「<b data-page-node-id="VnmqLMhCi0BGIV3Ucb4WUP">更新</b>」。</li>
+      <li data-page-node-id="lyu0Py6OxBVJ3qMnpmBFrP">按下面这张表勾选（勾多了会被问，勾少了接口会失败，按实际来）：</li>
+    </ol>
+    <table data-page-node-id="EBBEO50gNLSkN7Tdb958He">
+      <tr data-page-node-id="GQ875U7W3ixZ2dbDNS6Nr4"><th style="width:30%" data-page-node-id="6YRYJ41LoL2C1UUazVXemP">要勾选的信息类型</th><th data-page-node-id="Y4E94tHVXJjGAiHxEkoQfU">原因（代码里用到）</th></tr>
+      <tr data-page-node-id="litJFchHCbpQOHbawRXbGi"><td data-page-node-id="84BCZKDGTxEmhfkdncMk1v"><b data-page-node-id="w85bhn82RQZytEeFqlmcFd">相册</b></td><td data-page-node-id="ZBFAsL1HLeHzjIQYBxsFne"><code data-page-node-id="mF25QNbNmoKhOyrP92MPh2">wx.chooseMedia</code> / <code data-page-node-id="8jDmrbDynhjfimEVdwz5sO">wx.chooseImage</code>——「我」页从相册选头像</td></tr>
+      <tr data-page-node-id="ZrIkpyBbvHRbAF8cyepoMb"><td data-page-node-id="xqp2xYIdVLJgDi07JW2ajf"><b data-page-node-id="RM1XVht6nmCcCs4RVcXnoE">摄像头</b></td><td data-page-node-id="Hy40ouFMqd8inVNIZbtINE"><code data-page-node-id="CcaJbJJ5IHMab1kEHYfQde">chooseMedia</code> 的 <code data-page-node-id="X0lZXxCzylsTlx2RDxuw5A">sourceType</code> 含 <code data-page-node-id="Jwm0Cu9WXyJflYgWIAQcrl">camera</code>（拍照当头像）</td></tr>
+      <tr data-page-node-id="0OgM9SH8f5jAt0h0DDyGEm"><td data-page-node-id="NuBFbk3f7lCCWul7aWzuCP"><b data-page-node-id="EGEWhgzjW5EWbJmitaPP9C">微信头像、昵称</b></td><td data-page-node-id="wmX4mrfg6vVnYfzzEor4Z6"><code data-page-node-id="o6XeLYhD5PPMM363P2lQqS">&lt;button open-type="chooseAvatar"&gt;</code> 和
+          <code data-page-node-id="ZEOFzo5shACtGJ98wyFMou">&lt;input type="nickname"&gt;</code></td></tr>
+      <tr data-page-node-id="8vRRMcftXqIsbX5QKOeI3W"><td data-page-node-id="t6QuaQzUCZEw6jYuMm14rz"><b data-page-node-id="Pasb3teTPYsr6iFJLguEJH">手机号</b></td><td data-page-node-id="pqZQFD16BEnJyrr1rsqB0E"><code data-page-node-id="gFB4VpYav4JO0FEr0HUs4j">&lt;button open-type="getPhoneNumber"&gt;</code>（登录页）</td></tr>
+      <tr data-page-node-id="2PhRhbczOqrmRjCuFui23W"><td data-page-node-id="902llotCeG8etyzNMB5Rkw"><b data-page-node-id="4WbldJkw4fYIPSxx9KE8cE">剪贴板</b></td><td data-page-node-id="rPgdyM7p3KkTiiViYLdLub"><code data-page-node-id="vpC5ThHVDtxZjcRjSR8mwh">wx.getClipboardData</code>——影子粘贴聊天记录</td></tr>
+      <tr data-page-node-id="Qe2YOfNUfA2hUQndZ95jXN"><td data-page-node-id="QU2ZBORfW7HlftpLPasHnU"><b data-page-node-id="ecgG1ZifHPC8B2RoDg5Rkt">用户选择的文件</b></td><td data-page-node-id="ZHLrdMldCuAzxHYXY0lubi"><code data-page-node-id="lWiqWF05IxYGupfMaF9cRc">wx.chooseMessageFile</code>——影子从聊天里选文件（降级入口）</td></tr>
+    </table>
+    <div class="note" data-page-node-id="xbvhYNNaPJHlCEflXwMHsw">
+      不需要勾：<b data-page-node-id="2LvLU6IwgVa1RmEITBcB0d">位置</b>、<b data-page-node-id="0gxRrXs5dOVqPKzcw18EVF">通讯录</b>、<b data-page-node-id="oUU2sCuDfYAht6r86GVqdB">微信运动</b>、<b data-page-node-id="QU17eCLOMVjvzvImmxQt49">蓝牙</b>、<b data-page-node-id="OKW3C2BclU3EUXwF0MJYBY">设备信息</b>——代码里都没用。
+    </div>
+    <ol class="step" start="3" data-page-node-id="f2O3qthJ5IyJHHU8kdNUg6">
+      <li data-page-node-id="OCXRkIk8VYsIBvvo20mtF4">提交后微信审核通常 <b data-page-node-id="3kXHoJdlrALNbMsPw1xYxZ">1～2 个工作日</b>。状态变成「已生效」再提审小程序。</li>
+      <li data-page-node-id="HxoZifIuIWfvyPEcdxa0uJ">提审前在开发者工具里重新编译，真机预览点一遍：换头像、选相册、影子粘贴——
+          应该先弹出这次新加的隐私弹窗，点同意后功能正常。</li>
+    </ol>
+  </div>
+
+  <div class="card" data-page-node-id="JEfSWsWYfHLMUTn3tzMKEW">
+    <h2 data-page-node-id="GyIdx59LMRt1ZIBkhZmfrE"><span class="num" data-page-node-id="Tx9ApklkhoenSbScrNXSkT">3</span>这段时间本地测试会怎样</h2>
+    <div class="note" data-page-node-id="YGlcAhFommUBnSsjwEZGg6">
+      指引还没过审时，开发者工具里调用这些接口会失败，页面会退回到已有的兜底提示
+      （比如「隐私指引未配置，先用相册选」）。<b data-page-node-id="dwiksNjG1s7AliBg7uHwxo">这不是 bug</b>，
+      等后台指引过审就恢复。想继续无障碍调试，临时把
+      <code data-page-node-id="o8L2AEDI5TyoegIqpa3wxl">app.json</code> 的开关改回 <code data-page-node-id="VFgNjVExIVeae72YSZYmIO">false</code> 即可，<b data-page-node-id="wrdFyHdOwhDPQ2U86rM9B8">提审前记得改回 true</b>。
+    </div>
+  </div>
+
+  <div class="card" data-page-node-id="U01Z1gZOl4L6HZG3D8tKOU">
+    <h2 data-page-node-id="vju0F8D6CLtUCSdsCZruWY"><span class="num" data-page-node-id="U8laW59X3xjEBLM4QQ3YCJ">4</span>测试情况</h2>
+    <p style="margin:0 0 10px" data-page-node-id="NtGdqs8mII0HFW5urar8Ot">全量套件连跑三遍，全部通过、无波动：</p>
+    <div data-page-node-id="GYJUI47fpaDqmqXwr53M7c">
+      <span class="chip" data-page-node-id="xLL9J0ec5XqhmpYUvf2KVH">平台合规审计 15</span>
+      <span class="chip" data-page-node-id="r7wd17kwMT5ejOhWqHEuZJ">静态审计 135</span>
+      <span class="chip" data-page-node-id="fxeWJb9X9BOEpfjeUZyzHh">端到端 135</span>
+      <span class="chip" data-page-node-id="fRigOBUinqIxeO4i54dfuI">集成 26</span>
+      <span class="chip" data-page-node-id="B6j2OImlJVbysHFAgbIc4J">微信能力 94</span>
+      <span class="chip" data-page-node-id="tzFMYOB0awKTi6tO1induA">去重 48</span>
+      <span class="chip" data-page-node-id="9OImEAUvtSt1p5lHW5b4mD">AI 103</span>
+      <span class="chip" data-page-node-id="C9qgpQfosyBlEQUx7yDY85">不串台 130</span>
+    </div>
+    <div class="fix" data-page-node-id="X5PmpxHWZvPWVVMRP9LSz4">
+      平台合规审计第 6 项「隐私接口声明」此前是<b data-page-node-id="tz2HpsOj4FpfdJT9MukGob">未通过</b>（提示未开启校验），本版转绿：
+      已开启 <code data-page-node-id="k7jvVU9tNSloQov1cM4B7x">__usePrivacyCheck__</code>，覆盖 4 个隐私接口。
+    </div>
+    <div class="note" data-page-node-id="bD7ObXpfQqBpM5Xt0Y5X6v">
+      顺带修掉一个上一版的遗留：wx-test 里两条「尾巴必现」的旧断言，
+      在 v0.9.5 尾巴改成概率挂载后会随机失败。已改成 40 次采样断言，连跑 12 次全绿。
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

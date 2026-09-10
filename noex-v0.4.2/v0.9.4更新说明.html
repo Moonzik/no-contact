@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>断联日记 NOEX · v0.9.4 更新说明</title>
+<style>
+  :root{
+    --ink:#2b2620; --sub:#6b6154; --faint:#9b8c70; --line:#e8e0d0;
+    --card:#fffdf7; --bg:#faf7ef; --accent:#9a5d3a; --ok:#3f7d52;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.75;font-size:16px;}
+  .wrap{max-width:820px;margin:0 auto;padding:48px 24px 80px;}
+  h1{font-size:30px;margin:0 0 6px;letter-spacing:1px;}
+  .ver{color:var(--faint);font-size:15px;margin-bottom:36px;}
+  h2{font-size:21px;margin:44px 0 14px;padding-left:12px;border-left:5px solid var(--accent);}
+  h3{font-size:17px;margin:26px 0 10px;color:var(--sub);}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;
+    padding:22px 24px;margin:16px 0;}
+  .lead{background:#fff;border:1px solid var(--line);border-left:5px solid var(--ok);
+    border-radius:14px;padding:18px 22px;margin:20px 0;}
+  code{background:#f2ece0;padding:2px 7px;border-radius:5px;font-size:14px;
+    font-family:Consolas,Monaco,monospace;}
+  pre{background:#f2ece0;padding:14px 16px;border-radius:10px;overflow-x:auto;
+    font-size:13.5px;line-height:1.7;font-family:Consolas,Monaco,monospace;}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:15px;}
+  th,td{border:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:top;}
+  th{background:#f4eee1;font-weight:600;}
+  .chat{display:flex;flex-direction:column;gap:12px;margin:16px 0;}
+  .row{display:flex;gap:10px;align-items:flex-start;}
+  .who{flex:none;width:52px;font-size:13px;color:var(--faint);padding-top:6px;}
+  .bub{max-width:100%;padding:12px 16px;border-radius:14px;font-size:15px;}
+  .me{background:var(--ink);color:#faf9f4;border-bottom-right-radius:4px;}
+  .bot{background:#fffdf7;border:1px solid var(--line);border-bottom-left-radius:4px;}
+  .cmp{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0;}
+  @media(max-width:640px){.cmp{grid-template-columns:1fr;}}
+  .box{border-radius:14px;padding:16px 18px;font-size:14.5px;}
+  .bad{background:#fdf3f1;border:1px solid #f0d5ce;}
+  .good{background:#f1f8f2;border:1px solid #cfe4d5;}
+  .tag{display:inline-block;font-size:12px;padding:2px 9px;border-radius:20px;
+    margin-bottom:8px;letter-spacing:.5px;}
+  .t-bad{background:#f6ded9;color:#a34429;}
+  .t-good{background:#d8ecdd;color:#2f6b41;}
+  ul{padding-left:22px;margin:10px 0;}
+  li{margin:6px 0;}
+  .note{background:#fff8e8;border:1px solid #f0e0b8;border-radius:12px;
+    padding:14px 18px;font-size:14.5px;margin:16px 0;}
+  .foot{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);
+    color:var(--faint);font-size:13.5px;text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>v0.9.4 更新说明</h1>
+  <div class="ver">断联日记 NOEX · 2026-09-10 · 测试 532 项全过</div>
+
+  <div class="lead">
+    <b>这次解决的是同一件事：别再硬把话题拽回前任。</b><br>
+    小白加了「话题层」——你说加班就聊加班，说吃饭就聊吃饭；影子的聊天记录导入改成了
+    「复制文字」而不是「选文件」，并且终于能认出手机复制出来的格式。
+  </div>
+
+  <h2>一、小白：聊什么接什么</h2>
+
+  <p>
+    之前小白不智能的根因不只是 AI 提示词——<b>本地规则引擎本身就没有"话题"这个概念</b>。
+    只有「想念 / 想联系 / 难过 / 失眠…」这几个情绪意图，其余全部落进一句泛泛的兜底话。
+    所以你聊加班、聊晚饭、聊猫，得到的还是「慢慢说，不着急」这种哪儿都能用的句子。
+  </p>
+
+  <p>现在中间加了一层<b>日常话题识别</b>，覆盖最常见的 11 类：</p>
+
+  <table>
+    <tr><th>话题</th><th>你会这么说</th><th style="width:38%">小白会这样接（温柔档）</th></tr>
+    <tr><td>吃饭</td><td>晚饭吃什么 / 好饿 / 点了外卖</td><td>晚饭打算吃什么？别又随便对付一口。</td></tr>
+    <tr><td>工作</td><td>加班 / 老板 / 开会 / 想辞职</td><td>别把公司的火带回家，下班那一刻起时间就是你的。</td></tr>
+    <tr><td>学习</td><td>考试 / 论文 / 考研 / 作业</td><td>学到这个点，脑子要休息的，先睡，明天再战。</td></tr>
+    <tr><td>犯困</td><td>好困 / 起不来 / 赖床</td><td>困就去睡，别撑着。我又不会跑。</td></tr>
+    <tr><td>剧/歌/游戏</td><td>追剧 / 听歌 / 打游戏 / 刷到</td><td>看到哪了？有没有哪个情节把你气到了。</td></tr>
+    <tr><td>出门</td><td>散步 / 堵车 / 地铁 / 旅行</td><td>到家了吗？路上累不累。</td></tr>
+    <tr><td>猫狗</td><td>猫 / 狗 / 主子 / 毛孩子</td><td>它今天干了什么？给我讲讲。</td></tr>
+    <tr><td>身体</td><td>头疼 / 感冒 / 生理期 / 去医院</td><td>不舒服就别硬撑，该吃药吃药，该躺就躺。</td></tr>
+    <tr><td>亲友</td><td>朋友 / 爸妈 / 室友 / 聚会</td><td>朋友约你就去吧，别总一个人待着。</td></tr>
+    <tr><td>钱</td><td>房租 / 购物车 / 快递 / 打折</td><td>钱的事慢慢来，别一下把自己压太紧。</td></tr>
+    <tr><td>天气</td><td>下雨 / 好冷 / 降温 / 出太阳</td><td>降温了，别忘了加件衣服。</td></tr>
+  </table>
+
+  <p>每个话题都配了<b>温柔 / 毒舌两套</b>，毒舌档照样毒，但不提前任：</p>
+
+  <div class="cmp">
+    <div class="box bad">
+      <span class="tag t-bad">改前</span><br>
+      你：今天加班到十点，好累<br>
+      小白：嗯，我在听。你说的这些，<b>比反复想 TA 有意义多了</b>。
+    </div>
+    <div class="box good">
+      <span class="tag t-good">改后</span><br>
+      你：今天加班到十点，好累<br>
+      小白：别把公司的火带回家，下班那一刻起时间就是你的。今天辛苦你了，累了就歇会儿。
+    </div>
+  </div>
+
+  <h3>顺手修掉的两个毛病</h3>
+  <ul>
+    <li><b>撒娇人格</b>的尾巴以前通篇是「不许再提 TA」「TA 不会回的，我会」——聊晚饭也被拽回去。现在也分两档：只有聊到断联/情绪才用那池，日常改成黏人爱吃醋但不提 TA。</li>
+    <li><b>同一句说两遍</b>：主句池和尾巴池有交集，会抽到一模一样的一句（"我不催你，但你最好别在这儿耗一晚上"出现过两次）。加了去重重摇，实测重复率从可感知降到 0.3%。</li>
+  </ul>
+
+  <h2>二、影子：聊天记录「复制文字」而不是「选文件」</h2>
+
+  <div class="note">
+    <b>先说一句实话：</b>微信<b>不允许</b>任何小程序直接读取你的聊天记录，所以不存在「点一下自动导入聊天」这种按钮。
+    能做到的最快路径就是——你在微信里复制，回到这里粘贴。这次把这条路修顺了。
+  </div>
+
+  <h3>① 解析器终于认得出手机复制的格式</h3>
+  <p>
+    这是最要命的一个 bug：手机微信「长按 → 多选 → 复制」出来的格式是
+    <code>张三：在干嘛</code>，<b>没有时间戳</b>。旧解析器只认带时间的两种格式，
+    所以说话人列表是空的 —— 表现就是「导入了但分析不出来」。
+  </p>
+  <p>现在三种格式都能正确分离说话人：</p>
+  <pre>① 手机复制（最常用）        ② 电脑导出三段式          ③ 名字+时间
+张三：今天加班吗            2024年1月1日 12:00         张三 2024-01-01 12:00
+我：加啊                    张三                        在干嘛
+张三：那你几点回            在干嘛                      我 2024-01-01 12:01
+                            我                          没干嘛
+                            没干嘛</pre>
+
+  <h3>② 界面改成复制优先</h3>
+  <ul>
+    <li>主按钮从「粘贴剪贴板」改成 <b>「粘贴我复制好的聊天记录」</b>，做成整行的主按钮</li>
+    <li><b>自动检测剪贴板</b>：一进设置页（或从微信切回来）就看一眼，如果发现里面有 3 行以上文字，直接弹出一条提示「剪贴板里有 N 行文字，是从微信复制的聊天记录吗？→ 点这里一键导入」</li>
+    <li>「从微信选文件」<b>降级</b>到折叠说明里的一行小字链接，不再当主入口</li>
+    <li>最短长度限制从 20 字放宽到 8 字（复制两三条短消息也能过）</li>
+  </ul>
+
+  <h2>三、登录：微信头像 + 昵称 + 手机号</h2>
+  <p>「我」页点登录后，走的是和其他小程序一样的流程：</p>
+  <pre>┌─────────────────────────┐
+│        微信一键登录       │
+│                          │
+│         ⬤  ← 正圆       │
+│      选微信头像           │
+│                          │
+│  ┌────────────────────┐  │
+│  │ 点这里填入微信昵称   │  │
+│  └────────────────────┘  │
+│  ┌──────────┐ ┌────────┐ │
+│  │ 手机号    │ │一键填写│ │
+│  └──────────┘ └────────┘ │
+│                          │
+│  ┌────────────────────┐  │
+│  │        登录         │  │
+│  └────────────────────┘  │
+└─────────────────────────┘</pre>
+  <ul>
+    <li><b>头像框锁死正圆</b>：外层固定正方形容器 + 内层图片绝对定位铺满（以前 button 会被撑成椭圆）</li>
+    <li><b>按钮文案</b>：没登录显示「登录」，已登录显示「保存」</li>
+    <li><b>手机号</b>：先试微信一键填写，拿不到就手填（可留空）</li>
+  </ul>
+  <div class="note">
+    <b>关于「一键填写手机号」：</b>微信要求<b>企业主体</b>小程序才能用，个人主体点了会失败。
+    失败时不会卡住，会提示手填。等哪天你换成企业主体，这个功能自动就亮了。
+  </div>
+
+  <h2>改动文件</h2>
+  <table>
+    <tr><th>文件</th><th>改了什么</th></tr>
+    <tr><td><code>utils/guardian.js</code></td><td>新增 11 类话题池（温柔/毒舌各一套）+ <code>detectTopic()</code>；撒娇尾巴分档；主句/尾巴去重重摇</td></tr>
+    <tr><td><code>utils/wechat.js</code></td><td>解析「名字：内容」同行格式 + 三段式导出格式；跳过纯时间行</td></tr>
+    <tr><td><code>pages/yingzi/*</code></td><td>导入区改复制优先；剪贴板自动检测提示条；选文件降级为折叠链接</td></tr>
+    <tr><td><code>pages/me/*</code></td><td>登录流程：正圆头像框 + 微信昵称 + 手机号一键填写；按钮「登录」</td></tr>
+    <tr><td><code>utils/user.js</code></td><td><code>phoneSupported()</code> / <code>fetchPhone()</code></td></tr>
+    <tr><td><code>cloudfunctions/noex-ai/index.js</code></td><td>新增 <code>action:'phone'</code>（用 code 换手机号）</td></tr>
+    <tr><td><code>app.js</code></td><td>版本 → <b>v0.9.4</b></td></tr>
+  </table>
+
+  <div class="foot">
+    改完点开发者工具的「编译」即可。测试：wx 94 · 集成 26 · e2e 135 · 静态 126 · 去重 48 · AI 103 = <b>532 项全过</b>
+  </div>
+
+</div>
+</body>
+</html>

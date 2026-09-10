@@ -76,7 +76,9 @@ PERSONAS.forEach((p) => {
   const rounds = 60;
   const r = runXiaobai(p, rounds);
   console.log(`  ${p}: ${rounds} 轮 → ${r.unique} 条不同 / 重复 ${r.dup} 次`);
-  check(`小白[${p}] 前 ${rounds} 轮零重复`, r.dup === 0);
+  /* v0.9.5：尾巴改成按概率挂之后，同一输入的可组合数下降，
+     60 轮里偶尔会撞一次 —— 允许 ≤1 次，超过就说明池子真的该扩了。 */
+  check(`小白[${p}] 前 ${rounds} 轮几乎无重复（≤1）`, r.dup <= 1, '重复 ' + r.dup + ' 次');
 });
 
 /* 极端：四种人格混着聊 400 句 */

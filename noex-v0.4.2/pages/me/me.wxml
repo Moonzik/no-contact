@@ -87,28 +87,30 @@
     <view class="sheet" catchtap="noop">
       <view class="h">{{logged ? '编辑资料' : '微信一键登录'}}</view>
 
-      <!-- 支持 chooseAvatar 的基础库：点一下直接拉取微信头像 -->
-      <block wx:if="{{avaSupported}}">
-        <button class="ava-pick" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar"
-                bindtap="onAvatarTap" binderror="onAvatarError" hover-class="none">
-          <image class="ava-pick-img" src="{{tmpAvatar}}" mode="aspectFill" wx:if="{{tmpAvatar}}" />
-          <view class="ava-pick-img ava-pick-ph" wx:else>选微信头像</view>
-        </button>
-      </block>
-      <!-- 低版本/隐私未授权时降级：从相册选，保证一定点得动 -->
-      <block wx:else>
-        <button class="ava-pick" bindtap="onPickAvatarAlbum" hover-class="none">
-          <image class="ava-pick-img" src="{{tmpAvatar}}" mode="aspectFill" wx:if="{{tmpAvatar}}" />
-          <view class="ava-pick-img ava-pick-ph" wx:else>选头像</view>
-        </button>
-      </block>
+      <!-- 头像：外层固定正方形 + 内层铺满，锁死正圆（以前 button 会被拉成椭圆） -->
+      <view class="ava-pick-wrap">
+        <block wx:if="{{avaSupported}}">
+          <button class="ava-pick" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar"
+                  bindtap="onAvatarTap" binderror="onAvatarError" hover-class="none">
+            <image class="ava-pick-img" src="{{tmpAvatar}}" mode="aspectFill" wx:if="{{tmpAvatar}}" />
+            <view class="ava-pick-img ava-pick-ph" wx:else>选微信头像</view>
+          </button>
+        </block>
+        <!-- 低版本/模拟器/隐私未授权时降级：从相册选，保证一定点得动 -->
+        <block wx:else>
+          <button class="ava-pick" bindtap="onPickAvatarAlbum" hover-class="none">
+            <image class="ava-pick-img" src="{{tmpAvatar}}" mode="aspectFill" wx:if="{{tmpAvatar}}" />
+            <view class="ava-pick-img ava-pick-ph" wx:else>选头像</view>
+          </button>
+        </block>
+      </view>
 
       <!-- 兜底入口：微信头像那颗按钮如果点不动（模拟器 / 隐私指引未配置 / 基础库问题），这里一定行 -->
       <view class="ava-alt" bindtap="onPickAvatarAlbum" hover-class="ava-alt-hover">
         {{devtools ? '模拟器里请用这个从相册选头像' : '选微信头像没反应？点这里从相册选'}}
       </view>
 
-      <!-- 支持 type="nickname" 的基础库：聚焦时微信自动带出昵称 -->
+      <!-- 昵称：支持 type="nickname" 的基础库，聚焦时微信自动带出昵称 -->
       <input wx:if="{{nickSupported}}" class="nick-input" type="nickname"
              value="{{tmpNick}}"
              placeholder="点这里填入微信昵称"
@@ -122,9 +124,24 @@
              maxlength="16"
              bindinput="onNickInput" />
 
-      <view class="tip">头像和昵称只保存在你自己的手机里，不会上传。</view>
+      <!-- 手机号：先给微信一键填写（需企业主体 + 云函数），拿不到就手填 -->
+      <view class="field-row">
+        <input class="phone-input" type="number"
+               value="{{tmpPhone}}"
+               placeholder="手机号（选填）"
+               placeholder-style="color:#b8b1a4"
+               maxlength="11"
+               bindinput="onPhoneInput" />
+        <button wx:if="{{phoneSupported}}" class="phone-btn" open-type="getPhoneNumber"
+                bindgetphonenumber="onGetPhoneNumber" hover-class="phone-btn-hover">一键填写</button>
+      </view>
+      <view class="phone-hint" wx:if="{{!phoneSupported}}">
+        当前小程序主体不支持自动读取手机号，请手动填写（可留空）
+      </view>
 
-      <button class="btn btn-primary" bindtap="onProfileSave">保存</button>
+      <view class="tip">头像、昵称和手机号只保存在你自己的手机里，不会上传。</view>
+
+      <button class="btn btn-primary" bindtap="onProfileSave">{{logged ? '保存' : '登录'}}</button>
       <button class="btn btn-ghost" style="margin-top:16rpx;" bindtap="onProfileClose">取消</button>
       <view class="logout-link" wx:if="{{logged}}" bindtap="onLogoutAsk">退出登录</view>
     </view>

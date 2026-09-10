@@ -150,9 +150,12 @@ for (let i = 0; i < 30; i++) {
 }
 check('sharp 30 次采样至少 1 次含毒舌尾巴（宽关键词，与 e2e 同步）', sharpHit);
 
-// tsun 含「才不是心疼你」
-const tsunReply = guardian.guardianReply('想 ta', 'tsun');
-check('tsun 含「才不是心疼你」', tsunReply.text.indexOf('才不是心疼你') > -1);
+// tsun 含「才不是心疼你」（v0.9.5：尾巴按概率挂，改 30 次采样）
+let tsunHit = false;
+for (let i = 0; i < 30; i++) {
+  if (guardian.guardianReply('想 ta', 'tsun').text.indexOf('才不是心疼你') > -1) { tsunHit = true; break; }
+}
+check('tsun 30 次采样至少 1 次含傲娇尾巴', tsunHit);
 
 // 空字符串 send 不应写入
 xiaobaiSend('   ');

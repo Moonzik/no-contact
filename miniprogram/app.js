@@ -4,17 +4,43 @@ const ai = require('./utils/ai.js');
 
 App({
   globalData: {
-    version: '0.9.3',  // 2026-09-10 ① 小白改成「正常 AI 聊天 + 性格」：聊什么接什么，不再句句把话题拽回 TA/断联，识别出意图后不再额外追加一段 ② 影子揭示只在用户起疑（你怎么越来越不像他了）时才弹，取消所有自动计时触发 ③ 头像上传：模拟器自动降级相册 + chooseAvatar 报错兜底 + 隐私校验临时关闭
+    version: '0.9.6',  // 2026-09-10 提审合规：__usePrivacyCheck__ 改回 true + 隐私授权弹窗（pages/privacy）
     name: '断联日记 NOEX',
-    build: 'chat-nature-v9.3',
+    build: 'privacy-on-v9.6',
     /* 从功能页点「去登录」过来时置 true，me 页 onShow 消费掉并展开登录卡 */
-    autoOpenLogin: false
+    autoOpenLogin: false,
+    /* 隐私授权：onNeedPrivacyAuthorization 触发时存下 resolve，由 privacy 页消费 */
+    privacyResolve: null
   },
 
   onLaunch() {
     // 跨天检查：挂机过午夜后回到 today 页时自动刷新
     storage.initSessionTimer();
+    this.initPrivacy();
     console.log('[断联日记] 启动, 版本', this.globalData.version, this.globalData.build);
+  },
+
+  /* v0.9.5：开启 __usePrivacyCheck__ 后，相册/头像/剪贴板等接口调用前
+     会先抛 onNeedPrivacyAuthorization。不接这个回调的话，接口会直接 fail，
+     用户看到的就是「点了没反应」。这里统一跳到隐私弹窗页，让用户点同意。 */
+  initPrivacy() {
+    if (typeof wx === 'undefined' || !wx.onNeedPrivacyAuthorization) return;
+    wx.onNeedPrivacyAuthorization((resolve) => {
+      this.globalData.privacyResolve = resolve;
+      const pages = (typeof getCurrentPages === 'function' && getCurrentPages()) || [];
+      const cur = pages[pages.length - 1];
+      if (cur && cur.route === 'pages/privacy/privacy') return;
+      wx.navigateTo({
+        url: '/pages/privacy/privacy',
+        fail: () => {
+          /* 页面栈满了之类的极端情况：直接放行，别把用户卡死 */
+          this.globalData.privacyResolve = null;
+          try {
+            resolve({ event: 'disagree' });
+          } catch (e) { /* ignore */ }
+        }
+      });
+    });
   },
 
   onShow() {}

@@ -83,7 +83,15 @@ console.log('\n[guardian]');
 
   const warm = guardian.guardianReply('今晚又睡不着', 'warm');
   check('warm 不再前置安慰（不含「嗯，我在。」前缀）', warm.text.indexOf('嗯，我在。') !== 0, warm.text);
-  check('warm 结尾温柔收尾（陪我/不急/听着/歇/哭）', /(我陪着你|你不用急|我听着呢|累了|不急|哭也没关系)/.test(warm.text), warm.text);
+  /* v0.9.5：尾巴改成概率挂载，单次必现的断言会 flaky → 改 40 次采样至少命中 1 次 */
+  let warmTail = false;
+  let warmSample = warm.text;
+  for (let i = 0; i < 40; i++) {
+    const r = guardian.guardianReply('今晚又睡不着', 'warm');
+    warmSample = r.text;
+    if (/(我陪着你|你不用急|我听着呢|累了|不急|哭也没关系)/.test(r.text)) { warmTail = true; break; }
+  }
+  check('warm 40 次采样至少 1 次温柔收尾（陪我/不急/听着/歇/哭）', warmTail, warmSample);
   check('warm reply 无 crisis', !warm.crisis);
 
   /* sharp 多次采样，base 是温柔的，毒舌在尾巴（8 个候选，约 12% 命中/次） */
@@ -97,11 +105,27 @@ console.log('\n[guardian]');
   check('sharp 20 次采样至少 1 次含毒舌尾巴', sharpHit, sharpSample);
 
   const tsun = guardian.guardianReply('想找他', 'tsun');
-  check('tsun 含「才不是心疼你」', tsun.text.indexOf('才不是心疼你呢') > -1, tsun.text);
+  /* v0.9.5：同 warm，概率尾巴 → 采样断言 */
+  let tsunTail = false;
+  let tsunSample = tsun.text;
+  for (let i = 0; i < 40; i++) {
+    const r = guardian.guardianReply('想找他', 'tsun');
+    tsunSample = r.text;
+    if (r.text.indexOf('才不是心疼你呢') > -1) { tsunTail = true; break; }
+  }
+  check('tsun 40 次采样至少 1 次含「才不是心疼你」', tsunTail, tsunSample);
 
   const spoil = guardian.guardianReply('想找他', 'spoil');
   // 关键词覆盖 spoil 池全部 7 条尾巴 → 断言确定性通过（此前漏了「只准想我/只能想我」2 条，~29% flaky）
-  check('spoil 含吃醋 / 争宠', /(我才是|先看我|想我吗|吃醋|小宝贝|只准想我|只能想我)/.test(spoil.text), spoil.text);
+  /* v0.9.5：同上，改采样 */
+  let spoilTail = false;
+  let spoilSample = spoil.text;
+  for (let i = 0; i < 40; i++) {
+    const r = guardian.guardianReply('想找他', 'spoil');
+    spoilSample = r.text;
+    if (/(我才是|先看我|想我吗|吃醋|小宝贝|只准想我|只能想我)/.test(r.text)) { spoilTail = true; break; }
+  }
+  check('spoil 40 次采样至少 1 次含吃醋 / 争宠', spoilTail, spoilSample);
 
   /* ── v0.8.1 接话：回复要对着用户这句话说，不是随便抽一句 ── */
   /* 「我」和「今天」都是口水词，会被逐层剥掉，剩下最有信息量的那截 */

@@ -63,7 +63,59 @@ function post(host, path, headers, body) {
   });
 }
 
+function get(host, path) {
+  return new Promise((resolve, reject) => {
+    const req = https.request(
+      { hostname: host, path: path, method: 'GET', timeout: 15000 },
+      (res) => {
+        let buf = '';
+        res.setEncoding('utf8');
+        res.on('data', (c) => (buf += c));
+        res.on('end', () => {
+          try { resolve(JSON.parse(buf)); } catch (e) { reject(new Error('bad json: ' + buf.slice(0, 200))); }
+        });
+      }
+    );
+    req.on('timeout', () => req.destroy(new Error('upstream timeout')));
+    req.on('error', reject);
+    req.end();
+  });
+}
+
+/* ── v0.9.3 · 手机号：把 getPhoneNumber 的 code 换成真实号码 ──
+   只有**企业主体**小程序才能拿到 code；个人主体点了会直接 fail，前端会提示手填。
+   需要两个环境变量：NOEX_APPID、NOEX_APPSECRET（mp 后台 → 开发管理 → 开发设置）。 */
+async function getPhone(code) {
+  const appid = process.env.NOEX_APPID || '';
+  const secret = process.env.NOEX_APPSECRET || '';
+  if (!appid || !secret) return { ok: false, error: 'NOEX_APPID / NOEX_APPSECRET 未配置', phone: '' };
+  try {
+    const tok = await get(
+      'api.weixin.qq.com',
+      '/cgi-bin/token?grant_type=client_credential&appid=' + appid + '&secret=' + secret
+    );
+    const accessToken = tok && tok.access_token;
+    if (!accessToken) return { ok: false, error: 'access_token 获取失败', phone: '' };
+    const r = await post(
+      'api.weixin.qq.com',
+      '/wxa/business/getuserphonenumber?access_token=' + accessToken,
+      {},
+      { code: code }
+    );
+    const info = r && r.phone_info;
+    if (info && info.phoneNumber) return { ok: true, phone: info.phoneNumber };
+    return { ok: false, error: 'getuserphonenumber 失败: ' + JSON.stringify(r).slice(0, 200), phone: '' };
+  } catch (e) {
+    return { ok: false, error: String((e && e.message) || e).slice(0, 200), phone: '' };
+  }
+}
+
 exports.main = async (event) => {
+  /* 手机号分支：不需要 AI Key */
+  if (event && event.action === 'phone') {
+    return getPhone(event.code);
+  }
+
   const apiKey = process.env.NOEX_AI_KEY || CONFIG.apiKey;
   const model = process.env.NOEX_AI_MODEL || CONFIG.model;
 

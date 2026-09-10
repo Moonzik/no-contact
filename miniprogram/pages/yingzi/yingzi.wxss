@@ -593,6 +593,39 @@
 }
 .btn-reveal-dismiss::after { content: none; }
 
+/* v0.9.4 · 导入区：主推「从微信复制文字」，把选文件降级到折叠说明里 */
+.clip-hint {
+  background: #f6f1e6;
+  border: 1rpx solid #e6dbc6;
+  border-radius: 20rpx;
+  padding: 20rpx 26rpx;
+  margin: 8rpx 0 20rpx;
+}
+.clip-hint-hover { background: #efe7d6; }
+.clip-hint-t {
+  font-size: 25rpx;
+  color: var(--ink);
+  line-height: 1.6;
+}
+.clip-hint-a {
+  margin-top: 8rpx;
+  font-size: 25rpx;
+  color: var(--accent, #9a5d3a);
+  font-weight: 600;
+}
+.paste-btn {
+  margin: 0;
+  flex: 1;
+  font-size: 28rpx;
+  padding: 22rpx 0;
+  border-radius: 999rpx;
+}
+.paste-btn::after { display: none; }
+.howto-line .link {
+  text-decoration: underline;
+  padding: 0 2rpx;
+}
+
 /* v0.9.0 · AI 开启时的知情提示 */
 .ai-note {
   font-size: 22rpx;

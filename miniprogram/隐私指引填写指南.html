@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>断联日记 NOEX · 隐私指引填写指南（照着点版）</title>
+<style>
+  :root{
+    --bg:#faf7f2; --card:#ffffff; --ink:#3a332b; --sub:#7a7064; --faint:#b0a798;
+    --line:#e8e0d4; --accent:#9a5d3a; --ok:#4a7c59; --bad:#b4453c; --chip:#f2ece1;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+       line-height:1.8;font-size:15px}
+  .wrap{max-width:800px;margin:0 auto;padding:40px 24px 80px}
+  h1{font-size:26px;margin:0 0 6px;letter-spacing:1px}
+  .sub{color:var(--sub);font-size:14px;margin-bottom:28px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+        padding:24px 26px;margin:20px 0}
+  h2{font-size:18px;margin:0 0 14px;display:flex;align-items:center;gap:10px}
+  .num{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;
+       font-size:14px;display:flex;align-items:center;justify-content:center;flex:none}
+  .bug{background:#fdf1ef;border-left:3px solid var(--bad);padding:12px 16px;
+       border-radius:0 8px 8px 0;margin:12px 0;font-size:14px}
+  .fix{background:#f0f6f1;border-left:3px solid var(--ok);padding:12px 16px;
+       border-radius:0 8px 8px 0;margin:12px 0;font-size:14px}
+  .warn{background:#fff8e8;border-left:3px solid #c9962f;padding:12px 16px;
+        border-radius:0 8px 8px 0;margin:12px 0;font-size:14px}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--sub);font-weight:600;font-size:13px}
+  code{background:var(--chip);padding:1px 6px;border-radius:4px;font-size:13px}
+  .note{color:var(--sub);font-size:13px;margin-top:10px}
+  ol.step,ul.step{margin:0;padding-left:22px}
+  ol.step li,ul.step li{margin:10px 0}
+  .copy{background:var(--chip);border-radius:8px;padding:10px 14px;font-size:14px;
+        margin:6px 0;border-left:3px solid var(--accent)}
+  .path{background:#2f2b25;color:#f0ebe2;border-radius:8px;padding:12px 16px;
+        font-size:14px;margin:10px 0;letter-spacing:.3px}
+  .path b{color:#e8c08a;font-weight:600}
+  .bad{color:var(--bad)}
+  .good{color:var(--ok);font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>隐私指引填写指南</h1>
+  <div class="sub">断联日记 NOEX v0.9.6 · 照着点就行 · 预计 15 分钟</div>
+
+  <div class="card">
+    <h2><span class="num">!</span>先看这个：两个入口，你只能用第二个</h2>
+    <p>微信有两条路可以填隐私指引，但<b>适用条件不一样</b>，选错了白填：</p>
+    <table>
+      <tr><th style="width:16%">入口</th><th style="width:40%">路径</th><th>适用条件</th></tr>
+      <tr>
+        <td><b>入口 1</b></td>
+        <td>mp 后台 → 左下角<b>头像</b> → 账号设置 → 服务内容声明 → 用户隐私保护指引 → 去完善</td>
+        <td class="bad"><b>只对已上线的小程序生效。</b>没上线的话填了不生效、页面还是空白</td>
+      </tr>
+      <tr>
+        <td><b>入口 2</b></td>
+        <td>mp 后台 → 管理 → 版本管理 → <b>提交代码审核</b> → 信息填写页面最底部</td>
+        <td class="good"><b>你走这条。</b>提审时填写，审核通过并发布后自动生效</td>
+      </tr>
+    </table>
+    <div class="warn">
+      <b>你的小程序还没上线，所以「设置 → 服务内容声明」那条路暂时没用。</b>
+      正确做法是在<b>提交代码审核的那一步</b>顺手把隐私指引填了——
+      微信会把代码扫描一遍，自动列出你用到的权限让你填。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">1</span>先把代码传到后台</h2>
+    <ol class="step">
+      <li>微信开发者工具打开项目，点顶部菜单 <code>工具 → 上传</code>
+          <div class="note">底部那个「上传」按钮在某些版本会被折叠，找不到就从菜单栏进。</div>
+      </li>
+      <li>填版本号和备注，比如 <code>0.9.6</code> / <code>隐私指引完善 + 授权弹窗</code>，确定。</li>
+      <li>上传完，去 <b>mp.weixin.qq.com</b> 登录 → <b>管理</b> → <b>版本管理</b>，
+          在开发版本里能看到刚传的这版。</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">2</span>提交审核时填隐私指引</h2>
+    <div class="path">
+      管理 → 版本管理 → 开发版本 → <b>提交审核</b> → 往下滚到最底部
+      →「<b>用户隐私保护指引设置</b>」一栏 → 选 <b>「采集用户隐私」</b>
+    </div>
+    <div class="fix">
+      微信会自动扫描你的代码，把用到的权限列成<b>必填项</b>。
+      下面这 6 项就是我们代码里实际用到的，照着勾、照着抄用途描述即可。
+      <b>用途描述不能笼统</b>（写「使用」「开发」会被驳回），要写清楚拿它干什么。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">3</span>勾选清单（可直接照抄）</h2>
+    <table>
+      <tr><th style="width:30%">官方权限名称（照这个勾）</th><th style="width:26%">我们为什么用</th><th>用途描述（复制进输入框）</th></tr>
+      <tr>
+        <td><b>收集你的昵称、头像</b></td>
+        <td>「我」页登录时选微信头像、填昵称</td>
+        <td><div class="copy">用于登录后在个人主页展示你的头像与昵称</div></td>
+      </tr>
+      <tr>
+        <td><b>收集你的手机号</b></td>
+        <td>登录流程里的手机号一栏</td>
+        <td><div class="copy">用于登录时完善账号信息、便于找回断联记录</div>
+          <div class="note">⚠️ 这个能力<b>只对企业主体开放</b>，个人主体点了会失败。
+          代码里已经做了手填兜底，不影响使用。平台如果列为必填就勾上。</div></td>
+      </tr>
+      <tr>
+        <td><b>收集你选中的照片或视频信息</b></td>
+        <td>「我」页「从相册选」头像</td>
+        <td><div class="copy">用于从相册选择图片并设置为个人头像</div></td>
+      </tr>
+      <tr>
+        <td><b>访问你的摄像头</b></td>
+        <td>选头像时可以现拍（代码里 sourceType 含 camera）</td>
+        <td><div class="copy">用于拍摄照片后设置为个人头像</div>
+          <div class="note">平台扫描出来要求填就勾；没要求可以不勾。</div></td>
+      </tr>
+      <tr>
+        <td><b>读取你的剪切板</b></td>
+        <td>影子功能：粘贴你复制的聊天记录</td>
+        <td><div class="copy">用于粘贴你从微信复制的聊天记录，生成影子对话</div>
+          <div class="note">这是核心功能，<b>必填</b>，不勾影子就用不了。</div></td>
+      </tr>
+      <tr>
+        <td><b>收集你选中的文件</b></td>
+        <td>影子的降级入口：从聊天里选文件</td>
+        <td><div class="copy">用于从聊天会话中选择聊天记录文件并导入</div></td>
+      </tr>
+    </table>
+    <div class="bug">
+      <b>不用勾：</b>位置信息、通讯录、微信运动、蓝牙、麦克风、日历、发票、车牌号——代码里都没用。<br>
+      多勾没用反而容易被审核追问。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">4</span>另外两个必填项，别漏</h2>
+    <ul class="step">
+      <li><b>联系方式邮箱</b>（必填）：填一个你能收信的邮箱，用户在小程序里行使删除权时会看到它。
+          没邮箱就现注册一个。</li>
+      <li><b>信息存储期限</b>：我们所有数据都存在<b>用户手机本地</b>，
+          没有服务器。建议填：
+          <div class="copy">仅存储于用户设备本地，卸载小程序即删除；开发者服务器不保存任何个人信息</div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">5</span>提交后</h2>
+    <ul class="step">
+      <li>隐私指引和代码审核<b>一起提交</b>，通常 1～2 个工作日出结果，会收到服务通知。</li>
+      <li>通过后<b>发布上线</b>，隐私指引同步生效。上线后就可以在
+          「头像 → 账号设置 → 服务内容声明」里查看和修改了（那时入口 1 才可用）。</li>
+      <li>上线后真机上走一遍：换头像 → 从相册选 → 影子粘贴，应该先弹出我们写的隐私弹窗，
+          点同意后功能正常。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">6</span>被驳回了怎么办</h2>
+    <table>
+      <tr><th style="width:34%">驳回理由</th><th>怎么改</th></tr>
+      <tr><td>用途描述不明确 / 过于简洁</td>
+          <td>按上面表格抄。别写「使用」「开发」「收集信息」这种词，要写清<b>拿它做哪个具体功能</b>。</td></tr>
+      <tr><td>多个权限填了同一句描述</td>
+          <td>每一项单独写，别复制粘贴同一句。</td></tr>
+      <tr><td>涉及 XX 接口，请完善隐私指引</td>
+          <td>平台扫描出新权限了，补上那一项即可。用<b>入口 2</b> 补，别去设置页。</td></tr>
+    </table>
+    <div class="note">
+      调试期如果看到接口报错 <code>112</code>（未声明该类型）或
+      <code>1025/1026</code>（未声明任何隐私类型），说明隐私指引还没配好，属正常。
+      想先无障碍调试，可临时把 <code>app.json</code> 的
+      <code>__usePrivacyCheck__</code> 改回 <code>false</code>，<b>提审前记得改回 true</b>。
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

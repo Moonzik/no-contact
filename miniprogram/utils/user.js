@@ -58,6 +58,35 @@ function avatarSupported() {
 }
 /* input type="nickname" 同上，低版本只能手填 */
 function nicknameSupported() { return canUse('input.type.nickname'); }
+/* button open-type="getPhoneNumber"：需要企业主体，个人主体点了会 fail */
+function phoneSupported() {
+  return canUse('button.open-type.getPhoneNumber');
+}
+
+/**
+ * 用 getPhoneNumber 拿到的 code 换真实手机号。
+ * 必须走云函数（需要 appid + secret），没配就回调空，调用方提示手填。
+ */
+function fetchPhone(code, cb) {
+  const done = (p) => { if (typeof cb === 'function') cb(p || ''); };
+  try {
+    if (typeof wx === 'undefined' || !wx.cloud || typeof wx.cloud.callFunction !== 'function') {
+      done('');
+      return;
+    }
+    wx.cloud.callFunction({
+      name: 'noex-ai',
+      data: { action: 'phone', code: code },
+      success(res) {
+        const r = res && res.result;
+        done(r && r.phone);
+      },
+      fail: () => done('')
+    });
+  } catch (e) {
+    done('');
+  }
+}
 
 /**
  * 软登录拦截：放在「真正要用的动作」里调用（发消息 / 打卡 / 写瓶子 / 导入 …）。
@@ -232,6 +261,8 @@ module.exports = {
   isDevtools,
   avatarSupported,
   nicknameSupported,
+  phoneSupported,
+  fetchPhone,
   userDir,
   saveAvatar,
   pickFromAlbum,

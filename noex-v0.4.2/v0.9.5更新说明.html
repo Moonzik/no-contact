@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>断联日记 NOEX · v0.9.5 更新说明</title>
+<style>
+  :root{
+    --bg:#faf7f2; --card:#ffffff; --ink:#3a332b; --sub:#7a7064; --faint:#b0a798;
+    --line:#e8e0d4; --accent:#9a5d3a; --ok:#4a7c59; --bad:#b4453c; --chip:#f2ece1;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:48rpx 0 0;background:var(--bg);color:var(--ink);
+       font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+       line-height:1.8;font-size:15px}
+  .wrap{max-width:760px;margin:0 auto;padding:0 24px 80px}
+  h1{font-size:26px;margin:40px 0 6px;letter-spacing:1px}
+  .sub{color:var(--sub);font-size:14px;margin-bottom:32px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+        padding:24px 26px;margin:20px 0}
+  h2{font-size:18px;margin:0 0 14px;display:flex;align-items:center;gap:10px}
+  .num{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;
+       font-size:14px;display:flex;align-items:center;justify-content:center;flex:none}
+  .bug{background:#fdf1ef;border-left:3px solid var(--bad);padding:12px 16px;
+       border-radius:0 8px 8px 0;margin:12px 0;font-size:14px}
+  .fix{background:#f0f6f1;border-left:3px solid var(--ok);padding:12px 16px;
+       border-radius:0 8px 8px 0;margin:12px 0;font-size:14px}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--sub);font-weight:600;font-size:13px}
+  .u{color:var(--sub)}
+  .a{color:var(--ink)}
+  .old{color:var(--bad);text-decoration:line-through;opacity:.75}
+  .new{color:var(--ok);font-weight:600}
+  .chip{display:inline-block;background:var(--chip);border-radius:999px;
+        padding:2px 12px;margin:3px 4px 3px 0;font-size:13px;color:var(--sub)}
+  code{background:var(--chip);padding:1px 6px;border-radius:4px;font-size:13px}
+  .note{color:var(--sub);font-size:13px;margin-top:10px}
+  .tail-yes{color:var(--accent)}
+  .tail-no{color:var(--faint)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>v0.9.5 · 说到什么回什么</h1>
+  <div class="sub">2026-09-10 · 修「想去旅游 → 外面冷」这类串台，以及人设不再每句都挂</div>
+
+  <div class="card">
+    <h2><span class="num">1</span>你报的问题</h2>
+    <div class="bug">
+      你：我想去旅游<br>
+      小白：外面冷的话多穿一件。
+    </div>
+    <p style="margin:8px 0 0">我复现后发现比这更糟 —— 同一句话还抽到过 <b>「堵车就听会儿歌，反正急也快不了」</b>，而「想去成都」连话题都没命中，掉进了兜底池。</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">2</span>根因：话题池粒度太粗</h2>
+    <p>之前只有 11 个大话题，「出门」这一类里<b>同时装着旅游、散步、堵车、回家</b>。抽到哪句全凭运气，所以聊旅游会拿到给堵车写的句子。</p>
+    <div class="fix">
+      新增<b>关键词钩子层</b>：命中具体词就直接给对应回应，绕开粗粒度话题池。共 <b>48 个具体场景</b>，温柔/毒舌各一套，命中多个词时取最长的那个（「出去玩」赢过「出去」）。
+    </div>
+    <div style="margin-top:14px">
+      <span class="chip">旅游</span><span class="chip">火锅</span><span class="chip">奶茶</span><span class="chip">外卖</span>
+      <span class="chip">加班</span><span class="chip">下班</span><span class="chip">辞职</span><span class="chip">老板</span>
+      <span class="chip">考试</span><span class="chip">论文</span><span class="chip">睡不着</span><span class="chip">起床</span>
+      <span class="chip">追剧</span><span class="chip">电影</span><span class="chip">听歌</span><span class="chip">打游戏</span>
+      <span class="chip">短视频</span><span class="chip">小说</span><span class="chip">猫</span><span class="chip">狗</span>
+      <span class="chip">感冒</span><span class="chip">头疼</span><span class="chip">房租</span><span class="chip">工资</span>
+      <span class="chip">快递</span><span class="chip">购物车</span><span class="chip">搬家</span><span class="chip">朋友</span>
+      <span class="chip">爸妈</span><span class="chip">室友</span><span class="chip">相亲</span><span class="chip">生日</span>
+      <span class="chip">下雨</span><span class="chip">下雪</span><span class="chip">好热</span><span class="chip">好冷</span>
+      <span class="chip">堵车</span><span class="chip">到家</span><span class="chip">散步</span><span class="chip">周末</span>
+      <span class="chip">周一</span><span class="chip">好忙</span><span class="chip">好累</span><span class="chip">无聊</span>
+      <span class="chip">开心</span><span class="chip">生气</span><span class="chip">做饭</span><span class="chip">地铁</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">3</span>改前 / 改后</h2>
+    <table>
+      <tr><th style="width:32%">你说</th><th style="width:34%">改前</th><th>改后（温柔人格）</th></tr>
+      <tr><td class="u">我想去旅游</td><td class="old">堵车就听会儿歌</td><td class="new">想去哪儿？有想好的地方吗。</td></tr>
+      <tr><td class="u">好想吃火锅啊</td><td class="old">（被当成想 TA）</td><td class="new">火锅好啊，一个人吃还是约人？</td></tr>
+      <tr><td class="u">外面下大雨</td><td class="old">天气好的时候人会松一点</td><td class="new">淋湿了吗？赶紧换件干的。</td></tr>
+      <tr><td class="u">今天加班到十点</td><td class="old">你今天有在好好过日子</td><td class="new">又加班？几点了，别熬太晚。</td></tr>
+      <tr><td class="u">刚下班，地铁挤</td><td class="old">（抽到散步或旅游）</td><td class="new">下班了就先歇着，公司的事明天再说。</td></tr>
+      <tr><td class="u">我妈又催我相亲</td><td class="old">（泛泛安慰）</td><td class="new">他们唠叨你，那是还想管你。</td></tr>
+    </table>
+    <div class="note">聊想念、想联系、难过、回忆这些，仍然走原来的情绪池 —— 没有被钩子抢走，已加断言锁住。</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">4</span>人设不再每句都挂</h2>
+    <p>以前每条回复 = 主句 + 尾巴，回回带一句「我陪着你」「别绕圈子说重点」，像盖章一样，读起来是在演角色。</p>
+    <div class="fix">
+      尾巴改成<b>按概率出现</b>：聊日常约 35%~50%，聊情绪时提高到 65%~80%（那种时候确实需要陪伴感）。<br>
+      人格本身没丢 —— 主句来自各人格专属的池子，毒舌还是毒舌，只是不再每句都补一句标签。
+    </div>
+    <table>
+      <tr><th style="width:30%">你说</th><th>连续三次的回复</th></tr>
+      <tr><td class="u">我想去旅游</td>
+        <td>
+          <div>想去哪儿？有想好的地方吗。</div>
+          <div>出去走走是对的，待在原地只会越想越多。<span class="tail-yes"> 我在听，你说。</span></div>
+          <div>想去哪儿？有想好的地方吗。</div>
+        </td></tr>
+      <tr><td class="u">好想吃火锅啊</td>
+        <td>
+          <div>火锅这种东西，一个人吃也理直气壮。</div>
+          <div>那就去吃。别等了，等着等着就没了。</div>
+          <div>火锅好啊，一个人吃还是约人？</div>
+        </td></tr>
+    </table>
+    <div class="note">有的带、有的不带，才像正常人说话。</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">5</span>顺手修的三处</h2>
+    <table>
+      <tr><th style="width:26%">问题</th><th>说明</th></tr>
+      <tr><td><b>「想 ta」识别不出想念</b></td>
+        <td>关键词表里写的是 <code>想ta</code>（无空格），你打「想 ta」带空格就匹配不上，整句掉进兜底池。现在三个识别函数都会先去掉空格再匹配。</td></tr>
+      <tr><td><b>硬假设细节</b></td>
+        <td>毒舌尾巴里有一句「又听见 TA 给你点的那条语音了？听过八百遍了」—— 你没说过的事它不该知道。已换成「凌晨的念头一条都别信，包括想 TA 的那条」。</td></tr>
+      <tr><td><b>傲娇尾巴串场</b></td>
+        <td>傲娇人格的尾巴句句「别哭了」「才不是心疼你」，聊火锅也来这句很怪。已分两档：聊情绪用原版，聊日常用新版（「别误会，我才不是在陪你」）。温柔人格同样分档，不再出现「哭也没关系」挂在旅游后面。</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">6</span>测试</h2>
+    <p>新增 <b>G 组 · 关键词钩子</b>：把 12 组「输入 → 必须出现的词 / 绝不能出现的词」写死，每种人格跑 40 次，要求贴题率 100%、跑题率 0%。防止以后再退化。</p>
+    <p style="margin:6px 0 0">全量回归：<b>nodrama 130 · wx 94 · 集成 26 · e2e 135 · 静态 126 · 去重 48 · AI 103</b>，连跑三遍无波动。</p>
+    <div class="note">改动文件：<code>utils/guardian.js</code>（钩子层 + 尾巴概率 + 日常版尾巴）、<code>utils/ai.js</code>（提示词补「不许串台」「不要每句挂人设」）、<code>app.js</code>（版本号）、三个测试文件。已同步到导入目录。</div>
+  </div>
+
+</div>
+</body>
+</html>

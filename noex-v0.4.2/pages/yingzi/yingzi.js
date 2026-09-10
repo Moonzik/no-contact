@@ -21,6 +21,9 @@ Page({
     shSel: '',
     shParseInfo: '',
     showHowto: false,
+    /* v0.9.4：一进设置页就看一眼剪贴板，有聊天记录就直接提示，省得用户不知道去哪复制 */
+    clipHint: '',
+    clipLines: 0,
 
     /* analyze */
     analyzeStep: 0,
@@ -81,6 +84,8 @@ Page({
     /* v0.8.0：影子页可以进来看，只有「创建 / 聊天」才要登录 */
     this.setData({ aiOn: ai.isEnabled() });
     this.refresh();
+    /* v0.9.4：切回来时再看一眼剪贴板（用户很可能是刚去微信复制完） */
+    if (this.data.mode === 'setup') this.autoCheckClipboard();
   },
 
   onUnload() {
@@ -139,6 +144,7 @@ Page({
       shSel: '',
       shParseInfo: ''
     });
+    this.autoCheckClipboard();
   },
 
   onNameInput(e) {
@@ -179,6 +185,31 @@ Page({
   },
 
   /* 从剪贴板导入——最顺手的路径：在微信里复制好，回来点一下 */
+  /* v0.9.4 · 自动看一眼剪贴板：如果里面像聊天记录（≥3 行 / ≥30 字），
+     就在页面上直接提示「点这里导入」，用户不用猜按钮在哪。
+     拿不到就静默失败，不打扰。 */
+  autoCheckClipboard() {
+    const self = this;
+    try {
+      if (typeof wx === 'undefined' || !wx.getClipboardData) return;
+      wx.getClipboardData({
+        success(res) {
+          const t = (res && res.data ? String(res.data) : '').trim();
+          const lines = t ? t.split(/\r?\n/).filter((x) => x.trim()) : [];
+          if (t.length >= 30 && lines.length >= 3) {
+            self.setData({
+              clipHint: '剪贴板里有 ' + lines.length + ' 行文字，是从微信复制的聊天记录吗？',
+              clipLines: lines.length
+            });
+          } else {
+            self.setData({ clipHint: '', clipLines: 0 });
+          }
+        },
+        fail() { /* 静默 */ }
+      });
+    } catch (e) { /* 静默 */ }
+  },
+
   onPasteClipboard() {
     if (user.requireLogin('导入聊天记录需要登录一次。')) return;
     const self = this;
@@ -190,10 +221,11 @@ Page({
           wx.showToast({ title: '剪贴板是空的', icon: 'none', duration: 2000 });
           return;
         }
-        if (t.length < 20) {
+        if (t.length < 8) {
           wx.showToast({ title: '复制的内容太短了', icon: 'none' });
           return;
         }
+        self.setData({ clipHint: '', clipLines: 0 });
         self.applyLogText(t, '剪贴板');
       },
       fail: (err) => {

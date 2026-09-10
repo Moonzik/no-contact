@@ -99,13 +99,48 @@ function parseWeChatLog(raw) {
     /^(.+?)\s+(\d{4}[-\/.年]\d{1,2}[-\/.月]\d{1,2}日?)\s*(上午|下午|晚上|凌晨)?\s*(\d{1,2}:\d{2}(?::\d{2})?)$/;
   const DAYSEP = /^[—\-–=﹉~*·]{3,}\s*\d{4}|^[—\-–=﹉~*·]{3,}$/;
 
+  /* v0.9.4 · 手机微信「长按 → 多选 → 复制」最常得到的格式：
+       张三：在干嘛
+       我：没干嘛
+     同一行、带冒号、没有时间戳。以前认不出来，说话人列表是空的 —— 用户就会以为「导入失败」。
+     另外这两种也要跳过：只含时间的行（「09:30」「2024年1月1日 12:00」）、链接。 */
+  const INLINE = /^["'“‘]?([^"'：:\n]{1,20}?)["'”’]?\s*[：:]\s*(.+)$/;
+  const TIMEONLY =
+    /^\[?\d{4}[-\/.年]\d{1,2}[-\/.月]\d{1,2}日?\s*(上午|下午|晚上|凌晨)?\s*\d{1,2}:\d{2}(:\d{2})?\]?$/;
+  const COLONTIME = /^\d{1,2}:\d{2}/;
+
   const msgs = [];
   let cur = null;
   let found = false;
 
+  /* v0.9.4 · 还有一种导出格式是「时间行 / 名字行 / 内容行」三段式，名字单独成行、没有时间戳：
+       2024年1月1日 12:00
+       张三
+       在干嘛
+     判断办法：这种短行会在全文里反复出现（因为同一个人说了很多句），
+     按出现次数≥2 且不是「嗯/好的」这类常见短回复，就能认出来。 */
+  const COMMON_SHORT = /^(嗯|哦|啊|好|好的|行|对|是的|是|不|没有|哈哈|哈哈哈|hehe|在吗|在|收到|知道|晚安|早安|谢谢|拜拜|？|\?|。)$/i;
+  const freq = {};
+  for (const ln of lines) {
+    if (ln.length < 1 || ln.length > 16) continue;
+    if (/[。？！？!?,，、；;]/.test(ln)) continue;
+    if (TIMEONLY.test(ln) || COLONTIME.test(ln)) continue;
+    if (/^\[[^\]]{1,10}\]$/.test(ln)) continue;
+    if (DAYSEP.test(ln)) continue;
+    if (COMMON_SHORT.test(ln)) continue;
+    freq[ln] = (freq[ln] || 0) + 1;
+  }
+  let candCount = 0;
+  for (const k in freq) if (freq[k] >= 2) candCount++;
+  const candidate = candCount > 0 && candCount <= 4
+    ? Object.keys(freq).filter((k) => freq[k] >= 2).reduce((o, k) => { o[k] = 1; return o; }, {})
+    : {};
+
   for (const ln of lines) {
     if (DAYSEP.test(ln)) continue;
     if (/^(以上是|以下是|系统消息)/.test(ln)) continue;
+    /* 纯时间行（手机复制时经常单独成行）直接丢掉，别当成消息内容 */
+    if (TIMEONLY.test(ln) || COLONTIME.test(ln)) continue;
 
     let m = ln.match(HEAD1);
     let name = null;
@@ -122,7 +157,26 @@ function parseWeChatLog(raw) {
       continue;
     }
 
+    /* 「名字：内容」同一行（手机复制的主力格式） */
+    const mi = ln.match(INLINE);
+    if (mi && !/https?:|www\./i.test(ln)) {
+      const nm = String(mi[1] || '').trim().replace(/^["'“‘]+|["'”’]+$/g, '');
+      const tx = String(mi[2] || '').trim();
+      if (nm && tx && !/[。？！？!?]/.test(nm)) {
+        found = true;
+        cur = { name: nm, text: tx };
+        msgs.push(cur);
+        continue;
+      }
+    }
+
     if (/^\[[^\]]{1,10}\]$/.test(ln)) continue; // [图片][语音] 等
+    if (candidate[ln]) {
+      found = true;
+      cur = { name: ln, text: '' };
+      msgs.push(cur);
+      continue;
+    }
     if (cur) {
       cur.text += (cur.text ? '\n' : '') + ln;
     } else {

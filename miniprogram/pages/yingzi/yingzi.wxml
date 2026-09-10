@@ -55,7 +55,7 @@
     <view class="card">
       <view class="h2">设置影子</view>
       <view class="p">
-        把和ta的聊天记录给我：可以从微信导出的文件直接导入，也可以复制粘贴（每行一条消息）。我会分析ta的说话习惯，生成一个「影子」。它只存在于你的手机里。
+        把和ta的聊天记录<text class="em">文字</text>给我——不是选文件，就是在微信里复制好、粘到下面。我会分析 ta 的说话习惯，生成一个「影子」。它只存在于你的手机里。
       </view>
       <view class="p ai-note" wx:if="{{aiOn}}">
         已开启 AI 增强：生成回复时，聊天记录里挑出的少量短句会经云函数中转给大模型，用于模仿 ta 的语气。关闭该能力则全程不联网。
@@ -71,14 +71,20 @@
           class="field-textarea"
           value="{{shLog}}"
           rows="7"
-          placeholder="把聊天记录粘贴到这里，每行一条…&#10;（最简单：在微信里长按消息 → 复制，粘进来就行）"
+          placeholder="把聊天记录粘贴到这里，每行一条…&#10;（在微信里长按消息 → 多选 → 复制，回来粘进这里）"
           placeholder-style="color:#b8b1a4"
           bindinput="onLogInput"
         ></textarea>
+
+        <!-- v0.9.4：剪贴板里有东西就直接告诉他，不用猜按钮在哪 -->
+        <view class="clip-hint" wx:if="{{clipHint}}" bindtap="onPasteClipboard" hover-class="clip-hint-hover">
+          <view class="clip-hint-t">{{clipHint}}</view>
+          <view class="clip-hint-a">点这里一键导入 →</view>
+        </view>
+
         <view class="file-row">
-          <button class="btn-ghost file-btn" bindtap="onPasteClipboard">粘贴剪贴板</button>
-          <button class="btn-ghost file-btn" bindtap="onPickFile">从微信选文件</button>
-          <text class="file-info">{{shFile || '推荐用「粘贴剪贴板」'}}</text>
+          <button class="btn-primary paste-btn" bindtap="onPasteClipboard">粘贴我复制好的聊天记录</button>
+          <text class="file-info">{{shFile || ''}}</text>
         </view>
         <view class="howto-toggle" bindtap="onToggleHowto">
           <text>{{showHowto ? '收起' : '怎么把聊天记录弄进来？'}}</text>
@@ -89,7 +95,12 @@
           <view class="howto-line">② <text class="em">长按一条消息 → 多选 → 勾选一堆 → 点「复制」</text></view>
           <view class="howto-line">③ 切回这里，点<text class="em">「粘贴剪贴板」</text>，完事</view>
           <view class="howto-line" style="margin-top:10rpx;color:var(--faint)">也可以直接在上面输入框里长按粘贴，一样。</view>
-          <view class="howto-line howto-warn" style="margin-top:14rpx">关于「从微信选文件」：它<text class="em">不能</text>自动读你的聊天——微信不允许任何小程序这么做。它只能选一个你事先发到微信里的 txt 文件，所以要先在电脑上导出、再发到「文件传输助手」，很麻烦，不如复制粘贴。</view>
+          <view class="howto-line howto-warn" style="margin-top:14rpx">微信<text class="em">不允许</text>任何小程序直接读取你的聊天记录，所以没有「一键导入聊天」这种按钮——只能你复制、我粘贴。上面这条路就是最快的了，一分钟搞定。</view>
+          <view class="howto-line" style="margin-top:14rpx">
+            <text style="color:var(--faint)">如果你事先在电脑上导出过 txt 文件并发给了「文件传输助手」，也可以</text>
+            <text class="em link" bindtap="onPickFile">从这里选那个文件</text>
+            <text style="color:var(--faint)">（不推荐，很绕）。</text>
+          </view>
         </view>
         <block wx:if="{{shSpeakers.length > 0}}">
           <view class="speakers">文件里检测到 {{shSpeakers.length - 1}} 位说话人，分析谁的消息？</view>

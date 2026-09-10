@@ -1,0 +1,81 @@
+page {
+  background: transparent;
+}
+
+.p-mask {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(20, 18, 14, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 32rpx;
+  box-sizing: border-box;
+}
+
+.p-card {
+  width: 100%;
+  max-width: 600rpx;
+  background: #faf9f4;
+  border-radius: 28rpx;
+  padding: 40rpx 36rpx 28rpx;
+  box-sizing: border-box;
+  box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.18);
+}
+
+.p-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #26231e;
+  text-align: center;
+  margin-bottom: 24rpx;
+}
+
+.p-body {
+  font-size: 28rpx;
+  line-height: 1.7;
+  color: #3d3931;
+}
+
+.p-link {
+  color: #8a6f4e;
+  text-decoration: underline;
+}
+
+.p-note {
+  margin-top: 18rpx;
+  font-size: 25rpx;
+  line-height: 1.65;
+  color: #8a8478;
+}
+
+.p-btn {
+  margin-top: 24rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: 44rpx;
+  font-size: 30rpx;
+  border: none;
+}
+
+.p-btn::after {
+  border: none;
+}
+
+.p-btn-main {
+  background: #26231e;
+  color: #faf9f4;
+  font-weight: 600;
+}
+
+.p-btn-ghost {
+  background: transparent;
+  color: #8a8478;
+  font-size: 27rpx;
+  height: 72rpx;
+  line-height: 72rpx;
+  margin-top: 8rpx;
+}
