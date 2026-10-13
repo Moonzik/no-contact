@@ -5,9 +5,11 @@ const vm = require('vm');
 
 const ROOT = path.resolve(__dirname, '..');
 const utilsSrc = {};
-/* v0.9.0：新增 voiceprint / ai-config / ai（ai 依赖前两者，顺序不能反） */
+/* v0.9.0：新增 voiceprint / ai-config / ai（ai 依赖前两者，顺序不能反）
+   v0.9.13：新增 config / notify（notify 依赖 config，顺序同样不能反）
+   v0.9.14：新增 errlog（me 页 require 了它，不登记的话 me 页 refresh 直接崩） */
 ['storage', 'util', 'guardian', 'shadow', 'wechat', 'user', 'quotes',
- 'voiceprint', 'ai-config', 'ai'].forEach((m) => {
+ 'voiceprint', 'ai-config', 'ai', 'config', 'notify', 'errlog'].forEach((m) => {
   utilsSrc[m] = fs.readFileSync(path.join(ROOT, 'utils', m + '.js'), 'utf8');
 });
 
@@ -120,6 +122,9 @@ loadUtil('quotes');   /* v0.7.0 首页每日一句 */
 loadUtil('voiceprint'); /* v0.9.0 影子语言指纹 */
 loadUtil('ai-config');
 loadUtil('ai');         /* v0.9.0 AI 智能体（默认 off，测试里不联网） */
+loadUtil('config');     /* v0.9.13 广告位 ID / 订阅消息模板 ID（默认空） */
+loadUtil('notify');     /* v0.9.13 打卡提醒（依赖 config） */
+loadUtil('errlog');     /* v0.9.14 本地异常日志（无依赖，me 页要用） */
 
 const loadedPages = {};
 function loadPage(name) {
@@ -296,7 +301,10 @@ console.log('\n========== yingzi ==========');
   yz.onChatInput({ detail: { value: '想你' } });
   yz.onChatSend();
   check('onChatSend me 消息进入 msgs', yz.data.msgs.some(m => m.role === 'me' && m.text === '想你'));
-  check('onChatSend 后 ai 回复已生成', yz.data.msgs.some(m => m.role === 'ai' && m.text.length > 0));
+  /* v0.9.16：取消了写死的开场白「……嗯。」之后，这条断言露出了真面目——
+     以前它其实是被那句开场白"蒙对"的。影子是纯智能体，AI 没开启时
+     **必须不伪造任何 ai 回复**，只留系统说明。 */
+  check('AI 未开启时不伪造 ai 回复', !yz.data.msgs.some(m => m.role === 'ai'));
 
   yz.onSessionEndChat();
   check('onSessionEndChat 回 view', yz.data.mode === 'view');
@@ -608,7 +616,9 @@ console.log('\n========== 边界场景 ==========');
   check('进入 chat 模式', yz.data.mode === 'chat');
   yz.onShow(); /* 模拟切 tab 再回来 */
   check('切 tab 回来仍是 chat 模式', yz.data.mode === 'chat');
-  check('回来后消息列表还在', yz.data.msgs.length >= 2);
+  /* v0.9.16：开场只有一条中性系统说明（不再有写死的「……嗯。」），所以是 1 条 */
+  check('回来后消息列表还在', yz.data.msgs.length >= 1 && yz.data.msgs.some(m => m.role === 'sys'));
+  check('开场只有系统说明、没有写死的开场白', !yz.data.msgs.some(m => m.role === 'ai'));
 }
 
 /* 15. yingzi 已触发过洞察 → 手动按钮可再看（不误报「还不到时候」） */

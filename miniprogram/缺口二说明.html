@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NOEX · 缺口二说明（v0.9.13）</title>
+<style>
+  :root{
+    --bg:#faf9f4; --card:#fff; --ink:#26231e; --sub:#8f887b; --faint:#b8b1a4;
+    --line:#e9e4d8; --accent:#b5623c; --accent-soft:#f5ece6; --danger:#a5432e;
+    --serif:"Noto Serif SC","Source Han Serif SC","Songti SC","STSong",serif;
+    --sans:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.85;font-size:15px}
+  .wrap{max-width:880px;margin:0 auto;padding:56px 28px 96px}
+  h1{font-family:var(--serif);font-size:34px;letter-spacing:4px;margin:0 0 10px;font-weight:600}
+  .sub{color:var(--sub);font-size:14px;margin-bottom:6px}
+  .meta{color:var(--faint);font-size:13px;margin-bottom:44px}
+  h2{font-family:var(--serif);font-size:22px;letter-spacing:2px;margin:52px 0 18px;padding-bottom:10px;border-bottom:1px solid var(--line);font-weight:600}
+  h3{font-size:16px;margin:30px 0 10px;font-weight:600}
+  p{margin:10px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px 26px;margin:18px 0}
+  .card h3{margin-top:0}
+  .num{display:inline-block;width:26px;height:26px;line-height:26px;text-align:center;border-radius:50%;background:var(--accent);color:#fff;font-size:13px;margin-right:10px;text-indent:-1px}
+  ul{margin:10px 0;padding-left:22px}
+  li{margin:6px 0}
+  code{background:var(--accent-soft);border-radius:5px;padding:1px 6px;font-size:13px;font-family:Consolas,Monaco,monospace}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+  th,td{border-bottom:1px solid var(--line);padding:10px 8px;text-align:left;vertical-align:top}
+  th{color:var(--sub);font-weight:600;font-size:13px;letter-spacing:1px}
+  .do{background:var(--accent-soft);border-left:4px solid var(--accent);border-radius:0 14px 14px 0;padding:18px 22px;margin:20px 0}
+  .do b{color:var(--accent)}
+  .warn{background:#fdf6f2;border-left:4px solid var(--danger);border-radius:0 14px 14px 0;padding:18px 22px;margin:20px 0}
+  .warn b{color:var(--danger)}
+  .ok{color:#5c7a4a;font-weight:600}
+  .muted{color:var(--sub);font-size:14px}
+  .tag{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:2px 12px;font-size:12px;margin-left:8px;letter-spacing:1px}
+  .tag.off{background:#f0eee8;color:var(--faint)}
+  footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);color:var(--faint);font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>缺口二说明</h1>
+  <div class="sub">体验与留存六项：文字日记 · 备份还原 · 换断联对象 · 打卡提醒 · 留白瓶仪式 · 流量主广告位</div>
+  <div class="meta">NOEX v0.9.13（build <code>gaps2-v9.13</code>） · 2026-09-11 · 全量 12 套件 1136 项测试全绿</div>
+
+  <div class="do">
+    <b>一句话：六项里四项已经完全可用（日记、备份还原、换段、留白瓶仪式），两项需要你去做一次后台操作才会亮起来（打卡提醒要申请订阅消息模板、广告位要开通流量主）。</b>
+    没有后台配置的那两项，代码里做成了「不存在」而不是「假装能用」——点进去会如实告诉你还差什么，不会给你一个假的成功提示。
+  </div>
+
+  <h2>1 · 文字日记（今天页）<span class="tag">已可用</span></h2>
+  <div class="card">
+    <p>打卡卡片下面多了一张「写给自己」。每天写一句就够，最多 200 字。</p>
+    <ul>
+      <li><b>写完可以随时改</b>——同一天再写是覆盖，不会堆出两条</li>
+      <li><b>往期能回看</b>：卡片底部「往期 N 天」展开，倒序列出写过的话</li>
+      <li><b>日历上有点</b>：写过日记的日子，格子里会有一个小小的圆点，点一下就能看到那天写了什么</li>
+      <li><b>删掉今天</b>这个入口放在角落，不显眼但要找得到</li>
+    </ul>
+    <p class="muted">设计上的克制：日记卡片没有天数徽章、没有进度条——它不是打卡任务，是给自己留的痕迹。<br>
+    写日记需要先登录一次（和打卡、留白瓶同一个口径），你说的话仍然只在你手机里。</p>
+  </div>
+
+  <h2>2 · 备份还原（我 → 数据）<span class="tag">已可用</span></h2>
+  <div class="card">
+    <p>原来只能导出，现在能导回来了。换手机、重装小程序都不再等于数据清零。</p>
+    <p><b>怎么用：</b>我 → 导入备份 → 「从剪贴板导入」（把之前导出的那段 JSON 复制好）或「从聊天选文件」（备份存成了 .json / .txt）。</p>
+
+    <h3>刻意做成两步，不让人一键把数据冲掉</h3>
+    <ul>
+      <li><b>第一步只核对、不写库</b>：先告诉你这份备份里有什么（开始日、打卡次数、对话条数、留白瓶、日记天数、过往段数、是否含登录信息），确认无误再点「确认导入」</li>
+      <li><b>第二步才覆盖</b>，并且覆盖前自动给当前数据存一份快照</li>
+      <li>事后后悔：数据卡片里会多出「<b>撤销上次导入</b>」这一行，一键回到导入前</li>
+    </ul>
+    <p class="muted">认不出来的东西一律拒绝并说明原因（空剪贴板 / JSON 解析失败 / 结构不对 / 不是本小程序的备份），不会硬塞进去把现有数据弄脏。<br>
+    导入的是老版本备份也没关系：缺的新字段（日记、过往段、提醒状态）会在导入时自动补齐。</p>
+  </div>
+
+  <h2>3 · 换断联对象（我 → 开始新的一段）<span class="tag">已可用</span></h2>
+  <div class="card">
+    <p>以前只有「断联开始日」和「TA 的代号」两个字段，复发重启后没法干净地开新的一段。现在有明确的出口了。</p>
+    <table>
+      <tr><th>点「开始新的一段」之后</th><th>怎么处理</th></tr>
+      <tr><td>打卡天数 / 打卡次数 / 断联日历</td><td>从今天从零开始</td></tr>
+      <tr><td>TA 的代号</td><td>清空</td></tr>
+      <tr><td>影子（模仿对象）</td><td><b>清空</b>——他认的是具体的人，不换会认错人，得重新导入聊天记录</td></tr>
+      <tr><td>日记 / 留白瓶 / 和小白的对话</td><td><b>全部保留</b>——那些是你自己的东西，不属于某一个人</td></tr>
+      <tr><td>现在这一段</td><td>归档进「过往记录」，随时能回看（代号、起止日期、共几天、撑住几次、断过几次）</td></tr>
+    </table>
+    <p class="muted">过往记录最多留 20 段，只存摘要和日期，不存对话内容——避免占用手机存储。</p>
+  </div>
+
+  <h2>4 · 打卡提醒<span class="tag off">要你先申请模板</span></h2>
+  <div class="card">
+    <p>先说清楚一件事：<b>小程序没有任何「本地定时通知」能力</b>，微信不让小程序自己弹提醒。能把你叫回来打卡的官方通道只有一条——订阅消息：用户授权 → 云端按模板发一条。</p>
+    <p>代码里的客户端部分已经写好了（授权、记录订阅状态），但<b>缺一个模板 ID</b>，这个只能你去后台申请。</p>
+
+    <h3>你要做的</h3>
+    <ol>
+      <li>mp 后台 → <b>功能 → 订阅消息</b> → 选用模板（工具类目能选的模板有限，如果没有合适的，这项就先放着）</li>
+      <li>拿到模板 ID，填进 <code>utils/config.js</code> 的 <code>REMINDER_TMPL_ID</code></li>
+    </ol>
+    <p class="muted">提醒的门槛记一下：订阅消息是<b>一次授权一条</b>，发完要再授权。真要每天推，通常得让用户多点几次订阅，或者用云函数定时任务配合。<br>
+    在配好之前，点「每日提醒」会弹一段说明，并给一个土办法：把小程序添加到「我的小程序」，每天顺手往下拉。</p>
+  </div>
+
+  <h2>5 · 留白瓶仪式（封存 / 销毁）<span class="tag">已可用</span></h2>
+  <div class="card">
+    <p>留白瓶原来只能存和看，缺一个「结束」的动作。现在有三种。</p>
+    <ul>
+      <li><b>封存</b>：写完勾上「封存起来」，或长按旧的一条选封存。封上之后正文在列表里不显示，只留一句「封存中 · 2027 年 9 月 11 日打开」——这是自己给自己设的门，不是加密，但看不见就是看不见</li>
+      <li><b>提前打开</b>：封存中的条目长按可以提前开，会先问一句「提前打开就失去封存的意义了，确定吗？」</li>
+      <li><b>销毁</b>：长按选销毁，二次确认后从瓶子里删掉</li>
+    </ul>
+    <p class="muted">操作入口刻意做成<b>长按</b>而不是常驻按钮——销毁这种事越不容易误触越好。列表上方会显示「瓶子里 N 句 · 封着 M 句」。</p>
+  </div>
+
+  <h2>6 · 流量主广告位<span class="tag off">要你先开通流量主</span></h2>
+  <div class="card">
+    <p>广告位的代码位已经预留在今天页和留白瓶页底部，但 <code>utils/config.js</code> 里的 <code>AD_UNIT_ID</code> 是空的——<b>空着的时候整块不存在，不占位、不留白、不报错</b>。</p>
+    <p><b>开通路径：</b>小程序上线后 → mp 后台 → <b>推广 → 流量主</b>（个人主体也能开，门槛是累计独立访客 UV，以后台提示为准）→ 「广告位管理」新建一个 Banner 广告位 → 把 <code>adunit-</code> 开头的 ID 填进 <code>utils/config.js</code>。</p>
+    <p class="muted">提醒一句：这款产品的用户大多处在情绪低谷，广告出现太多会伤留存。建议先用最克制的位置（页面最底部、不遮挡任何功能），别加激励视频和插屏。<br>
+    另外，iOS 端小程序内不允许购买虚拟商品，但看广告不受影响。</p>
+  </div>
+
+  <h2>你要做的只有两件事（可做可不做）</h2>
+  <div class="do">
+    <p>1. <b>申请订阅消息模板</b> → 填进 <code>utils/config.js</code> 的 <code>REMINDER_TMPL_ID</code>，打卡提醒就活了。<span class="muted">（工具类目没有合适模板就先放着，不影响其它功能）</span></p>
+    <p>2. <b>上线后开通流量主</b> → 把广告位 ID 填进 <code>AD_UNIT_ID</code>，广告位自动出现。</p>
+    <p class="muted">其余四项（日记、备份还原、换段、留白瓶仪式）现在就能用，开发者工具点「编译」即可。云函数不用动，这次改的全是小程序端。</p>
+  </div>
+
+  <h2>技术侧（供对照，不看也行）</h2>
+  <table>
+    <tr><th>改动</th><th>说明</th></tr>
+    <tr><td><code>utils/storage.js</code></td><td>新增 <code>diary</code> / <code>segments</code> / <code>reminder</code> 字段与老数据自动补全；新增 <code>validateBackup</code> / <code>applyBackup</code> / <code>snapshotPrev</code> / <code>loadPrev</code> / <code>clearPrev</code>；日记 400 条、过往段 20 段封顶（防 1024KB 单键上限）</td></tr>
+    <tr><td><code>utils/util.js</code></td><td>新增 <code>addYears</code> / <code>mdd</code>；<code>calendarOf</code> 增加日记标记参数（用等长字符串比日期，不构造 Date，避开 iOS 解析坑）</td></tr>
+    <tr><td><code>utils/config.js</code> <span class="muted">（新）</span></td><td>两个待填 ID：<code>AD_UNIT_ID</code> / <code>REMINDER_TMPL_ID</code></td></tr>
+    <tr><td><code>utils/notify.js</code> <span class="muted">（新）</span></td><td>订阅消息客户端：<code>configured</code> / <code>supported</code> / <code>request</code>，未配置时直接返回 <code>off</code>，不伪造成功</td></tr>
+    <tr><td>今天页</td><td>日记卡片（原生 textarea 焦点中忽略 value 更新 → 重建清空的老坑同样处理）；日历新增 note 小点与「长按/点按回看」</td></tr>
+    <tr><td>我页</td><td>导入备份（剪贴板 + 选文件两条来源）、撤销导入、开始新的一段、过往记录、每日提醒</td></tr>
+    <tr><td>留白瓶页</td><td>封存勾选、长按操作菜单、封存中不渲染正文、瓶子统计</td></tr>
+    <tr><td>测试</td><td>新增第 12 套件 <code>_test/gap2-test.js</code>（168 项，含把页面方法挂到假实例上真跑一遍的行为测试）；<code>e2e-test.js</code> 的模块沙箱补上 config / notify</td></tr>
+  </table>
+
+  <div class="warn">
+    <b>一句安全说明：</b>导入备份是唯一可能覆盖用户数据的操作，所以流程是「读来源 → 校验并展示摘要 → 用户确认 → 落盘前自动快照」。快照只保留最近一次，用于「撤销上次导入」，不是第二份正式数据。
+  </div>
+
+  <footer>NOEX · 愿你断得干净，把时间留给自己</footer>
+</div>
+</body>
+</html>

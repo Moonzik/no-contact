@@ -9,9 +9,29 @@
 
 const EMOJI_RE = /[\uD83C-\uDBFF][\uDC00-\uDFFF]|[\u2600-\u27BF\u2B00-\u2BFF\uFE0F]/g;
 
-/* 语气词（句末或句中都能出现） */
-const TONE_WORDS = ['啊', '呀', '呢', '吧', '哦', '啦', '嘛', '哈', '嘿', '诶', '嗯',
-  '咯', '哒', '嗷', '嘞', '喔', '鸭', '惹', '呐', '噜', '嘞'];
+/* 语气词（句末或句中都能出现）
+   ⚠️ v0.9.16：不再收「哈」——「哈哈」已由 CATCHPHRASES 覆盖，
+   而单字「哈」在一句「哈哈哈哈」里会被重复计数，把普通人误判成"爱撒娇"。
+   同时去掉了原来重复写了两遍的「嘞」。
+
+   v0.9.16 起语气词加了**频率门槛**：偶尔蹦一个「啊」不算特点。
+   原因是「啊」「哦」「呢」「吧」在中文里本来就到处都有，
+   按出现次数排序必然把 TA 偶尔用的一个字顶到最前面，
+   画像里就会出现「语气词：嗯、啊、哦」这种莫名其妙的东西，
+   模型照着一写，影子就成了一嘴语气词的假人。 */
+const TONE_WORDS = ['啊', '呀', '呢', '吧', '哦', '啦', '嘛', '嘿', '诶', '嗯',
+  '咯', '哒', '嗷', '嘞', '喔', '鸭', '惹', '呐', '噜'];
+
+/* 语气词门槛：出现次数 / 消息条数
+   实测：真正常带语气词的人 ≥0.3；普通人 0.02~0.1。取 0.2 当分界线。
+   整体不达标 → 认定"这人不说语气词"，一个都不列，画像里改成明确禁令。 */
+const TONE_MIN_RATE = 0.2;
+/* 绝对次数门槛：比例是会被小样本骗到的——5 条消息里蹦出 1 个「啊」就是 0.2，
+   正好压线通过，于是"偶尔用了一次"被写成"TA 的习惯"。
+   所以再加一条：全文至少出现 2 次，才算得上习惯。 */
+const TONE_MIN_COUNT = 2;
+/* 单个语气词的门槛：平均每 6~7 条消息至少出现一次，才算 TA 的习惯。 */
+const TONE_ITEM_MIN_RATE = 0.15;
 
 /* 口头禅 / 高频短语候选 */
 const CATCHPHRASES = ['哈哈', '嘿嘿', '嗯嗯', '好好', '行吧', '好吧', '算了', '不是', '真的',
@@ -103,13 +123,21 @@ function buildVoicePrint(lines) {
     .sort((a, b) => emojiFreq[b] - emojiFreq[a])
     .slice(0, 6);
 
-  /* 语气词 */
+  /* 语气词：带频率门槛。中文里「啊」「哦」「呢」「吧」本来到处都是，
+     不做门槛的话它们必然霸占排行榜，把 TA 偶尔用的一个字变成"口头禅"。 */
   const tone = {};
+  let toneTotal = 0;
   TONE_WORDS.forEach((w) => {
     const c = count(joined, w);
-    if (c > 0) tone[w] = c;
+    if (c > 0) { tone[w] = c; toneTotal += c; }
   });
-  const toneTop = Object.keys(tone).sort((a, b) => tone[b] - tone[a]).slice(0, 4);
+  const toneRate = Math.round((toneTotal / n) * 100) / 100;
+  const toneTop = toneRate >= TONE_MIN_RATE && toneTotal >= TONE_MIN_COUNT
+    ? Object.keys(tone)
+        .filter((w) => tone[w] / n >= TONE_ITEM_MIN_RATE)
+        .sort((a, b) => tone[b] - tone[a])
+        .slice(0, 4)
+    : [];
 
   /* 口头禅 */
   const cp = {};
@@ -160,6 +188,7 @@ function buildVoicePrint(lines) {
     emojiRate: Math.round((emojiAll.length / n) * 100) / 100,
     emojiTop,
     toneTop,
+    toneRate,
     cpTop,
     slangTop,
     endPunct,
@@ -167,7 +196,7 @@ function buildVoicePrint(lines) {
     selfCall,
     hasRepeat,
     qRate,
-    samples: pickSamples(src, 6)
+    samples: pickSamples(src, 6, { toneLover: toneTop.length > 0 })
   };
 }
 
@@ -175,7 +204,7 @@ function emptyPrint() {
   return {
     count: 0, avgLen: 0, shortRate: 0, longRate: 0,
     emojiLove: false, emojiRate: 0, emojiTop: [],
-    toneTop: [], cpTop: [], slangTop: [],
+    toneTop: [], toneRate: 0, cpTop: [], slangTop: [],
     endPunct: { none: 1, period: 0, exclam: 0, question: 0, tilde: 0, ellipsis: 0 },
     address: '', selfCall: '', hasRepeat: false, qRate: 0,
     samples: []
@@ -186,8 +215,11 @@ function emptyPrint() {
  * 挑代表性原话当 few-shot 样本。
  * 标准：长度 4-24 字、有信息量、彼此不重复、尽量体现风格。
  */
-function pickSamples(src, n) {
+function pickSamples(src, n, opts) {
   const want = n || 6;
+  /* v0.9.16：只有 TA 真的爱用语气词时，才优先挑带语气词的句子当样本。
+     否则会把 TA 偶尔蹦的一个「啊」放大成"口头禅"，等于教影子撒娇。 */
+  const toneLover = !!(opts && opts.toneLover);
   const pool = (src || []).filter(function (s) {
     const t = String(s).trim();
     const len = t.replace(/\s/g, '').length;
@@ -198,7 +230,7 @@ function pickSamples(src, n) {
   /* 打分：能体现风格（含语气词/口头禅/emoji/标点习惯）的优先 */
   const scored = pool.map(function (t, i) {
     let score = 0;
-    if (/[啊呀呢吧哦啦嘛哈诶嗯咯哒嗷]/.test(t)) score += 2;
+    if (toneLover && /[啊呀呢吧哦啦嘛哈诶嗯咯哒嗷]/.test(t)) score += 2;
     if (/[?？！!~～]$/.test(t)) score += 1;
     if (EMOJI_RE.test(t)) score += 1;
     const len = t.replace(/\s/g, '').length;
@@ -255,8 +287,21 @@ function describe(vp) {
     L.push('· 不用 emoji。');
   }
 
-  /* 4. 语气词 */
-  if (vp.toneTop && vp.toneTop.length) L.push('· 语气词：' + vp.toneTop.join('、') + '。');
+  /* 4. 语气词 —— v0.9.16：没到门槛就明确下禁令，而不是"干脆不提"。
+     只写"TA 不带语气词"是不够的：模型会默认「聊天就该加个呀/啦」，
+     照样往上堆。必须写死一句"不许加"，影子才会干巴巴地像真人。
+
+     ⚠️ toneRate 是 v0.9.16 才有的字段。**老画像（升级前建的影子）没有它**，
+     所以这里用 `vp.toneRate >= TONE_MIN_RATE` 判断：undefined 比较为 false，
+     老画像一律走"不用语气词"分支——否则那些按旧口径统计出来的
+     toneTop（「嗯」「呀」「啦」）会继续生效，等于这次改动对老用户失效。 */
+  if (vp.toneRate >= TONE_MIN_RATE && vp.toneTop && vp.toneTop.length) {
+    L.push('· 高频语气词：' + vp.toneTop.join('、') +
+      '（这是 TA 真的习惯，可以自然带出来，但不要每句都挂）。');
+  } else {
+    L.push('· 不用语气词。「啊」「呀」「啦」「呢」「吧」「哦」「嘛」「嘿」「诶」「～」' +
+      '这些一个都不要加——不加语气词，才像 TA。');
+  }
 
   /* 5. 口头禅 */
   if (vp.cpTop && vp.cpTop.length) L.push('· 口头禅：' + vp.cpTop.join('、') + '。');
@@ -286,7 +331,12 @@ function summary(vp) {
   else if (vp.avgLen > 30) L.push('· 话比较多，会说一整段');
   else L.push('· 回复长短适中');
   if (vp.emojiTop && vp.emojiTop.length) L.push('· 会用 ' + vp.emojiTop.slice(0, 3).join(' '));
-  if (vp.toneTop && vp.toneTop.length) L.push('· 常带「' + vp.toneTop.slice(0, 3).join('」「') + '」');
+  /* 用户看到的摘要：只有真的到门槛才写（老画像缺 toneRate 一律不写）。
+     摘要里出现「常带「嗯」「呀」」是最容易被当成"莫名其妙"的一行，
+     因为这几个字在中文里本来就到处都是。 */
+  if (vp.toneRate >= TONE_MIN_RATE && vp.toneTop && vp.toneTop.length) {
+    L.push('· 说话爱带「' + vp.toneTop.slice(0, 3).join('」「') + '」');
+  }
   if (vp.cpTop && vp.cpTop.length) L.push('· 爱说「' + vp.cpTop.slice(0, 3).join('」「') + '」');
   if (vp.address) L.push('· 会叫你「' + vp.address + '」');
   if (vp.qRate >= 0.3) L.push('· 喜欢反问');

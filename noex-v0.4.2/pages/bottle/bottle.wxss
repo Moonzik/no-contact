@@ -51,3 +51,91 @@
   letter-spacing: 2rpx;
   margin-bottom: 8rpx;
 }
+
+/* ───────── v0.9.13 缺口二 · 留白瓶仪式 ─────────
+   封存 = 自己给自己设一道门。所以视觉上不能做得像"隐藏内容"，要做得像"封条"。 */
+.bottle-stat {
+  margin-top: 14rpx;
+  font-size: 24rpx;
+  color: var(--faint);
+  letter-spacing: 1rpx;
+}
+.seal-row {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 24rpx;
+}
+.seal-box {
+  width: 36rpx;
+  height: 36rpx;
+  flex-shrink: 0;
+  margin-right: 16rpx;
+  margin-top: 4rpx;
+  border: 2rpx solid var(--line);
+  border-radius: 10rpx;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  color: var(--bg);
+  background: transparent;
+}
+.seal-box.on {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.seal-label {
+  flex: 1;
+  font-size: 26rpx;
+  color: var(--sub);
+  line-height: 1.6;
+}
+.seal-tip {
+  font-size: 23rpx;
+  color: var(--faint);
+}
+.bottle-hint {
+  font-size: 23rpx;
+  color: var(--faint);
+  margin-bottom: 16rpx;
+  padding-left: 4rpx;
+}
+.bottle-item.locked {
+  background: var(--accent-soft);
+  border-color: var(--accent-soft);
+}
+.bottle-item.locked .bi-t {
+  color: var(--accent);
+}
+.bi-seal {
+  display: inline-block;
+  margin-left: 12rpx;
+  padding: 0 10rpx;
+  border-radius: 6rpx;
+  border: 1rpx solid var(--accent);
+  color: var(--accent);
+  font-size: 20rpx;
+  letter-spacing: 1rpx;
+  line-height: 30rpx;
+}
+.bi-locked {
+  font-size: 26rpx;
+  color: var(--accent);
+  line-height: 1.7;
+}
+.bi-state {
+  margin-top: 10rpx;
+  font-size: 23rpx;
+  color: var(--accent);
+}
+.bottle-foot {
+  margin-top: 40rpx;
+  text-align: center;
+  font-size: 23rpx;
+  color: var(--faint);
+  letter-spacing: 1rpx;
+}
+.ad-wrap {
+  margin-top: 40rpx;
+}

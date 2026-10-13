@@ -201,12 +201,19 @@ function step4b() {
   cfg.timeout = 1000;
   cloudShouldFail = false;
 
-  /* 云函数存在但内部报错（多半是没配 NOEX_AI_KEY） */
+  /* 云函数存在但内部报错。
+     v0.9.15：与 Key 有关的报错单独给 ai_key_missing —— 用户才知道要去配 Key，
+     而不是笼统一句「失败了」。其它上游报错仍是 cloud_error。 */
   cloudResult = { ok: false, error: 'NOEX_AI_KEY 未配置' };
   let e1 = null, t1 = 'unset';
   ai.shadowChat({ text: '在吗', profile: {}, affinity: 80, history: [] }, (e, t) => { e1 = e; t1 = t; });
   check('云函数报错 → 文本为 null', t1 === null, t1);
-  check('云函数报错 → code=cloud_error', e1 && e1.code === 'cloud_error', e1 && e1.code);
+  check('Key 未配置 → code=ai_key_missing', e1 && e1.code === 'ai_key_missing', e1 && e1.code);
+
+  cloudResult = { ok: false, error: 'HTTP 500: upstream boom' };
+  let e1b = null;
+  ai.shadowChat({ text: '在吗', profile: {}, affinity: 80, history: [] }, (e) => { e1b = e; });
+  check('其他云函数报错 → code=cloud_error', e1b && e1b.code === 'cloud_error', e1b && e1b.code);
 
   /* 云函数压根没部署 */
   cloudShouldFail = true;
@@ -379,6 +386,40 @@ function step7() {
     const tone = vp.buildVoicePrint(['好呀', '行吧', '是哦', '来啦']);
     check('语气词被提取', tone.toneTop.length > 0, JSON.stringify(tone.toneTop));
 
+    /* v0.9.16：语气词要有频率门槛。
+       以前只要出现一次就进画像，于是「啊」「哦」「呢」这些中文里到处都是的字
+       必然霸榜，介绍里就冒出「常说「嗯」「呀」「啦」」这种莫名其妙的东西，
+       喂给模型还会让它以为"TA 爱用语气词"，回一句加一个。 */
+    const plain = vp.buildVoicePrint([
+      '今天加班到十点', '明天上午要开会', '我先去吃饭了', '周末有安排吗',
+      '那个方案我改完了', '刚到家', '嗯这个我再想想', '好的我看看'
+    ]);
+    check('偶发一两个语气词 → 不算 TA 的特点', plain.toneTop.length === 0, JSON.stringify(plain.toneTop));
+    check('toneRate 低', plain.toneRate < 0.2, plain.toneRate);
+    check('describe 明确禁止加语气词', vp.describe(plain).indexOf('不用语气词') > -1);
+    check('describe 禁令点到具体字', /「啊」「呀」「啦」/.test(vp.describe(plain)));
+    check('summary 不列语气词', vp.summary(plain).indexOf('爱带') === -1, vp.summary(plain));
+
+    /* 小样本陷阱：5 条消息里蹦出 1 个「嗯」，比例正好 0.2 —— 纯按比例算就压线通过，
+       等于把"偶然用了一次"写成"TA 的习惯"。所以加了绝对次数门槛（≥2 次）。
+       这里刻意让 toneRate 达标、只靠次数把它拦下来。 */
+    const tiny = vp.buildVoicePrint(['在忙', '嗯', '晚点说', '知道了', '行']);
+    check('小样本里单次语气词 → toneRate 会达标（0.2）', tiny.toneRate >= 0.2, tiny.toneRate);
+    check('小样本里单次语气词 → 仍不算特点（次数门槛）', tiny.toneTop.length === 0, JSON.stringify(tiny.toneTop));
+    check('小样本也走禁令分支', vp.describe(tiny).indexOf('不用语气词') > -1);
+    check('小样本 summary 不写「爱带」', vp.summary(tiny).indexOf('爱带') === -1, vp.summary(tiny));
+
+    check('爱用语气词的人仍被识别', tone.toneTop.length > 0 && tone.toneRate >= 0.2, tone.toneRate);
+    check('爱用语气词的人 summary 会写出来', vp.summary(tone).indexOf('爱带') > -1, vp.summary(tone));
+    /* ⚠️ 升级前建的影子：画像存在手机里，没有 toneRate 字段。
+       必须保证这些老画像也走"不用语气词"，否则这次改动对老用户完全失效。 */
+    const legacy = { count: 30, avgLen: 12, emojiTop: [], emojiRate: 0, toneTop: ['嗯', '呀', '啦'],
+      cpTop: [], slangTop: [], endPunct: { none: 1 }, address: '', selfCall: '',
+      hasRepeat: false, qRate: 0.1, samples: [] };
+    check('老画像（无 toneRate）不列语气词', vp.describe(legacy).indexOf('高频语气词') === -1);
+    check('老画像 describe 走禁令', vp.describe(legacy).indexOf('不用语气词') > -1);
+    check('老画像 summary 不写语气词', vp.summary(legacy).indexOf('爱带') === -1, vp.summary(legacy));
+
     const q = vp.buildVoicePrint(['你去哪了？', '为什么呀？', '真的吗？']);
     check('问句率高', q.qRate >= 0.9, q.qRate);
 
@@ -461,6 +502,13 @@ function step8() {
     check('yingzi 画像含 voice 指纹', /voice\s*=\s*vp/.test(yz) || /legacy\.voice = vp/.test(yz));
     /* v0.9.10：发送后输入框必须真正清空（原生 textarea 焦点中忽略 value 更新） */
     check('yingzi 发送后重建输入框清空', /clearInputBox/.test(yz) && /taAlive/.test(yz));
+    /* v0.9.16：取消写死的语气词 */
+    const shjs = fs.readFileSync(path.join(ROOT, 'utils/shadow.js'), 'utf8');
+    check('yingzi 不再有写死的开场白「……嗯。」', yz.indexOf("text: '……嗯。'") === -1);
+    check('影子起疑的承认句不含语气词', shjs.indexOf('……嗯。被你发现') === -1);
+    check('影子画像过滤纯语气词口头禅', /TONE_ONLY/.test(shjs));
+    check('影子铁律默认禁语气词', /语气词默认一个都不加/.test(
+      fs.readFileSync(path.join(ROOT, 'utils/ai.js'), 'utf8')));
     const xbjs = fs.readFileSync(path.join(ROOT, 'pages/xiaobai/xiaobai.js'), 'utf8');
     const xbwxml = fs.readFileSync(path.join(ROOT, 'pages/xiaobai/xiaobai.wxml'), 'utf8');
     check('xiaobai 发送后重建输入框清空', /clearInputBox/.test(xbjs) && /taAlive/.test(xbjs) && /wx:if="\{\{taAlive\}\}"/.test(xbwxml));

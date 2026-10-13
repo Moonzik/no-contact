@@ -7,6 +7,10 @@ const ai = require('../../utils/ai.js');
 
 const CHIPS = ['我想ta了', '睡不着', '今天差点想联系ta', '我就是想说说'];
 
+/* 分享文案：中性，不出现情绪类字眼，避免替用户公开私事（原因见 today.js 注释） */
+const SHARE_TITLES = ['把时间留给自己', '今天也要好好过', '慢一点，也没关系'];
+const SHARE_IMG = '/images/agent.png';
+
 Page({
   data: {
     agentImg: '/images/agent.png',
@@ -24,6 +28,9 @@ Page({
     crisisText: '',
     /* v0.7.0：聊天区可视高度（px），0 = 交给 CSS 兜底 */
     winH: 0,
+    /* v0.9.14：使用说明的展开态。第一次进来自动展开一次，
+       用户点「收起」后被标记为看过，以后不再自动弹（见 onToggleHowto） */
+    showHowto: false,
     /* v0.7.0：scroll-view 滚动锚点（指向最后一条消息的 id） */
     anchor: ''
   },
@@ -44,6 +51,14 @@ Page({
   },
 
   onShow() {
+    /* v0.9.14：第一次进来把「怎么用」自动展开一次，让新用户先知道小白是干什么的、
+       上面那排语气是干嘛的。用户点过「收起」就算看过了，以后不再自动弹。 */
+    try {
+      const S = storage.load();
+      if (!S.xiaobaiHowtoSeen && !this.data.showHowto) {
+        this.setData({ showHowto: true });
+      }
+    } catch (e) { /* 读不到就不展开，不能因为说明把页面搞崩 */ }
     /* v0.8.0：聊天记录可以看，只有「发消息」才要登录 */
     this.refresh();
   },
@@ -115,6 +130,21 @@ Page({
     }
     this.refresh();
     this.scrollToBottom();
+  },
+
+  /* v0.9.14：展开 / 收起使用说明。
+     只有「用户主动收起」才写 xiaobaiHowtoSeen —— 光是自动展开不算看过，
+     万一他切了个 tab 就走了，下次进来还该再给一次。 */
+  onToggleHowto() {
+    const next = !this.data.showHowto;
+    this.setData({ showHowto: next });
+    if (!next) {
+      try {
+        const S = storage.load();
+        S.xiaobaiHowtoSeen = true;
+        storage.save(S);
+      } catch (e) { /* ignore */ }
+    }
   },
 
   onInput(e) {
@@ -251,5 +281,21 @@ Page({
     setTimeout(() => {
       this.setData({ anchor: 'm' + last._k });
     }, 30);
+  },
+
+  /* 分享文案同首页：刻意中性，别人从卡片上看不出这是什么产品（原因见 today.js 注释） */
+  onShareAppMessage() {
+    return {
+      title: SHARE_TITLES[Math.floor(Math.random() * SHARE_TITLES.length)],
+      path: '/pages/onboard/onboard',
+      imageUrl: SHARE_IMG
+    };
+  },
+
+  onShareTimeline() {
+    return {
+      title: SHARE_TITLES[Math.floor(Math.random() * SHARE_TITLES.length)],
+      imageUrl: SHARE_IMG
+    };
   }
 });

@@ -4,6 +4,7 @@ const util = require('../../utils/util.js');
 const guardian = require('../../utils/guardian.js');
 const user = require('../../utils/user.js');
 const quotes = require('../../utils/quotes.js');
+const cfg = require('../../utils/config.js');
 
 const QUOTES = {
   morning: ['早上好。新的一天还没有被任何情绪占用。', '晨光是最好 reset。先喝口水，我们慢慢来。'],
@@ -29,6 +30,17 @@ const DAILY_PRAISE = [
 
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
+/* 分享文案：刻意做到「看不出这是什么产品」。
+   这是断联日记——卡片上如果写着断联 / 前任 / 失恋，等于替用户向所有好友公开私事，
+   没人敢转。所以分享出去的文字和情绪、感情都不挂钩，图片用不带字的白狐狸。
+   分享路径指向引导页：老用户会被引导页自动送进首页，新用户看到完整介绍。 */
+const SHARE_TITLES = [
+  '把时间留给自己',
+  '今天也要好好过',
+  '慢一点，也没关系'
+];
+const SHARE_IMG = '/images/agent.png';
+
 Page({
   data: {
     day: 1,
@@ -49,12 +61,41 @@ Page({
     /* 鼓励弹层 */
     showEncourage: false,
     encourageDay: 0,
-    encourageText: ''
+    encourageText: '',
+    /* v0.9.12 · 打卡日历 */
+    weekNames: ['日', '一', '二', '三', '四', '五', '六'],
+    calCells: [],
+    calLabel: '',
+    calFoot: '',
+    canPrev: false,
+    canNext: false,
+    /* v0.9.13 缺口二 · 文字日记 */
+    taAlive: true,          // 原生 textarea 焦点中忽略 value 更新 → 重建清空（同小白/影子/留白瓶）
+    diaryText: '',
+    diarySaved: '',         // 今天已经存下的那一句（空 = 还没写）
+    diaryCount: 0,          // 累计写过多少天
+    diaryOpen: false,       // 往期是否展开
+    diaryList: [],          // 往期（不含今天），新的在前
+    /* v0.9.13 缺口二 · 广告位（AD_UNIT_ID 没配时为 false，整块不渲染） */
+    adShow: false,
+    adUnitId: ''
   },
 
   onShow() {
     /* v0.8.0：首页随便看，不拦登录 */
     this.refresh();
+    /* 广告位：utils/config.js 里的 AD_UNIT_ID 配了才渲染，没配则整块不存在 */
+    const adId = cfg.AD_UNIT_ID || '';
+    this.setData({ adUnitId: adId, adShow: !!adId });
+    /* 让右上角菜单里也出现「分享到朋友圈」（需要基础库 2.11.3+，低版本静默忽略） */
+    try {
+      if (wx.showShareMenu) {
+        wx.showShareMenu({
+          withShareTicket: false,
+          menus: ['shareAppMessage', 'shareTimeline']
+        });
+      }
+    } catch (e) { /* 低版本不支持，不影响其它功能 */ }
   },
 
   onMidnightRefresh() {
@@ -137,6 +178,205 @@ Page({
       nextNote,
       nextMs: nextMs ? { d: nextMs.d, n: nextMs.n } : null
     });
+
+    this.renderCalendar(S);
+    this.renderDiary(S);
+  },
+
+  /* ───────── v0.9.13 缺口二 · 文字日记 ─────────
+     一天一条，写满 200 字封顶。往期只渲染列表，不做编辑——
+     日记是给自己看的痕迹，改起来越麻烦越好，不然会变成反复修改的「作业」。
+     当前输入框只在「今天这条还没存」时用 rebuildTextarea 清空，
+     存过之后重建时会带回已存内容，方便继续补两句。 */
+  renderDiary(S) {
+    const today = util.todayStr();
+    const list = S.diary || [];
+    const mine = list.filter((it) => it.d === today)[0];
+    const saved = mine ? mine.text : '';
+
+    const past = list
+      .filter((it) => it.d !== today)
+      .slice()
+      .reverse()
+      .slice(0, 30)
+      .map((it) => ({ d: it.d, label: util.mdd(it.d), text: it.text }));
+
+    /* 输入框内容怎么定：用户正在改到一半的字不能被 refresh 冲掉。
+       判据是「当前内容 ≠ 上次存过的内容」→ 说明有未保存的编辑，保留它。 */
+    const prev = this._diarySaved || '';
+    const typed = this.data.diaryText || '';
+    const keepTyped = typed && typed !== prev;
+
+    this.setData({
+      diarySaved: saved,
+      diaryCount: list.length,
+      diaryList: past,
+      diaryText: keepTyped ? typed : (saved || typed || '')
+    });
+    this._diarySaved = saved;
+  },
+
+  onDiaryInput(e) {
+    this.setData({ diaryText: (e && e.detail && e.detail.value) || '' });
+  },
+
+  onDiaryBlur(e) {
+    /* 某些机型 bindinput 会漏触发，失焦再同步一次 */
+    if (e && e.detail && typeof e.detail.value === 'string') {
+      this.setData({ diaryText: e.detail.value });
+    }
+  },
+
+  onDiarySave() {
+    if (user.requireLogin('写日记需要登录一次。登录只是留个头像昵称，内容仍然只在你手机里。')) return;
+    const raw = (this.data.diaryText || '').trim();
+    if (!raw) {
+      wx.showToast({ title: '先写点什么吧', icon: 'none' });
+      return;
+    }
+    const S = storage.load();
+    const today = util.todayStr();
+    if (!Array.isArray(S.diary)) S.diary = [];
+    const idx = S.diary.map((it) => it.d).indexOf(today);
+    const item = { d: today, text: raw.slice(0, storage.MAX_DIARY_LEN) };
+    if (idx > -1) {
+      const isNew = S.diary[idx].text !== item.text;
+      S.diary[idx] = item;
+      if (!isNew) {
+        wx.showToast({ title: '和刚才一模一样，没动', icon: 'none' });
+        return;
+      }
+    } else {
+      S.diary.push(item);
+    }
+    storage.save(S);
+    this.setData({ diarySaved: item.text });
+    wx.showToast({ title: '存好了，只有你能看到', icon: 'none' });
+    this.refresh();
+  },
+
+  /* 删掉今天写的。放在「往期」列表之外、单独一个小入口——不显眼，但要找得到 */
+  onDiaryDeleteToday() {
+    wx.showModal({
+      title: '删掉今天这一句？',
+      content: '删了就找不回来了。',
+      confirmText: '删掉',
+      confirmColor: '#b5563f',
+      success: (r) => {
+        if (!r.confirm) return;
+        const S = storage.load();
+        const today = util.todayStr();
+        S.diary = (S.diary || []).filter((it) => it.d !== today);
+        storage.save(S);
+        this.rebuildDiaryBox();
+        wx.showToast({ title: '已删掉', icon: 'none' });
+        this.refresh();
+      }
+    });
+  },
+
+  onToggleDiary() {
+    this.setData({ diaryOpen: !this.data.diaryOpen });
+  },
+
+  /* 清空日记输入框：同小白 / 影子 / 留白瓶的原生 textarea 坑——
+     组件持有焦点时会忽略 value 更新，必须卸掉重建才拿得到新值 */
+  rebuildDiaryBox() {
+    this.setData({ diaryText: '', taAlive: false });
+    setTimeout(() => {
+      this.setData({ taAlive: true });
+    }, 100);
+  },
+
+  /* 点日历格子：有日记的那天弹出来看看（这是「回看」最自然的入口） */
+  onCalTap(e) {
+    const ds = e && e.currentTarget && e.currentTarget.dataset
+      ? e.currentTarget.dataset.d : '';
+    if (!ds) return;
+    const S = storage.load();
+    const it = (S.diary || []).filter((x) => x.d === ds)[0];
+    if (!it) return;
+    wx.showModal({
+      title: util.mdd(ds) + ' 写的',
+      content: it.text,
+      showCancel: false,
+      confirmText: '知道了'
+    });
+  },
+
+  /* 广告位加载失败（没开通流量主 / 广告拉不到）不打扰用户，只在控制台留个痕 */
+  onAdError(e) {
+    console.warn('[today] 广告位加载失败（多为流量主未开通或暂无广告填充）', e && e.detail);
+  },
+
+  /* ───────── v0.9.12 · 打卡日历 ─────────
+     每次打卡 / 复发都会往 checkLog / relapseLog 里记一个日期，
+     这里把当前显示月份的记录铺成 7 列网格。
+     单独成函数是为了让「翻月」只重算日历，不重跑整个 refresh
+     （refresh 会消耗掉一句小白开场白，翻个月就换一句话太跳了）。 */
+  renderCalendar(S) {
+    const today = util.todayStr();
+    if (!this._calYM) {
+      const p = today.split('-');
+      this._calYM = { y: parseInt(p[0], 10), m: parseInt(p[1], 10) };
+    }
+    const ym = this._calYM;
+
+    const checkMap = {};
+    (S.checkLog || []).forEach((k) => { checkMap[k] = 1; });
+    const relMap = {};
+    (S.relapseLog || []).forEach((k) => { relMap[k] = 1; });
+    /* v0.9.13：写过日记的日子在格子上点一个小点（不是状态，是痕迹） */
+    const noteMap = {};
+    (S.diary || []).forEach((it) => { if (it && it.d) noteMap[it.d] = 1; });
+
+    const cells = util.calendarOf(ym.y, ym.m, checkMap, relMap, today, noteMap);
+    const onDays = util.countInMonth(checkMap, ym.y, ym.m);
+    const relDays = util.countInMonth(relMap, ym.y, ym.m);
+    const streak = util.longestStreak(S.checkLog || []);
+
+    /* 一句人话总结：只陈述事实，不加压力 */
+    let foot = '';
+    if (onDays > 0) {
+      foot = '亮起 ' + onDays + ' 天';
+      if (relDays > 0) foot += ' · 断过 ' + relDays + ' 天';
+      if (streak > 1) foot += ' · 最长连着 ' + streak + ' 天';
+    } else if (relDays > 0) {
+      foot = '这个月断过 ' + relDays + ' 天，别的格子还空着';
+    } else if (S.checkCount > 0) {
+      /* 老用户升级上来：以前的打卡只有总数没有日期，说清楚免得以为丢数据 */
+      foot = '日历从这次更新后开始记，之后每天点亮一格';
+    } else {
+      foot = '每天打卡，这里就会亮起一格';
+    }
+
+    /* 能翻到多早：不早于最早那条记录所在的月 */
+    const earliest = [S.startDate].concat(S.checkLog || [], S.relapseLog || [])
+      .filter(Boolean).sort()[0] || today;
+    const eP = earliest.split('-');
+    const tP = today.split('-');
+    const canPrev = !(ym.y === parseInt(eP[0], 10) && ym.m === parseInt(eP[1], 10));
+    const canNext = !(ym.y === parseInt(tP[0], 10) && ym.m === parseInt(tP[1], 10));
+
+    this.setData({
+      calCells: cells,
+      calLabel: ym.y + ' 年 ' + ym.m + ' 月',
+      calFoot: foot,
+      canPrev: canPrev,
+      canNext: canNext
+    });
+  },
+
+  onCalPrev() {
+    if (!this.data.canPrev) return;
+    this._calYM = util.shiftMonth(this._calYM.y, this._calYM.m, -1);
+    this.renderCalendar(storage.load());
+  },
+
+  onCalNext() {
+    if (!this.data.canNext) return;
+    this._calYM = util.shiftMonth(this._calYM.y, this._calYM.m, 1);
+    this.renderCalendar(storage.load());
   },
 
   onCheck() {
@@ -145,8 +385,12 @@ Page({
     const S = storage.load();
     if (S.lastCheckIn === util.todayStr()) return;
 
-    S.lastCheckIn = util.todayStr();
+    const today = util.todayStr();
+    S.lastCheckIn = today;
     S.checkCount++;
+    /* v0.9.12：逐日记录，供打卡日历回看（同一天不会记两次） */
+    if (!Array.isArray(S.checkLog)) S.checkLog = [];
+    if (S.checkLog.indexOf(today) === -1) S.checkLog.push(today);
     const d = util.dayNum(S.startDate);
 
     /* 把鼓励写进小白对话，等用户去小白页能看到 */
@@ -225,6 +469,10 @@ Page({
     S.lastCheckIn = '';
     S.checkCount = 0;
     S.relapses++;
+    /* v0.9.12：复发也记进日历。注意 checkLog 不重置——
+       计数归零是让用户重新开始，日历是历史，要能回看哪几天撑住了、哪几天断了 */
+    if (!Array.isArray(S.relapseLog)) S.relapseLog = [];
+    if (S.relapseLog.indexOf(S.startDate) === -1) S.relapseLog.push(S.startDate);
     storage.save(S);
 
     wx.showToast({
@@ -249,5 +497,22 @@ Page({
 
   onChatXiaoBai() {
     wx.switchTab({ url: '/pages/xiaobai/xiaobai' });
+  },
+
+  /* 分享给好友 / 朋友圈。
+     两个都返回中性文案：不出现断联、天数、TA 的代号，别人从卡片上看不出用户在经历什么。 */
+  onShareAppMessage() {
+    return {
+      title: pick(SHARE_TITLES),
+      path: '/pages/onboard/onboard',
+      imageUrl: SHARE_IMG
+    };
+  },
+
+  onShareTimeline() {
+    return {
+      title: pick(SHARE_TITLES),
+      imageUrl: SHARE_IMG
+    };
   }
 });

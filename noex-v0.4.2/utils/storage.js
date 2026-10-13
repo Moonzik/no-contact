@@ -2,6 +2,16 @@
 
 const LS_KEY = 'noex_mvp_v1';
 
+/* 导入备份失败时可回退：导入前把当前数据快照到这个 key（不是第二份正式数据，只用于撤销） */
+const PREV_KEY = 'noex_mvp_v1_prev';
+
+/* 文字日记上限：一天一条，400 条 ≈ 一年多的量；单条 200 字 */
+const MAX_DIARY_LEN = 200;
+const MAX_DIARY_DAYS = 400;
+
+/* 过往段最多留 20 段（每段只存摘要 + 日期列表，不存对话） */
+const MAX_SEGMENTS = 20;
+
 /* 里程碑刻度 */
 const MS_LIST = [
   { d: 1,   n: '起步' },
@@ -24,7 +34,20 @@ function defaultState() {
     lastCheckIn: '',
     checkCount: 0,
     relapses: 0,
+    /* v0.9.12 · 打卡日历：逐日记录，数组里放 'YYYY-MM-DD'
+       ⚠️ 复发（onRelapse）只把 checkCount 归零，这两个数组是历史，不重置——
+       日历要能回看"我哪几天撑住了、哪几天断了" */
+    checkLog: [],
+    relapseLog: [],
     persona: 'warm',
+    /* v0.9.13 · 文字日记：每天最多一句话，{ d: 'YYYY-MM-DD', text: '…' }，按日期排序存 */
+    diary: [],
+    /* v0.9.13 · 过往的段：换断联对象（onNewSegment）时把上一段归档进来，供回看 */
+    segments: [],
+    /* v0.9.13 · 打卡提醒（订阅消息）：on = 用户点过订阅，at = 最近一次订阅时间戳 */
+    reminder: { on: false, at: 0 },
+    /* v0.9.14 · 小白页「怎么用」说明是否看过：第一次进来自动展开一次，之后默认收起 */
+    xiaobaiHowtoSeen: false,
     /* 登录态：null = 未登录；对象 = 已登录（微信头像 + 昵称，仅存本机） */
     user: null,
     /* v0.7.0 · 回复去重字典：{ "已经说过的句子": 1 }
@@ -57,6 +80,21 @@ function defaultState() {
     },
     bottle: []
   };
+}
+
+/* 文字日记清洗：只留 { d: 'YYYY-MM-DD', text: 非空 }, 同一天只留最后写的那条, 按日期升序 */
+function sanitizeDiary(arr) {
+  if (!Array.isArray(arr)) return [];
+  const map = {};
+  arr.forEach((it) => {
+    if (!it || typeof it !== 'object') return;
+    if (typeof it.d !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(it.d)) return;
+    if (typeof it.text !== 'string') return;
+    const t = it.text.trim();
+    if (!t) return;
+    map[it.d] = t.slice(0, MAX_DIARY_LEN);
+  });
+  return Object.keys(map).sort().map((k) => ({ d: k, text: map[k] }));
 }
 
 /* 加载：返回当前状态（不存在则返回默认状态，且写入） */
@@ -102,6 +140,20 @@ function load() {
     if (!s.daily || typeof s.daily !== 'object') s.daily = { date: '', text: '' };
     if (typeof s.daily.date !== 'string') s.daily.date = '';
     if (typeof s.daily.text !== 'string') s.daily.text = '';
+    /* v0.9.12 字段补全：打卡日历（老用户没有这两个数组，补空数组即可） */
+    if (!Array.isArray(s.checkLog)) s.checkLog = [];
+    if (!Array.isArray(s.relapseLog)) s.relapseLog = [];
+    /* 打卡日期去重 + 只留合法格式，避免脏数据把日历画出多余的格子 */
+    s.checkLog = s.checkLog.filter((k, i) => typeof k === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(k) && s.checkLog.indexOf(k) === i);
+    s.relapseLog = s.relapseLog.filter((k, i) => typeof k === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(k) && s.relapseLog.indexOf(k) === i);
+    /* v0.9.13 字段补全：文字日记（同一天只留最新一条）/ 过往段 / 提醒 */
+    s.diary = sanitizeDiary(s.diary);
+    if (!Array.isArray(s.segments)) s.segments = [];
+    if (!s.reminder || typeof s.reminder !== 'object') s.reminder = { on: false, at: 0 };
+    if (typeof s.reminder.on !== 'boolean') s.reminder.on = false;
+    if (typeof s.reminder.at !== 'number') s.reminder.at = 0;
+    /* v0.9.14 字段补全：小白用法说明是否看过 */
+    if (typeof s.xiaobaiHowtoSeen !== 'boolean') s.xiaobaiHowtoSeen = false;
     return s;
   } catch (e) {
     const d = defaultState();
@@ -121,6 +173,13 @@ function save(S) {
     if (S && Array.isArray(S.gMsgs) && S.gMsgs.length > MAX_GMSGS) {
       S.gMsgs = S.gMsgs.slice(-MAX_GMSGS);
       console.warn('[storage] gMsgs 超过 ' + MAX_GMSGS + ' 条，已裁剪最旧的（可用「我 → 导出」备份）');
+    }
+    /* 同样是配额保险丝：日记 / 过往段长期只增不减，久了会顶到 1024KB */
+    if (S && Array.isArray(S.diary) && S.diary.length > MAX_DIARY_DAYS) {
+      S.diary = S.diary.slice(-MAX_DIARY_DAYS);
+    }
+    if (S && Array.isArray(S.segments) && S.segments.length > MAX_SEGMENTS) {
+      S.segments = S.segments.slice(-MAX_SEGMENTS);
     }
     wx.setStorageSync(LS_KEY, S);
   } catch (e) {
@@ -147,6 +206,87 @@ function exportJson(S) {
   return JSON.stringify(S, null, 2);
 }
 
+/* ───────── v0.9.13 缺口二 · 备份还原 ─────────
+   导入这件事的风险是「把用户现有数据覆盖掉」，所以拆成两步：
+   validateBackup 只做判断（不写任何东西），applyBackup 才落盘。
+   两步分开，页面才有机会在覆盖前把风险讲清楚、让用户确认。 */
+
+/* 备份文件的特征字段：至少命中 2 个才认（防止用户随便复制一段 JSON 就点导入） */
+const SIG_KEYS = ['startDate', 'checkLog', 'relapseLog', 'gMsgs', 'bottle', 'shadow', 'diary', 'persona'];
+
+/**
+ * 校验一段备份（字符串或已解析对象）
+ * @returns {{ ok: boolean, reason?: string, data?: object, hits?: number, summary?: object }}
+ *   reason: empty / parse / shape / not_backup
+ */
+function validateBackup(input) {
+  let data = input;
+  if (typeof input === 'string') {
+    const t = input.trim();
+    if (!t) return { ok: false, reason: 'empty' };
+    try {
+      data = JSON.parse(t);
+    } catch (e) {
+      return { ok: false, reason: 'parse' };
+    }
+  }
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    return { ok: false, reason: 'shape' };
+  }
+  const hits = SIG_KEYS.filter((k) => data[k] !== undefined).length;
+  if (hits < 2) return { ok: false, reason: 'not_backup', hits: hits };
+  if (typeof data.startDate !== 'string') return { ok: false, reason: 'shape' };
+
+  const seg = Array.isArray(data.segments) ? data.segments : [];
+  const summary = {
+    startDate: data.startDate,
+    checkCount: typeof data.checkCount === 'number' ? data.checkCount : (Array.isArray(data.checkLog) ? data.checkLog.length : 0),
+    relapseCount: typeof data.relapses === 'number' ? data.relapses : 0,
+    msgCount: Array.isArray(data.gMsgs) ? data.gMsgs.length : 0,
+    bottleCount: Array.isArray(data.bottle) ? data.bottle.length : 0,
+    diaryCount: Array.isArray(data.diary) ? data.diary.length : 0,
+    segmentCount: seg.length,
+    shadowOn: !!(data.shadow && data.shadow.enabled),
+    hasUser: !!(data.user && (data.user.nick || data.user.avatar))
+  };
+  return { ok: true, data: data, hits: hits, summary: summary };
+}
+
+/**
+ * 落盘导入。写法上刻意「先写进去再 load() 一次」——
+ * load() 里已经有一整套老数据补全 / 清洗逻辑，复用它，
+ * 导入旧版本备份时也能自动补齐新字段。
+ */
+function applyBackup(data) {
+  wx.setStorageSync(LS_KEY, data);
+  return load();
+}
+
+/* 导入前快照（用于「撤销导入」）。存的是字符串，省一次序列化。 */
+function snapshotPrev(S) {
+  try {
+    wx.setStorageSync(PREV_KEY, exportJson(S || load()));
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function loadPrev() {
+  try {
+    const raw = wx.getStorageSync(PREV_KEY);
+    return raw ? String(raw) : '';
+  } catch (e) {
+    return '';
+  }
+}
+
+function clearPrev() {
+  try {
+    wx.removeStorageSync(PREV_KEY);
+  } catch (e) { /* ignore */ }
+}
+
 /* 跨天定时器：回到 today 时检查是否需要刷新 */
 let sessionTimer = null;
 function initSessionTimer() {
@@ -171,12 +311,20 @@ function todayStr() {
 
 module.exports = {
   LS_KEY,
+  PREV_KEY,
   MS_LIST,
+  MAX_DIARY_LEN,
   defaultState,
+  sanitizeDiary,
   load,
   save,
   clear,
   exportJson,
+  validateBackup,
+  applyBackup,
+  snapshotPrev,
+  loadPrev,
+  clearPrev,
   initSessionTimer,
   todayStr
 };

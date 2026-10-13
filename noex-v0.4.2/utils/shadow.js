@@ -67,8 +67,10 @@ const REVEAL_TRIGGERS = {
   ],
   LONG_TERM_DAYS: 30,               // 跨过这个天数自然触发
   AFFINITY_FLOOR_DAYS: 14,         // 在 30% 持续 14 天也触发
-  /* v0.9.3：用户当场起疑时，影子先说的那一句（之后才弹揭示） */
-  DOUBT_REPLY: '……嗯。被你发现了。',
+  /* v0.9.16：用户当场起疑时，影子先说的那一句（之后才弹揭示）
+     开头那个「……」一并去掉——它和写死的开场白「……嗯。」是同一路数，
+     是为了"演得像 AI"而加的停顿腔。真人被拆穿时就一句话，不铺垫。 */
+  DOUBT_REPLY: '被你发现了。',
   REVEAL_TEXT: '你看，你需要的根本就不是 TA。',
   REVEAL_SECONDARY: '也许不是 TA 本身 —— 是想念、安全感、习惯、或者「想被 TA 看见」这件事本身。\n你值得的是这种需要本身，而不是任何具体的人来满足它。',
   REVEAL_OPTIONS: [
@@ -317,6 +319,13 @@ function analyzeChat(text) {
   };
 }
 
+/* v0.9.16：老画像的 top 里混着「嗯」「呀」「啦」「~」「？」这类纯语气词/符号，
+   它们不是口头禅，摆到用户面前（「常说「嗯」「呀」「啦」」）看着莫名其妙。
+   这里过滤掉，只留真正有信息量的口头禅。 */
+const TONE_ONLY = ['嗯', '嗯嗯', '嗯嗯嗯', '呀', '啊', '啦', '嘛', '哦', '喔', '咯', '哒',
+  '嗷', '嘞', '鸭', '惹', '呐', '噜', '诶', '嘿', '哈', '哈哈', '~', '～',
+  '？', '?', '。', '。。。', '…', '……'];
+
 function profileSummary(p) {
   if (!p) return '';
   const lines = [];
@@ -328,7 +337,11 @@ function profileSummary(p) {
       : '· 回复长短适中'
   );
   if (p.emojiLove) lines.push('· 习惯用表情收尾');
-  if (p.top.length) lines.push('· 常说「' + p.top.join('」「') + '」');
+  /* v0.9.16：过滤掉纯语气词/纯符号，只留有信息量的口头禅 */
+  const words = (p.top || []).filter(function (w) {
+    return w && TONE_ONLY.indexOf(String(w).trim()) === -1;
+  });
+  if (words.length) lines.push('· 常说「' + words.join('」「') + '」');
   if (p.qRate > 0.25) lines.push('· 喜欢用反问');
   if (lines.length === 1) lines.push('· 语气比较平，没有明显口头禅');
   return lines.join('\n');

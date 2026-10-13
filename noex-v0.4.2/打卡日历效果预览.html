@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>打卡日历 · 效果预览</title>
+<style>
+  :root{
+    --bg:#faf9f4; --card:#fff; --ink:#26231e; --sub:#8f887b; --faint:#b8b1a4;
+    --line:#e9e4d8; --accent:#b5623c; --accent-soft:#f5ece6;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:44px 20px 80px; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;
+    font-size:15px; line-height:1.75;
+  }
+  .wrap{max-width:900px; margin:0 auto;}
+  h1{font-size:25px; font-weight:600; margin:0 0 6px;}
+  .lede{color:var(--sub); font-size:14px; margin-bottom:4px;}
+  .stamp{color:var(--faint); font-size:13px; margin-bottom:32px;}
+
+  .phones{display:flex; flex-wrap:wrap; gap:22px; margin-bottom:34px;}
+  .phone{
+    flex:1 1 300px; min-width:290px; background:var(--bg);
+    border:1px solid var(--line); border-radius:26px; padding:16px;
+  }
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:20px;
+    padding:20px 18px 18px;
+  }
+  .cal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+  .cap{font-size:14px; color:var(--sub); letter-spacing:2px;}
+  .cal-nav{display:flex; align-items:center;}
+  .cal-arrow{
+    width:28px; height:28px; line-height:26px; text-align:center; border-radius:50%;
+    font-size:18px; color:var(--sub); background:var(--accent-soft);
+  }
+  .cal-arrow.off{color:var(--line); background:transparent;}
+  .cal-ym{min-width:96px; text-align:center; font-size:13px; color:var(--sub);}
+  .cal-week{display:flex; margin-top:6px;}
+  .cal-wd{width:14.2857%; text-align:center; font-size:12px; color:var(--faint);}
+  .cal-grid{display:flex; flex-wrap:wrap; margin-top:5px;}
+  .cal-cell{width:14.2857%; padding:3px 0; display:flex; align-items:center; justify-content:center;}
+  .cal-d{
+    width:31px; height:31px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+    font-size:13px; color:var(--faint);
+  }
+  .cal-cell.on .cal-d{background:var(--ink); color:var(--bg);}
+  .cal-cell.rel .cal-d{background:var(--accent-soft); color:var(--accent);}
+  .cal-cell.future .cal-d{color:var(--line);}
+  .cal-cell.today .cal-d{border:1.5px solid var(--accent);}
+  .cal-legend{display:flex; margin-top:12px; padding-left:2px;}
+  .lg{display:flex; align-items:center; margin-right:18px; font-size:12.5px; color:var(--faint);}
+  .lg-dot{width:11px; height:11px; border-radius:3px; margin-right:6px; box-sizing:border-box;}
+  .lg-dot.on{background:var(--ink);}
+  .lg-dot.rel{background:var(--accent-soft);}
+  .lg-dot.today{border:1.5px solid var(--accent);}
+  .cal-foot{margin-top:10px; padding-left:2px; font-size:13px; color:var(--sub);}
+  .phone-note{color:var(--faint); font-size:12.5px; text-align:center; margin-top:10px;}
+
+  .sec{background:var(--card); border:1px solid var(--line); border-radius:18px; padding:24px 26px; margin-bottom:16px;}
+  .sec h2{font-size:16.5px; font-weight:600; margin:0 0 10px;}
+  .sec p{margin:8px 0; color:var(--sub); font-size:14px;}
+  .sec p b{color:var(--ink);}
+  ul{margin:8px 0 0; padding-left:0; list-style:none;}
+  li{position:relative; padding-left:20px; margin:8px 0; color:var(--sub); font-size:14px;}
+  li::before{content:""; position:absolute; left:4px; top:9px; width:6px; height:6px; border-radius:2px; background:var(--accent); opacity:.6;}
+  li b{color:var(--ink);}
+  .row{display:flex; gap:16px; flex-wrap:wrap; margin-top:12px;}
+  .swatch{
+    flex:1 1 200px; background:#faf8f2; border:1px solid var(--line); border-radius:12px; padding:14px 16px;
+    font-size:13.5px; color:var(--sub); display:flex; align-items:center; gap:12px;
+  }
+  .sw{width:30px; height:30px; border-radius:9px; flex:0 0 auto; display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--faint);}
+  .sw.on{background:var(--ink); color:#faf9f4;}
+  .sw.rel{background:var(--accent-soft); color:var(--accent);}
+  .sw.today{border:1.5px solid var(--accent);}
+  .sw.future{color:var(--line);}
+  .foot{text-align:center; color:var(--faint); font-size:13px; margin-top:34px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>打卡日历</h1>
+  <div class="lede">今天页新增 · 断联日记 NOEX v0.9.12</div>
+  <div class="stamp">2026-09-11 · 下面两张是真实渲染效果（数据是示例）</div>
+
+  <div class="phones">
+
+    <div class="phone">
+      <div class="card">
+        <div class="cal-head">
+          <div class="cap">打卡日历</div>
+          <div class="cal-nav">
+            <div class="cal-arrow">‹</div>
+            <div class="cal-ym">2026 年 8 月</div>
+            <div class="cal-arrow">›</div>
+          </div>
+        </div>
+        <div class="cal-week">
+          <div class="cal-wd">日</div><div class="cal-wd">一</div><div class="cal-wd">二</div>
+          <div class="cal-wd">三</div><div class="cal-wd">四</div><div class="cal-wd">五</div><div class="cal-wd">六</div>
+        </div>
+        <div class="cal-grid">
+          <div class="cal-cell"><div class="cal-d"></div></div>
+          <div class="cal-cell"><div class="cal-d"></div></div>
+          <div class="cal-cell"><div class="cal-d"></div></div>
+          <div class="cal-cell"><div class="cal-d"></div></div>
+          <div class="cal-cell"><div class="cal-d"></div></div>
+          <div class="cal-cell"><div class="cal-d"></div></div>
+          <div class="cal-cell"><div class="cal-d">1</div></div>
+          <div class="cal-cell"><div class="cal-d">2</div></div>
+          <div class="cal-cell"><div class="cal-d">3</div></div>
+          <div class="cal-cell"><div class="cal-d">4</div></div>
+          <div class="cal-cell"><div class="cal-d">5</div></div>
+          <div class="cal-cell"><div class="cal-d">6</div></div>
+          <div class="cal-cell"><div class="cal-d">7</div></div>
+          <div class="cal-cell"><div class="cal-d">8</div></div>
+          <div class="cal-cell"><div class="cal-d">9</div></div>
+          <div class="cal-cell"><div class="cal-d">10</div></div>
+          <div class="cal-cell"><div class="cal-d">11</div></div>
+          <div class="cal-cell"><div class="cal-d">12</div></div>
+          <div class="cal-cell"><div class="cal-d">13</div></div>
+          <div class="cal-cell"><div class="cal-d">14</div></div>
+          <div class="cal-cell"><div class="cal-d">15</div></div>
+          <div class="cal-cell"><div class="cal-d">16</div></div>
+          <div class="cal-cell"><div class="cal-d">17</div></div>
+          <div class="cal-cell"><div class="cal-d">18</div></div>
+          <div class="cal-cell"><div class="cal-d">19</div></div>
+          <div class="cal-cell on"><div class="cal-d">20</div></div>
+          <div class="cal-cell on"><div class="cal-d">21</div></div>
+          <div class="cal-cell on"><div class="cal-d">22</div></div>
+          <div class="cal-cell on"><div class="cal-d">23</div></div>
+          <div class="cal-cell on"><div class="cal-d">24</div></div>
+          <div class="cal-cell on"><div class="cal-d">25</div></div>
+          <div class="cal-cell rel"><div class="cal-d">26</div></div>
+          <div class="cal-cell on"><div class="cal-d">27</div></div>
+          <div class="cal-cell on"><div class="cal-d">28</div></div>
+          <div class="cal-cell on"><div class="cal-d">29</div></div>
+          <div class="cal-cell on"><div class="cal-d">30</div></div>
+          <div class="cal-cell on"><div class="cal-d">31</div></div>
+        </div>
+        <div class="cal-legend">
+          <div class="lg"><div class="lg-dot on"></div>撑住</div>
+          <div class="lg"><div class="lg-dot rel"></div>断过</div>
+          <div class="lg"><div class="lg-dot today"></div>今天</div>
+        </div>
+        <div class="cal-foot">亮起 11 天 · 断过 1 天</div>
+      </div>
+      <div class="phone-note">可以往前翻，看到开始那天</div>
+    </div>
+
+    <div class="phone">
+      <div class="card">
+        <div class="cal-head">
+          <div class="cap">打卡日历</div>
+          <div class="cal-nav">
+            <div class="cal-arrow">‹</div>
+            <div class="cal-ym">2026 年 9 月</div>
+            <div class="cal-arrow off">›</div>
+          </div>
+        </div>
+        <div class="cal-week">
+          <div class="cal-wd">日</div><div class="cal-wd">一</div><div class="cal-wd">二</div>
+          <div class="cal-wd">三</div><div class="cal-wd">四</div><div class="cal-wd">五</div><div class="cal-wd">六</div>
+        </div>
+        <div class="cal-grid">
+          <div class="cal-cell"><div class="cal-d"></div></div>
+          <div class="cal-cell"><div class="cal-d"></div></div>
+          <div class="cal-cell on"><div class="cal-d">1</div></div>
+          <div class="cal-cell on"><div class="cal-d">2</div></div>
+          <div class="cal-cell on"><div class="cal-d">3</div></div>
+          <div class="cal-cell"><div class="cal-d">4</div></div>
+          <div class="cal-cell on"><div class="cal-d">5</div></div>
+          <div class="cal-cell on"><div class="cal-d">6</div></div>
+          <div class="cal-cell on"><div class="cal-d">7</div></div>
+          <div class="cal-cell rel"><div class="cal-d">8</div></div>
+          <div class="cal-cell on"><div class="cal-d">9</div></div>
+          <div class="cal-cell on"><div class="cal-d">10</div></div>
+          <div class="cal-cell on today"><div class="cal-d">11</div></div>
+          <div class="cal-cell future"><div class="cal-d">12</div></div>
+          <div class="cal-cell future"><div class="cal-d">13</div></div>
+          <div class="cal-cell future"><div class="cal-d">14</div></div>
+          <div class="cal-cell future"><div class="cal-d">15</div></div>
+          <div class="cal-cell future"><div class="cal-d">16</div></div>
+          <div class="cal-cell future"><div class="cal-d">17</div></div>
+          <div class="cal-cell future"><div class="cal-d">18</div></div>
+          <div class="cal-cell future"><div class="cal-d">19</div></div>
+          <div class="cal-cell future"><div class="cal-d">20</div></div>
+          <div class="cal-cell future"><div class="cal-d">21</div></div>
+          <div class="cal-cell future"><div class="cal-d">22</div></div>
+          <div class="cal-cell future"><div class="cal-d">23</div></div>
+          <div class="cal-cell future"><div class="cal-d">24</div></div>
+          <div class="cal-cell future"><div class="cal-d">25</div></div>
+          <div class="cal-cell future"><div class="cal-d">26</div></div>
+          <div class="cal-cell future"><div class="cal-d">27</div></div>
+          <div class="cal-cell future"><div class="cal-d">28</div></div>
+          <div class="cal-cell future"><div class="cal-d">29</div></div>
+          <div class="cal-cell future"><div class="cal-d">30</div></div>
+        </div>
+        <div class="cal-legend">
+          <div class="lg"><div class="lg-dot on"></div>撑住</div>
+          <div class="lg"><div class="lg-dot rel"></div>断过</div>
+          <div class="lg"><div class="lg-dot today"></div>今天</div>
+        </div>
+        <div class="cal-foot">亮起 9 天 · 断过 1 天 · 最长连着 8 天</div>
+      </div>
+      <div class="phone-note">当前月时，右箭头是灰的（翻不到未来）</div>
+    </div>
+
+  </div>
+
+  <div class="sec">
+    <h2>四种格子各是什么意思</h2>
+    <div class="row">
+      <div class="swatch"><div class="sw on">11</div><span><b>撑住</b>：这天打了卡</span></div>
+      <div class="swatch"><div class="sw rel">8</div><span><b>断过</b>：这天没忍住，联系了</span></div>
+      <div class="swatch"><div class="sw today">11</div><span><b>今天</b>：描边高亮</span></div>
+      <div class="swatch"><div class="sw future">12</div><span><b>还没到</b>：变淡，不抢注意力</span></div>
+    </div>
+    <p>「断过」用的是暖砖色，不是红色——红色像警报，看着更难受。这天已经够难了，日历不该再吼你一句。</p>
+  </div>
+
+  <div class="sec">
+    <h2>怎么用</h2>
+    <ul>
+      <li>在 <b>今天页</b> 打卡 / 记「没忍住」，日历上对应的格子立刻亮起或变砖色</li>
+      <li>点左右箭头 <b>翻月份</b>：能一直翻到你开始那天；翻不到未来（右箭头变灰）</li>
+      <li>脚注只陈述事实：<b>亮起 N 天 · 断过 N 天 · 最长连着 N 天</b>，不加压力、不说教</li>
+      <li>「同一天既打卡又断过」时显示为断过——那天最终的结果是断了，如实呈现</li>
+    </ul>
+  </div>
+
+  <div class="sec">
+    <h2>两件你可能想问的</h2>
+    <p><b>「最长连着」是怎么算的？</b>把所有打卡日期排一遍，取最长的一段连续天数，跨月也算。上面的例子里是 8 月 27 日一直连到 9 月 3 日，共 8 天。</p>
+    <p><b>之前打的卡会显示吗？</b>老版本只存了「总共打卡 N 次」，没存具体日期，所以补不回来。<b>日历从这次更新后开始记</b>，遇到这种情况脚注会直接说明，不会让你以为是数据丢了。</p>
+  </div>
+
+  <div class="sec">
+    <h2>复发不会清空日历</h2>
+    <p>点「没忍住」时，断联天数会归零、打卡总次数会归零，但<b>日历上的历史保留</b>——哪几天撑住了、哪几天断了，都在。</p>
+    <p>因为计数归零是让你重新开始，日历是给你回头看自己走过的路。这两件事不该混在一起。</p>
+  </div>
+
+  <div class="foot">愿你断得干净，把时间留给自己</div>
+
+</div>
+</body>
+</html>

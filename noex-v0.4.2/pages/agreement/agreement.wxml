@@ -1,0 +1,24 @@
+<view class="ag">
+
+  <view class="ag-title">断联日记 NOEX · 用户服务协议</view>
+  <view class="ag-meta">版本 v{{version}} · 更新于 {{updatedAt}}</view>
+
+  <view class="ag-lead">
+    用大白话写，没有弯绕。请花两分钟看完——尤其是「你的数据存在哪里」和「遇到危机」两节。
+  </view>
+
+  <block wx:for="{{sections}}" wx:key="h" wx:for-item="s">
+    <view class="sec">
+      <view class="sec-h">{{s.h}}</view>
+      <view class="sec-p" wx:for="{{s.p}}" wx:key="*this" wx:for-item="para">{{para}}</view>
+      <view class="sec-li" wx:for="{{s.list}}" wx:key="*this" wx:for-item="li">· {{li}}</view>
+    </view>
+  </block>
+
+  <view class="ag-privacy" bindtap="onOpenPrivacy" hover-class="ag-privacy-hover">
+    另见：用户隐私保护指引（由微信托管，点这里打开）
+  </view>
+
+  <view class="ag-foot">愿你断得干净，把时间留给自己</view>
+
+</view>

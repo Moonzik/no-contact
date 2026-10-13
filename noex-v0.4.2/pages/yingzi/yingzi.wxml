@@ -55,10 +55,10 @@
     <view class="card">
       <view class="h2">设置影子</view>
       <view class="p">
-        把和ta的聊天记录<text class="em">文字</text>给我——不是选文件，就是在微信里复制好、粘到下面。我会分析 ta 的说话习惯，生成一个「影子」。它只存在于你的手机里。
+        把和ta的聊天记录<text class="em">给</text>我，截图或复制好的文字都行。我会分析 ta 的说话习惯，生成一个「影子」。分析过程全在你手机里完成。
       </view>
       <view class="p ai-note" wx:if="{{aiOn}}">
-        已开启 AI 增强：生成回复时，聊天记录里挑出的少量短句会经云函数中转给大模型，用于模仿 ta 的语气。关闭该能力则全程不联网。
+        已开启 AI 增强：生成回复时，聊天记录里挑出的少量短句会经云函数中转给大模型，用于模仿 ta 的语气。用截图导入时，图片会临时上传转成文字，转完立刻从云端删除。关闭该能力则全程不联网。
       </view>
       <view class="field">
         <label class="field-label">ta 的代号</label>
@@ -83,19 +83,24 @@
         </view>
 
         <view class="file-row">
-          <button class="btn-primary paste-btn" bindtap="onPasteClipboard">粘贴我复制好的聊天记录</button>
-          <text class="file-info">{{shFile || ''}}</text>
+          <button class="btn-primary paste-btn" bindtap="onImportMenu">导入微信聊天记录</button>
+          <button class="btn-ghost clip-btn" bindtap="onPasteClipboard">只粘贴剪贴板</button>
         </view>
+        <view class="imp-note">
+          支持：微信聊天里的<text class="em">截图</text>、相册里的截图、微信聊天里的文件、复制好的文字（最多 9 张图）
+        </view>
+        <view class="imp-busy" wx:if="{{impBusy}}">{{impTip}}</view>
+        <view class="imp-priv" wx:if="{{impBusy}}">截图会临时上传识别成文字，识别完立刻从云端删除；文字导入不联网。</view>
+        <text class="file-info">{{shFile || ''}}</text>
         <view class="howto-toggle" bindtap="onToggleHowto">
           <text>{{showHowto ? '收起' : '怎么把聊天记录弄进来？'}}</text>
         </view>
         <view class="howto-body" wx:if="{{showHowto}}">
-          <view class="howto-line howto-tip" style="margin:0 0 10rpx;padding:0;border:none"><text class="em">最省事的办法（推荐）：</text></view>
-          <view class="howto-line">① 去微信，打开你和 TA 的聊天</view>
-          <view class="howto-line">② <text class="em">长按一条消息 → 多选 → 勾选一堆 → 点「复制」</text></view>
-          <view class="howto-line">③ 切回这里，点<text class="em">「粘贴剪贴板」</text>，完事</view>
-          <view class="howto-line" style="margin-top:10rpx;color:var(--faint)">也可以直接在上面输入框里长按粘贴，一样。</view>
-          <view class="howto-line howto-warn" style="margin-top:14rpx">微信<text class="em">不允许</text>任何小程序直接读取你的聊天记录，所以没有「一键导入聊天」这种按钮——只能你复制、我粘贴。上面这条路就是最快的了，一分钟搞定。</view>
+          <view class="howto-line howto-tip" style="margin:0 0 10rpx;padding:0;border:none"><text class="em">两条路，挑一条：</text></view>
+          <view class="howto-line">① <text class="em">截图</text>：把聊天界面截下来（可以截好几张，连着的一起选）→ 点「导入微信聊天记录」→ 选「从微信聊天里选截图」→ 自动识别成文字</view>
+          <view class="howto-line">② <text class="em">复制文字</text>：长按一条消息 → 多选 → 勾选一堆 → 点「复制」→ 回来点「只粘贴剪贴板」，完事</view>
+          <view class="howto-line" style="margin-top:10rpx;color:var(--faint)">也可以直接在输入框里长按粘贴，一样。</view>
+          <view class="howto-line howto-warn" style="margin-top:14rpx">微信<text class="em">不允许</text>任何小程序直接读取你的聊天记录，所以没有「一键导入聊天」这种按钮——只能你复制或截图、我来读。上面两条就是最快的了。</view>
           <view class="howto-line" style="margin-top:14rpx">
             <text style="color:var(--faint)">如果你事先在电脑上导出过 txt 文件并发给了「文件传输助手」，也可以</text>
             <text class="em link" bindtap="onPickFile">从这里选那个文件</text>

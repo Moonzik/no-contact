@@ -33,7 +33,7 @@ Page({
   onDisagree() {
     this._resolve({ event: 'disagree' });
     wx.showToast({
-      title: '未同意的话，头像和粘贴功能用不了',
+      title: '未同意的话，头像、选图和粘贴功能都用不了',
       icon: 'none',
       duration: 2400
     });

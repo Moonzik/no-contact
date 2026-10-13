@@ -225,9 +225,77 @@ function defaultShadowSpeaker(r) {
   return null;
 }
 
+/* ── v0.9.15 · 截图转写结果的清洗与合并 ─────────────────────
+   模型再听话也会偶尔带上代码块围栏、「以下是转写结果：」这种前言，
+   或者把整段包在引号里。这里统一剥掉，只留「说话人：内容」的行。
+   ⚠️ 只做格式清洗，**绝不改写内容**——这里多改一个字，影子学到的就是错的。 */
+
+/* 模型明确表示没读到内容时，返回它原话，交给上层如实告诉用户 */
+const NO_CONTENT = /没有识别到聊天内容|没有可读|无法识别|未检测到.*文字/;
+
+function cleanTranscript(raw) {
+  let t = String(raw == null ? '' : raw);
+  /* 代码块围栏 */
+  t = t.replace(/```[a-zA-Z]*\n?/g, '').replace(/```/g, '');
+  const lines = t.split(/\r?\n/).map((s) => s.trim());
+  const out = [];
+  for (let i = 0; i < lines.length; i++) {
+    let ln = lines[i];
+    if (!ln) continue;
+    /* 前言 / 后语 / 标题类 */
+    if (/^(以下是|下面是|转写结果|识别结果|聊天记录转写|转写如下)/.test(ln)) continue;
+    if (/^#{1,6}\s/.test(ln)) continue;
+    /* 模型自作主张写的分析、点评（不是聊天内容），一律不要：
+       影子学的是 TA 怎么说话，掺进一段「这段对话体现出…」会把画像带偏。 */
+    if (!/[：:]/.test(ln)) {
+      if (/^(这段|这一段|可以看|从中|整体|综上|以上|可见|说明|由此|总结)/.test(ln)) continue;
+      if (/体现|可以看出|反映出|整体来看|值得注意的是/.test(ln)) continue;
+      /* 无冒号 + 句号收尾 + 偏长 → 当成说明文字丢掉 */
+      if (/[。！？]$/.test(ln) && ln.length > 18) continue;
+    }
+    /* 模型表示「没读到内容」的元信息，不是聊天内容 */
+    if (NO_CONTENT.test(ln)) continue;
+    /* 纯时间 / 日期分隔行 */
+    if (/^\[?\d{4}[-\/.年]\d{1,2}[-\/.月]\d{1,2}日?.*\]?$/.test(ln)) continue;
+    if (/^\d{1,2}:\d{2}($|:)/.test(ln)) continue;
+    if (/^[—\-–=﹉~*·]{3,}$/.test(ln)) continue;
+    /* 行首的列表符号 */
+    ln = ln.replace(/^[-*·]\s+/, '');
+    /* 全角冒号统一成半角，解析器两边都认，统一了更好去重 */
+    ln = ln.replace(/：/g, ':');
+    /* 说话人两侧的 markdown 粗体 / 引号 */
+    ln = ln.replace(/^\*\*(.+?)\*\*\s*:/, '$1:').replace(/^["'“”‘’]+|["'“”‘’]+$/g, '');
+    out.push(ln);
+  }
+  return out.join('\n').trim();
+}
+
+/* 多张截图的结果按顺序拼起来；相邻完全重复的行去掉（截图重叠时很常见） */
+function mergeTranscripts(list) {
+  const parts = [];
+  (list || []).forEach((x) => {
+    const t = cleanTranscript(typeof x === 'string' ? x : (x && x.text) || '');
+    if (t) parts.push(t);
+  });
+  const lines = parts.join('\n').split('\n');
+  const uniq = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (i > 0 && lines[i] === lines[i - 1]) continue;
+    uniq.push(lines[i]);
+  }
+  return uniq.join('\n').trim();
+}
+
+function isNoContent(raw) {
+  return NO_CONTENT.test(String(raw || ''));
+}
+
 module.exports = {
   decodeChatFile,
   wechatHtmlToText,
   parseWeChatLog,
-  defaultShadowSpeaker
+  defaultShadowSpeaker,
+  cleanTranscript,
+  mergeTranscripts,
+  isNoContent
 };

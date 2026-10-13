@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NOEX v0.9.15 · 图片导入与聊天记录导入</title>
+<style>
+  :root {
+    --bg: #faf9f4;
+    --card: #ffffff;
+    --ink: #26231e;
+    --sub: #8f887b;
+    --faint: #b8b1a4;
+    --line: #e9e4d8;
+    --accent: #b5623c;
+    --accent-soft: #f5ece6;
+    --serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 48px 20px 80px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    line-height: 1.85;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; }
+  h1 {
+    font-family: var(--serif);
+    font-size: 30px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    margin: 0 0 8px;
+  }
+  .sub { color: var(--faint); font-size: 14px; letter-spacing: 1px; margin-bottom: 40px; }
+  h2 {
+    font-family: var(--serif);
+    font-size: 21px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    margin: 48px 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  h3 { font-size: 16px; font-weight: 600; margin: 28px 0 10px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 26px 28px;
+    margin-bottom: 16px;
+  }
+  .hero { background: var(--accent-soft); border-color: var(--accent-soft); }
+  p { margin: 10px 0; }
+  ul, ol { margin: 10px 0; padding-left: 22px; }
+  li { margin: 6px 0; }
+  code {
+    background: #f2efe7;
+    border-radius: 5px;
+    padding: 2px 7px;
+    font-family: ui-monospace, Consolas, monospace;
+    font-size: 14px;
+  }
+  .k { font-family: ui-monospace, Consolas, monospace; font-size: 14px; color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 15px; }
+  th, td { text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--line); }
+  th { color: var(--sub); font-weight: 500; font-size: 14px; letter-spacing: 1px; }
+  td:first-child { white-space: nowrap; }
+  .green { color: #3f7a4d; font-weight: 600; }
+  .muted { color: var(--sub); font-size: 15px; }
+  .note {
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+    padding: 16px 20px;
+    margin: 18px 0;
+    font-size: 15px;
+  }
+  .foot { margin-top: 56px; text-align: center; color: var(--faint); font-size: 14px; letter-spacing: 2px; }
+  .mock {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  .mock-line {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 0;
+    border-bottom: 1px dashed var(--line);
+  }
+  .mock-line:last-child { border-bottom: none; }
+  .mock-go { color: var(--faint); font-size: 13px; }
+  .flow { text-align: center; color: var(--sub); font-size: 15px; line-height: 2.2; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>图片导入与聊天记录导入</h1>
+  <div class="sub">v0.9.15 · 2026-09-11 · 影子设置页：截图直接喂进去，不用再手打</div>
+
+  <div class="card hero">
+    <p><strong>这次要你做两件事：</strong></p>
+    <ol>
+      <li><strong>重新部署云函数</strong> <code>noex-ai</code>（云函数代码改了，加了「读图」分支）</li>
+      <li>确认云函数超时时间已改成 <strong>60 秒</strong>（读一张图要 10-30 秒，不改一定失败）</li>
+    </ol>
+    <p class="muted">第一件就是开发者工具里右键那个文件夹 → 上传并部署，和上次一样。</p>
+    <p class="muted"><strong>第二件已经帮你预设好了</strong>：项目里加了
+      <code>cloudfunctions/noex-ai/config.json</code>（内容 <code>{"timeout": 60}</code>）。
+      部署时它会一起上传，正常情况下不用再手动改。但<strong>部署完请花十秒核对一次</strong>——
+      去控制台「云函数 → noex-ai → 函数配置」，看「超时时间」是不是 60 秒。
+      如果还显示 3 秒，就点右上角「编辑」手动改成 60（手动设的值优先级最高）。</p>
+  </div>
+
+  <h2>一、一个按钮，四条路</h2>
+
+  <div class="card">
+    <p>影子设置页原来只有「粘贴我复制好的聊天记录」一个按钮。现在换成一个统一入口
+       <strong>「导入微信聊天记录」</strong>，点开是四条路，你挑最省事的那条：</p>
+    <table>
+      <tr><th>路径</th><th>适合什么情况</th></tr>
+      <tr><td>从微信聊天里选截图</td><td>聊天界面截了图，图就躺在和 TA 的对话框里</td></tr>
+      <tr><td>从相册选截图</td><td>截图已经存进手机相册了</td></tr>
+      <tr><td>从微信聊天里选文件</td><td>事先导出过 txt 文件，发给了「文件传输助手」</td></tr>
+      <tr><td>粘贴剪贴板里已复制的文字</td><td>在微信里长按消息 → 多选 → 复制，回来点一下</td></tr>
+    </table>
+    <p class="muted">一次最多 9 张截图，可以连着截好几张一起选，程序会按顺序识别再拼起来。</p>
+    <div class="note">
+      <strong>为什么没有「一键导入聊天记录」？</strong><br>
+      微信<strong>不允许</strong>任何小程序读取用户的聊天记录，这是平台级限制，不是懒得做。
+      能走的只有两条：你自己复制文字、或者你自己截图。上面这个入口已经是能给到的最短路径了。
+    </div>
+  </div>
+
+  <h2>二、截图是怎么变成文字的</h2>
+
+  <div class="card">
+    <div class="flow">
+      选截图 → 压缩到几百 KB → 临时上传云存储 → 换个临时链接<br>
+      → 交给视觉模型转成文字 → <strong>立刻删掉云端那张图</strong> → 文字填进输入框
+    </div>
+    <p>转出来的是这种格式，一行一句，解析器正好认识：</p>
+    <div class="mock">
+      <div class="mock-line"><span>对方: 在忙吗</span><span class="mock-go">原样转写</span></div>
+      <div class="mock-line"><span>我: 没有 怎么了</span><span class="mock-go">原样转写</span></div>
+      <div class="mock-line"><span>对方: 没什么 就是想问问你</span><span class="mock-go">原样转写</span></div>
+    </div>
+    <h3>提示词把「不许编」放在第一条</h3>
+    <p>影子要模仿的是 TA <strong>真实的说话方式</strong>。模型在这里只要多写一句脑补的台词，
+       你后面调出来的影子就是假的——而且你完全看不出来。所以对模型的约束是：
+       只转写图片里真实存在的文字、看不清的字用 <code>□</code> 代替、看不清整条就跳过、
+       图片语音转账这些写占位符、不许总结不许翻译不许加标题。</p>
+    <p class="muted">另外还拦了一层：如果模型不听话，写了一整段「这段对话体现出…」的分析，
+       程序会把这种点评句剔掉，只留「说话人：内容」的行——语料里掺一段分析，画像会被带偏。</p>
+  </div>
+
+  <h2>三、识别完，你必须核对一件事</h2>
+
+  <div class="card">
+    <p>识别完会弹一句提醒，让你检查<strong>「我」和「对方」有没有标反</strong>。
+       微信气泡左边是对方、右边是自己，模型绝大多数时候能分对，但截图被裁过、或者用了深色模式时可能搞错。</p>
+    <p>标反的后果不轻：影子会拿<strong>你自己的口头禅</strong>去模仿 TA，用起来会很怪。
+       识别错的字也一样，直接在上面的输入框里改就行——那份文字本来就是可编辑的。</p>
+    <p class="muted">确认没问题，再点「开始分析」。分析这一步完全在手机本地做，不联网。</p>
+  </div>
+
+  <h2>四、失败提示对照表</h2>
+
+  <div class="card">
+    <p>图片识别比聊天多好几个环节，失败原因必须说清楚，不然你只会看到「失败了」然后放弃这个功能。
+       程序会把下面这些话直接告诉你：</p>
+    <table>
+      <tr><th>你看到的话</th><th>实际发生了什么 / 怎么办</th></tr>
+      <tr><td>识别超时了</td><td>云函数超时时间还是默认的 3 秒 → 改成 60 秒</td></tr>
+      <tr><td>现在配的模型不支持读图</td><td>要去云函数环境变量加 <code>NOEX_AI_VISION_MODEL</code></td></tr>
+      <tr><td>Key 无效</td><td>服务商后台看一眼，Key 是不是被删了或过期了</td></tr>
+      <tr><td>云函数还没部署</td><td>回开发者工具右键 <code>cloudfunctions/noex-ai</code> 上传部署</td></tr>
+      <tr><td>截图没传上去</td><td>云开发的「云存储」没开通，或当时网络不好</td></tr>
+      <tr><td>有图片格式不支持</td><td>只认 jpg / png / webp / gif，换一张</td></tr>
+      <tr><td>这张图里没读到聊天文字</td><td>截图太模糊，或者截的不是聊天界面</td></tr>
+    </table>
+    <p class="muted">一批图里只要有几张成功了，成功的那部分会照常填进去，同时告诉你「有 N 张没识别成功」——
+       不会因为一张失败就整批作废。</p>
+  </div>
+
+  <h2>五、隐私：哪些数据会离开手机</h2>
+
+  <div class="card">
+    <table>
+      <tr><th>数据</th><th>在哪儿</th></tr>
+      <tr><td>粘贴进来的文字</td><td class="green">只在手机本地</td></tr>
+      <tr><td>分析出来的语气画像</td><td class="green">只在手机本地</td></tr>
+      <tr><td>聊天截图（用截图导入时）</td><td>压缩后临时上云 → 转成文字 → <strong>立刻删除</strong></td></tr>
+      <tr><td>转出来的文字</td><td class="green">只在手机本地（你在对话里主动发的内容才会外发）</td></tr>
+    </table>
+    <p>删除不依赖页面是否关闭：不论识别成功还是失败，<strong>都会在那个环节里立刻调删除</strong>。
+       所以截图上云只存在十几秒，且用的是随机文件名。</p>
+    <div class="note">
+      <strong>提审要注意：隐私保护指引要加一项。</strong><br>
+      小程序现在会用到「相册 / 微信聊天里选中的图片」，后台填隐私指引时<strong>多勾一项「选中的照片或视频信息」</strong>。
+      反正主体变更后备案重来、隐私指引也要重提，顺手一起改掉就行。
+    </div>
+  </div>
+
+  <h2>六、成本与限制</h2>
+
+  <div class="card">
+    <h3>花钱吗</h3>
+    <p>图片按 token 计费。模型会把图缩放到约 800×800 再算，<strong>一张图封顶约 384 token</strong>，
+       转写出来的文字另算。粗估<strong>一张截图几分钱级别</strong>，比聊一天还便宜。
+       云存储那边：临时放十几秒就删，占用可以忽略。</p>
+    <h3>识不出来的东西</h3>
+    <ul>
+      <li>表情包、语音、视频通话记录 —— 只会留一个 <code>[表情]</code> <code>[语音]</code> 占位符</li>
+      <li>撤回了的消息、被马赛克的内容 —— 读不到</li>
+      <li>深色模式截图、字号特别小的截图 —— 准确率会掉</li>
+      <li>长截图（一次截几十屏）—— 建议分段截，一次 9 张以内更稳</li>
+    </ul>
+    <h3>必须联网</h3>
+    <p>图片识别靠云端模型，断网就用不了。但<strong>「粘贴文字」这条路完全不用联网</strong>，
+       所以网络不好时不会把你的路堵死——设置页里两个入口都在。</p>
+  </div>
+
+  <h2>七、这次改了什么代码</h2>
+
+  <div class="card">
+    <table>
+      <tr><th>文件</th><th>改了什么</th></tr>
+      <tr><td>cloudfunctions/noex-ai/index.js</td><td>新增 <code>action:'vision'</code> 分支、转写提示词、视觉模型名可配、模型名失效自动换名重试</td></tr>
+      <tr><td>utils/ai.js</td><td>新增 <code>ocrImage()</code>（45 秒超时）、失败分类更细（Key 没配 / Key 无效 / 模型不认图分开说）</td></tr>
+      <tr><td>utils/wechat.js</td><td>新增转写结果清洗与多张合并（剥围栏前言、去重、剔掉模型点评句）</td></tr>
+      <tr><td>pages/yingzi/*</td><td>导入入口、四条路、进度提示、识别后核对提醒</td></tr>
+      <tr><td>pages/privacy/*</td><td>隐私弹窗写明截图会临时上云并立刻删除</td></tr>
+    </table>
+    <p class="muted">测试：新增 <code>vision-test</code> 套件 154 项，全量 14 套件 1413 项全绿。</p>
+  </div>
+
+  <div class="foot">NOEX · v0.9.15 · import-v9.15</div>
+
+</div>
+</body>
+</html>

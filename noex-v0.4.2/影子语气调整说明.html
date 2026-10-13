@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NOEX v0.9.16 · 影子说话方式调整</title>
+<style>
+  :root {
+    --bg: #faf9f4;
+    --card: #ffffff;
+    --ink: #26231e;
+    --sub: #8f887b;
+    --faint: #b8b1a4;
+    --line: #e9e4d8;
+    --accent: #b5623c;
+    --accent-soft: #f5ece6;
+    --serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 48px 20px 80px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    line-height: 1.85;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; }
+  h1 {
+    font-family: var(--serif);
+    font-size: 30px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    margin: 0 0 8px;
+  }
+  .sub { color: var(--faint); font-size: 14px; letter-spacing: 1px; margin-bottom: 40px; }
+  h2 {
+    font-family: var(--serif);
+    font-size: 21px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    margin: 48px 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  h3 { font-size: 16px; font-weight: 600; margin: 28px 0 10px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 26px 28px;
+    margin-bottom: 16px;
+  }
+  .hero { background: var(--accent-soft); border-color: var(--accent-soft); }
+  p { margin: 10px 0; }
+  ul, ol { margin: 10px 0; padding-left: 22px; }
+  li { margin: 6px 0; }
+  code {
+    background: #f2efe7;
+    border-radius: 5px;
+    padding: 2px 7px;
+    font-family: ui-monospace, Consolas, monospace;
+    font-size: 14px;
+  }
+  .k { font-family: ui-monospace, Consolas, monospace; font-size: 14px; color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 15px; }
+  th, td { text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--sub); font-weight: 500; font-size: 14px; letter-spacing: 1px; }
+  .green { color: #3f7a4d; font-weight: 600; }
+  .red { color: #b5623c; font-weight: 600; }
+  .muted { color: var(--sub); font-size: 15px; }
+  .note {
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+    padding: 16px 20px;
+    margin: 18px 0;
+    font-size: 15px;
+  }
+  .bubble {
+    border-radius: 14px;
+    padding: 10px 15px;
+    margin: 6px 0;
+    font-size: 15px;
+    display: inline-block;
+    max-width: 82%;
+  }
+  .b-old { background: #f0ece2; color: var(--sub); text-decoration: line-through; }
+  .b-new { background: #e8f0e8; color: #2f5c3a; }
+  .row-b { margin: 4px 0; }
+  .foot { margin-top: 56px; text-align: center; color: var(--faint); font-size: 14px; letter-spacing: 2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>影子说话方式调整</h1>
+  <div class="sub">v0.9.16 · 2026-09-11 · 不再自带语气词，除非那就是 TA 的习惯</div>
+
+  <div class="card hero">
+    <p><strong>这次你什么都不用做。</strong></p>
+    <p class="muted">改的全是小程序内的代码，<strong>云函数一行没动，不需要重新部署</strong>。
+      上次 v0.9.15 部署好的那份继续用就行。在开发者工具里点一次「编译」即可看到效果。</p>
+  </div>
+
+  <h2>一、改掉的三处「AI 腔」</h2>
+
+  <div class="card">
+    <h3>1. 开场白没了</h3>
+    <p>以前一进影子聊天页，它会先自己说一句：</p>
+    <div class="row-b"><span class="bubble b-old">……嗯。</span></div>
+    <p>这句话是<strong>写死的</strong>，跟你喂进去的聊天记录毫无关系——你连话都还没说，它先「嗯」了一声，
+      像是敷衍。现在的做法是：<strong>开场只留一行中性说明，第一句话完全交给 AI 按 TA 的方式说</strong>，
+      而且由你先开口。</p>
+
+    <h3>2. 被拆穿时的台词也改了</h3>
+    <p>你问它「你是 AI 吧」时，它会先承认一句，再弹揭示层：</p>
+    <div class="row-b"><span class="bubble b-old">……被你发现了。</span></div>
+    <div class="row-b"><span class="bubble b-new">被你发现了。</span></div>
+    <p class="muted">开头那个「……」跟上面那个「……嗯」是同一路数——为了显得「像 AI」而加出来的停顿腔。
+      真人被拆穿时就一句话，不铺垫。</p>
+
+    <h3>3. 语气词这件事，从「统计」改成了「认定」</h3>
+    <p>这才是根子上的问题。以前的做法是：只要 TA 的聊天记录里出现过某个语气词，就写进画像，
+      于是画像摘要里会冒出这种让人一头雾水的东西——</p>
+    <div class="row-b"><span class="bubble b-old">· 语气词：嗯、啊、哦、呀</span></div>
+    <p>「啊」「哦」「呢」「吧」在中文里本来就到处都是，按出现次数一排序，必然把它们顶到最前面。
+      模型一看画像写着「TA 爱用语气词」，回你一句就挂一个，影子就成了一嘴语气词的假人。</p>
+    <p>现在加了门槛，<strong>过不了门槛就当作「这个人不用语气词」，而且在画像里写成明确禁令</strong>：</p>
+    <div class="row-b"><span class="bubble b-new">· 不用语气词。「啊」「呀」「啦」「呢」「吧」「哦」「嘛」「嘿」「诶」「～」这些一个都不要加——不加语气词，才像 TA。</span></div>
+    <p class="muted">只写「TA 不带语气词」是不够的——模型会默认「聊天就该加个呀/啦」，照样往上堆。
+      必须写死一句「不许加」，它才会干干地说话。</p>
+  </div>
+
+  <h2>二、门槛具体是多少</h2>
+
+  <div class="card">
+    <table>
+      <tr><th>判定项</th><th>要求</th><th>为什么这么定</th></tr>
+      <tr>
+        <td>整体比例</td>
+        <td>带语气词的消息占 <span class="k">≥ 20%</span></td>
+        <td>实测真常带的人 ≥30%，普通人只有 2%~10%，20% 是中间那条线</td>
+      </tr>
+      <tr>
+        <td>绝对次数</td>
+        <td>全文至少出现 <span class="k">2 次</span></td>
+        <td>光看比例会被小样本骗到：5 条消息里蹦 1 个「啊」正好是 20%，压线过关。
+          加这一条，把「偶尔用了一次」挡住</td>
+      </tr>
+      <tr>
+        <td>单个语气词</td>
+        <td>平均每 <span class="k">6~7 条</span>至少 1 次</td>
+        <td>避免把偏爱的那个字和随手带的字混在一起列</td>
+      </tr>
+    </table>
+    <p><strong>达标会怎样：</strong>画像写「高频语气词：呀（这是 TA 真的习惯，可以自然带出来，但不要每句都挂）」，
+      你看到的画像摘要写「· 说话爱带「呀」」。</p>
+    <p><strong>不达标会怎样：</strong>画像写上面那句禁令，摘要里<strong>一个字都不提</strong>语气词。</p>
+    <div class="note">
+      <strong>也就是说：如果 TA 本人就是满嘴「呀」「啦」，影子照样会用。</strong>
+      这次改的不是「禁用语气词」，而是「只在证据够硬的时候才用」。
+    </div>
+  </div>
+
+  <h2>三、已经建好的影子会怎样</h2>
+
+  <div class="card">
+    <p>画像存在你手机本地，升级前建的影子是<strong>老格式</strong>——里面只有「出现过哪些语气词」，
+      没有新加的比例和次数。为这种情况留了兜底：</p>
+    <ul>
+      <li><strong>老画像一律走「不用语气词」</strong>。因为升级前的语气词榜单是按「出现就记」的旧口径算的，
+        不做处理的话，这次改动对老用户等于没生效。</li>
+      <li><strong>摘要和口头禅列表里，纯语气词会被滤掉</strong>，不会再出现「常说「嗯」「呀」」这种行。</li>
+    </ul>
+    <p class="muted">想彻底按新规矩重算，就去影子设置页重新分析一次聊天记录。</p>
+  </div>
+
+  <h2>四、怎么验证</h2>
+
+  <div class="card">
+    <ol>
+      <li>开发者工具点「编译」，切到影子页——<strong>不该再看到「……嗯。」</strong></li>
+      <li>给影子随便发一句，看它回的内容里有没有平白多出来的「呀」「啦」「哦」。
+        如果你喂的聊天记录里 TA 本来就这么说话，那它带了才是对的。</li>
+      <li>回到设置页看画像摘要，语气词那行要么写成「说话爱带「X」」（真有这个习惯），要么整行不存在。</li>
+    </ol>
+  </div>
+
+  <h2>五、这次没动的东西</h2>
+
+  <div class="card">
+    <ul>
+      <li><strong>云函数</strong>：一行没改，<strong>不需要重新部署</strong>。</li>
+      <li><strong>图片导入、聊天记录导入</strong>：v0.9.15 做的那些照旧。</li>
+      <li><strong>亲密称呼高压线</strong>：仍然是「只有样本里 TA 真叫过才允许用」，这条没变。</li>
+    </ul>
+    <p class="muted"><strong>自测：</strong>15 套件 1441 项全绿（其中 4 项是这次新加的「小样本陷阱」用例），三目录逐字节一致。</p>
+  </div>
+
+  <div class="foot">NOEX · v0.9.16</div>
+
+</div>
+</body>
+</html>

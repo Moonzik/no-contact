@@ -8,6 +8,10 @@ const voiceprint = require('../../utils/voiceprint.js');
 const user = require('../../utils/user.js');
 const ai = require('../../utils/ai.js');
 
+/* 分享文案：中性，不出现断联 / 前任 / 失恋，避免替用户公开私事 */
+const SHARE_TITLES = ['把时间留给自己', '今天也要好好过', '慢一点，也没关系'];
+const SHARE_IMG = '/images/agent.png';
+
 Page({
   data: {
     mode: 'view', // view | setup | analyze | chat
@@ -24,6 +28,9 @@ Page({
     /* v0.9.4：一进设置页就看一眼剪贴板，有聊天记录就直接提示，省得用户不知道去哪复制 */
     clipHint: '',
     clipLines: 0,
+    /* v0.9.15：图片导入进度（识别中要等 20-40 秒，必须让用户看到在动） */
+    impBusy: false,
+    impTip: '',
 
     /* analyze */
     analyzeStep: 0,
@@ -69,6 +76,8 @@ Page({
   _userCount: 0,
   _parseCache: null,
   _msgSeq: 0,
+  /* v0.9.15：同一时间只允许一批图片在识别，避免连点造成重复上传 */
+  _impBusy: false,
 
   onLoad() {
     /* v0.9.0：chat 模式整页锁高为 windowHeight（不含 tabBar）。
@@ -358,6 +367,262 @@ Page({
     });
   },
 
+  /* ────────────────────────────────────────────────────────
+     v0.9.15 · 导入微信聊天记录
+     四条路，一个入口：
+       · 从微信聊天里选截图    ← 新增，最直观
+       · 从相册选截图          ← 新增
+       · 从微信聊天里选文件    (txt / html 导出件，老路径)
+       · 粘贴剪贴板里已复制的文字（最省事，一直在）
+     ⚠️ 微信不允许任何小程序直接读聊天记录，所以不存在「一键导入聊天」——
+        只能是用户自己选、自己给。这条路已经是最短的了。
+     ──────────────────────────────────────────────────────── */
+
+  onImportMenu() {
+    if (user.requireLogin('导入聊天记录需要登录一次。')) return;
+    if (this._impBusy) return;
+    const self = this;
+    wx.showActionSheet({
+      itemList: [
+        '从微信聊天里选截图',
+        '从相册选截图',
+        '从微信聊天里选文件',
+        '粘贴剪贴板里已复制的文字'
+      ],
+      success(res) {
+        const i = res.tapIndex;
+        if (i === 0) self.onPickChatImage();
+        else if (i === 1) self.onPickAlbumImage();
+        else if (i === 2) self.onPickFile();
+        else if (i === 3) self.onPasteClipboard();
+      },
+      fail() { /* 用户取消，静默 */ }
+    });
+  },
+
+  /* 从「微信聊天」里选图片：chooseMessageFile 的 type:'image' 就是干这个的 */
+  onPickChatImage() {
+    const self = this;
+    wx.chooseMessageFile({
+      count: 9,
+      type: 'image',
+      success(res) {
+        self.runVisionImport((res && res.tempFiles) || [], '微信聊天截图');
+      },
+      fail(err) {
+        const msg = (err && err.errMsg) || '';
+        if (/cancel/i.test(msg)) return;
+        if (/not supported/i.test(msg)) {
+          self.setData({ shFile: '这里选不了截图' });
+          wx.showModal({
+            title: '这里选不了',
+            content: '微信电脑版不支持从会话里选图片。\n\n换手机打开这个小程序，或者直接用「粘贴聊天记录」。',
+            showCancel: false,
+            confirmText: '知道了'
+          });
+          return;
+        }
+        if (/privacy/i.test(msg)) { self.warnImportPrivacy(); return; }
+        self.setData({ shFile: '选截图失败，试试粘贴' });
+      }
+    });
+  },
+
+  /* 从手机相册选截图（用户自己截好存进相册的情况） */
+  onPickAlbumImage() {
+    const self = this;
+    if (typeof wx.chooseMedia !== 'function') {
+      wx.showToast({ title: '当前微信版本不支持选图', icon: 'none' });
+      return;
+    }
+    wx.chooseMedia({
+      count: 9,
+      mediaType: ['image'],
+      sourceType: ['album'],
+      success(res) {
+        const files = ((res && res.tempFiles) || []).map((f) => ({
+          path: f.tempFilePath,
+          size: f.size
+        }));
+        self.runVisionImport(files, '相册截图');
+      },
+      fail(err) {
+        const msg = (err && err.errMsg) || '';
+        if (/cancel/i.test(msg)) return;
+        if (/privacy/i.test(msg)) { self.warnImportPrivacy(); return; }
+        self.setData({ shFile: '选图失败' });
+      }
+    });
+  },
+
+  warnImportPrivacy() {
+    wx.showModal({
+      title: '需要隐私授权',
+      content:
+        '小程序还没通过「用户隐私保护指引」审核，暂时选不了图片。\n\n' +
+        '可以先用「粘贴剪贴板里已复制的文字」。',
+      showCancel: false,
+      confirmText: '知道了'
+    });
+  },
+
+  /* 一批图：逐张 压缩 → 上传云存储 → 换临时链接 → 交视觉模型转写 → 立刻删掉云上那张 */
+  runVisionImport(files, label) {
+    const self = this;
+    if (this._impBusy) return;
+    if (!ai.isEnabled()) {
+      wx.showModal({
+        title: '图片识别没开',
+        content:
+          ai.describeVisionErr({ code: ai.mode() === 'off' ? 'off' : 'cloud_unavailable' }) +
+          '\n\n也可以把截图里的字长按复制出来，粘到下面输入框。',
+        showCancel: false,
+        confirmText: '知道了'
+      });
+      return;
+    }
+    const list = (files || []).filter((f) => f && f.path).slice(0, 9);
+    if (!list.length) { wx.showToast({ title: '没选到图片', icon: 'none' }); return; }
+
+    /* 直接调 wx.cloud.uploadFile 之前必须先 init：用户这一轮要是还没触发过 AI 调用，
+       云开发其实没初始化，上传只会以「upload_failed」收场，而真实原因完全对不上。 */
+    if (!ai.cloudInit()) {
+      wx.showModal({
+        title: '云开发没连上',
+        content:
+          '图片要经云存储中转一道，现在云开发没初始化成功。\n\n' +
+          '检查 utils/ai-config.js 里的环境 ID，或者先用「粘贴剪贴板」这条路（不用联网）。',
+        showCancel: false,
+        confirmText: '知道了'
+      });
+      return;
+    }
+
+    this._impBusy = true;
+    this.setData({ impBusy: true, impTip: '准备上传…', shFile: '' });
+
+    const texts = [];
+    let failed = 0;
+    let lastErr = null;
+    const step = (i) => {
+      if (i >= list.length) {
+        self.finishVisionImport(texts, label, list.length, failed, lastErr);
+        return;
+      }
+      self.setData({ impTip: '正在识别第 ' + (i + 1) + ' / ' + list.length + ' 张…（每张约 10-30 秒）' });
+      self.visionOne(list[i], (err, text) => {
+        if (err) { failed++; lastErr = err; }
+        else if (text) texts.push(text);
+        step(i + 1);
+      });
+    };
+    step(0);
+  },
+
+  visionOne(file, cb) {
+    const self = this;
+    const path = file.path;
+    const name = file.name || path || '';
+    const ext = ((/\.([a-z0-9]{2,5})$/i.exec(name) || [])[1] || 'jpg').toLowerCase();
+    /* 视觉模型只认这四种格式，选到别的先拦下来，别白跑一趟 */
+    if (['jpg', 'jpeg', 'png', 'webp', 'gif'].indexOf(ext) < 0) {
+      cb({ code: 'bad_format' }, null);
+      return;
+    }
+    if (file.size && file.size > 12 * 1024 * 1024) {
+      cb({ code: 'vision_failed' }, null);
+      return;
+    }
+    if (!wx.cloud || typeof wx.cloud.uploadFile !== 'function') {
+      cb({ code: 'cloud_unavailable' }, null);
+      return;
+    }
+
+    /* 先压缩：截图动辄 2-4 MB，压完通常几百 KB，上传快、也省 token */
+    const compress = (next) => {
+      if (typeof wx.compressImage !== 'function') { next(path); return; }
+      wx.compressImage({
+        src: path,
+        quality: 70,
+        success(r) { next((r && r.tempFilePath) || path); },
+        fail() { next(path); }
+      });
+    };
+
+    compress((p) => {
+      const realExt = ext === 'jpeg' ? 'jpg' : ext;
+      const cloudPath = 'import/' + Date.now() + '-' + Math.floor(Math.random() * 1000000) + '.' + realExt;
+      wx.cloud.uploadFile({
+        cloudPath: cloudPath,
+        filePath: p,
+        success(up) {
+          const fileID = up && up.fileID;
+          if (!fileID) { cb({ code: 'upload_failed' }, null); return; }
+          wx.cloud.getTempFileURL({
+            fileList: [fileID],
+            success(r) {
+              const url = r && r.fileList && r.fileList[0] && r.fileList[0].tempFileURL;
+              if (!url) { self.dropCloudFiles([fileID]); cb({ code: 'upload_failed' }, null); return; }
+              ai.ocrImage(url, (err, text) => {
+                /* 不论成败，立刻删掉云上那张。聊天截图是最私密的东西，
+                   没有任何理由让它多留一秒 */
+                self.dropCloudFiles([fileID]);
+                cb(err, text);
+              });
+            },
+            fail(e) {
+              self.dropCloudFiles([fileID]);
+              console.warn('[yingzi] tempFileURL fail', e && e.errMsg);
+              cb({ code: 'upload_failed' }, null);
+            }
+          });
+        },
+        fail(e) {
+          const msg = (e && e.errMsg) || '';
+          console.warn('[yingzi] uploadFile fail', msg);
+          cb({ code: /privacy/i.test(msg) ? 'cloud_unavailable' : 'upload_failed' }, null);
+        }
+      });
+    });
+  },
+
+  dropCloudFiles(ids) {
+    try {
+      if (!ids || !ids.length || !wx.cloud || typeof wx.cloud.deleteFile !== 'function') return;
+      wx.cloud.deleteFile({
+        fileList: ids,
+        fail(e) { console.warn('[yingzi] deleteFile fail', e && e.errMsg); }
+      });
+    } catch (e) { /* 删不掉也不能影响主流程 */ }
+  },
+
+  finishVisionImport(texts, label, total, failed, lastErr) {
+    this._impBusy = false;
+    this.setData({ impBusy: false, impTip: '' });
+    const merged = wechat.mergeTranscripts(texts);
+    if (!merged) {
+      const why = lastErr
+        ? ai.describeVisionErr(lastErr)
+        : '这几张图里都没读到聊天文字。换清晰一点、只截对话区域的截图试试。';
+      wx.showModal({ title: '没读到聊天内容', content: why, showCancel: false, confirmText: '知道了' });
+      return;
+    }
+    const ok = this.applyLogText(merged, label + ' · ' + texts.length + '/' + total + ' 张');
+    if (!ok) return;
+    if (failed) {
+      wx.showToast({ title: '有 ' + failed + ' 张没识别成功', icon: 'none', duration: 2500 });
+    }
+    wx.showModal({
+      title: '识别完了，检查一下',
+      content:
+        '上面框里是识别出来的文字。\n\n' +
+        '重点看「我」和「对方」有没有标反，识别错的字可以直接改。\n' +
+        '确认没问题再点「开始分析」。',
+      showCancel: false,
+      confirmText: '好'
+    });
+  },
+
   /* 展开 / 收起「怎么导出聊天记录」说明 */
   onToggleHowto() {
     this.setData({ showHowto: !this.data.showHowto });
@@ -522,14 +787,13 @@ Page({
           (S.shadow.name || '') +
           '。它不会主动找你，也不会替ta做任何承诺。）'
       };
-      const intro2 = { role: 'ai', avatar: this.data.agentImg, text: '……嗯。', tip: '' };
       intro1._k = 0;
-      intro2._k = 1;
-      msgs = [intro1, intro2];
-      S.shadow.msgs = [
-        { role: 'sys', text: intro1.text, t: Date.now() },
-        { role: 'ai', text: '……嗯。', t: Date.now() }
-      ];
+      /* v0.9.16：取消写死的开场白「……嗯。」。
+         那是"敷衍"的语气，跟 TA 本人平时怎么说话毫无关系；用户一进来先看到
+         一句莫名其妙的「嗯。」，只会以为影子就这水平。现在开场只留中性说明，
+         第一句话完全交给 AI 按 TA 的方式说（用户先开口）。 */
+      msgs = [intro1];
+      S.shadow.msgs = [{ role: 'sys', text: intro1.text, t: Date.now() }];
       storage.save(S);
     }
     this._msgSeq = msgs.length;
@@ -843,5 +1107,14 @@ Page({
     setTimeout(() => {
       this.setData({ anchor: 'm' + last._k });
     }, 30);
+  },
+
+  /* 分享文案同首页：中性，不暴露用户在用断联日记（原因见 today.js 注释） */
+  onShareAppMessage() {
+    return {
+      title: SHARE_TITLES[Math.floor(Math.random() * SHARE_TITLES.length)],
+      path: '/pages/onboard/onboard',
+      imageUrl: SHARE_IMG
+    };
   }
 });

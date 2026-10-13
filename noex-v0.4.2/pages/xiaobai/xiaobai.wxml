@@ -22,6 +22,38 @@
     </view>
   </view>
 
+  <!-- v0.9.14 使用说明：第一次进来自动展开一次，点「收起」后不再自动弹。
+       内容用小白第一人称写——它是这个页面的人格，说明也该由它自己介绍自己。 -->
+  <view class="xb-help">
+    <view class="xb-help-toggle" bindtap="onToggleHowto">
+      {{showHowto ? '收起' : '小白能做什么 · 怎么用'}}
+    </view>
+
+    <view class="xb-help-body" wx:if="{{showHowto}}">
+      <view class="xh-sec">
+        <view class="xh-t">我是谁</view>
+        <view class="xh-line">一只白狐狸。你手痒想联系 TA 的时候，我坐你旁边。</view>
+      </view>
+
+      <view class="xh-sec">
+        <view class="xh-t">上面那排是语气</view>
+        <view class="xh-line">想被哄就选「宠溺」，想被骂醒就选「毒舌」。随时能换，聊过的不会丢。</view>
+      </view>
+
+      <view class="xh-sec">
+        <view class="xh-t">跟我说什么都行</view>
+        <view class="xh-line">想 TA 了、睡不着、今天差点又点开那个对话框，或者纯粹想找个人废话两句。不用组织语言，也不用讲道理。</view>
+      </view>
+
+      <view class="xh-sec">
+        <view class="xh-t">我不会做的</view>
+        <view class="xh-line">不劝你「该放下了」，不教你怎么挽回，你没问我就不给建议。</view>
+      </view>
+
+      <view class="xh-foot">你说的话只存在你自己的手机里。开了 AI 模式时，对话内容会用来生成回复。</view>
+    </view>
+  </view>
+
   <!-- 聊天消息流 -->
   <scroll-view class="msgs" scroll-y="true" scroll-into-view="{{anchor}}"
     scroll-with-animation="true" enhanced="true">

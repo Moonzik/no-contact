@@ -77,6 +77,115 @@ function hourBucket() {
   return 'late';
 }
 
+/* ───────── v0.9.12 打卡日历 ───────── */
+
+function pad2(n) { return ('0' + n).slice(-2); }
+
+/**
+ * 拼 "YYYY-MM-DD"
+ */
+function dateStr(y, m, d) { return y + '-' + pad2(m) + '-' + pad2(d); }
+
+/**
+ * 把某个月的打卡 / 复发记录铺成 7 列网格（周日打头）
+ * @param {number} y 年
+ * @param {number} m 月（1-12）
+ * @param {object} checkMap { 'YYYY-MM-DD': 1 }
+ * @param {object} relMap   { 'YYYY-MM-DD': 1 }
+ * @param {string} today    'YYYY-MM-DD'
+ * @returns {Array} [{ k, d, cls, blank }]
+ *
+ * 注意：日期都是等长的 'YYYY-MM-DD'，所以字符串比较就等于日期比较，
+ * 不需要构造 Date（也就避开了 iOS 上 ISO 字符串解析的老问题）。
+ */
+function calendarOf(y, m, checkMap, relMap, today, noteMap) {
+  const cells = [];
+  const lead = new Date(y, m - 1, 1).getDay();        // 0 = 周日
+  const days = new Date(y, m, 0).getDate();           // 该月天数
+  for (let i = 0; i < lead; i++) cells.push({ k: 'b' + i, blank: true, cls: 'cal-cell blank' });
+  for (let d = 1; d <= days; d++) {
+    const ds = dateStr(y, m, d);
+    const future = ds > today;
+    const on = !!checkMap[ds];
+    const rel = !!relMap[ds];
+    let cls = 'cal-cell';
+    if (future) cls += ' future';
+    else if (rel) cls += ' rel';       // 复发优先：这天先记断过
+    else if (on) cls += ' on';
+    if (ds === today) cls += ' today';
+    /* v0.9.13 文字日记：写过日记的日子加一个小点（不是状态，是痕迹） */
+    if (noteMap && noteMap[ds]) cls += ' note';
+    cells.push({ k: ds, d: d, cls: cls });
+  }
+  return cells;
+}
+
+/**
+ * 统计某个 map 里落在指定月份的天数
+ */
+function countInMonth(map, y, m) {
+  const prefix = y + '-' + pad2(m) + '-';
+  let n = 0;
+  for (const k in map) {
+    if (k.indexOf(prefix) === 0) n++;
+  }
+  return n;
+}
+
+/**
+ * 最长连续打卡天数（跨月也算，所以直接吃全量日期）
+ */
+function longestStreak(dateStrs) {
+  if (!dateStrs || !dateStrs.length) return 0;
+  const arr = dateStrs.slice().sort();
+  let best = 1;
+  let cur = 1;
+  for (let i = 1; i < arr.length; i++) {
+    const a = parseDate(arr[i - 1]);
+    const b = parseDate(arr[i]);
+    if (!a || !b) continue;
+    const diff = Math.round((b - a) / 86400000);
+    if (diff === 1) {
+      cur++;
+      if (cur > best) best = cur;
+    } else if (diff !== 0) {
+      cur = 1;
+    }
+  }
+  return best;
+}
+
+/**
+ * 上一个月 / 下一个月（跨年处理）
+ */
+function shiftMonth(y, m, delta) {
+  const t = y * 12 + (m - 1) + delta;
+  return { y: Math.floor(t / 12), m: (t % 12 + 12) % 12 + 1 };
+}
+
+/* ───────── v0.9.13 缺口二 · 文字日记 / 留白瓶封存 ───────── */
+
+/**
+ * 加 n 年（留白瓶「一年后打开」用）
+ * 用数字构造，不碰 Date 字符串解析。2 月 29 日 + 1 年 → 3 月 1 日，可接受。
+ */
+function addYears(ds, n) {
+  const d = parseDate(ds);
+  if (!d) return ds;
+  const nd = new Date(d.getFullYear() + n, d.getMonth(), d.getDate());
+  return dateStr(nd.getFullYear(), nd.getMonth() + 1, nd.getDate());
+}
+
+/**
+ * "2026-09-11" → "9 月 11 日"（日期列表里用的短格式）
+ */
+function mdd(ds) {
+  if (!ds) return '';
+  const p = String(ds).split('-');
+  if (p.length < 3) return String(ds);
+  return parseInt(p[1], 10) + ' 月 ' + parseInt(p[2], 10) + ' 日';
+}
+
 module.exports = {
   todayStr,
   parseDate,
@@ -84,5 +193,12 @@ module.exports = {
   fmtDate,
   pick,
   fmtRemain,
-  hourBucket
+  hourBucket,
+  dateStr,
+  calendarOf,
+  countInMonth,
+  longestStreak,
+  shiftMonth,
+  addYears,
+  mdd
 };

@@ -1,12 +1,13 @@
 // app.js — 全局入口
 const storage = require('./utils/storage.js');
 const ai = require('./utils/ai.js');
+const errlog = require('./utils/errlog.js');
 
 App({
   globalData: {
-    version: '0.9.10',  // 2026-09-11 影子去"亲密称呼/答非所问"（重写铁律 0 + 新增 0b 高压线）+ 修 prompt 重复输入真 bug（dropDupTail）+ 输入框高度稳定化 + 跨零点次数重置
+    version: '0.9.16',  // 2026-09-11 影子去语气词：①取消写死开场白「……嗯。」与起疑承认句里的语气词；②语气词加频率门槛（toneRate<0.2 一律不算特点），画像改为明确禁令「不用语气词」，只有 TA 真高频才允许用；③用户看的画像摘要与老画像口头禅过滤纯语气词
     name: '断联日记 NOEX',
-    build: 'shadow-agent-v9.10',
+    build: 'no-tone-v9.16',
     /* 从功能页点「去登录」过来时置 true，me 页 onShow 消费掉并展开登录卡 */
     autoOpenLogin: false,
     /* 隐私授权：onNeedPrivacyAuthorization 触发时存下 resolve，由 privacy 页消费 */
@@ -14,6 +15,11 @@ App({
   },
 
   onLaunch() {
+    /* v0.9.14：先挂异常监听，越早越好——后面任何一步出错都会被记下来。
+       记在本地（不联网、不上传），用户在「我 → 运行记录」里能看到并复制给我们。
+       这是上线后排查"用户说用不了但我这边好好的"的仅有线索来源。 */
+    errlog.install(this.globalData.version, this.globalData.build);
+
     // 跨天检查：挂机过午夜后回到 today 页时自动刷新
     storage.initSessionTimer();
     this.initPrivacy();

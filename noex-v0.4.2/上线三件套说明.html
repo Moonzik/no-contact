@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOEX 上线三件套说明</title>
+<style>
+  :root{
+    --bg:#faf9f4; --card:#ffffff; --line:#e8e3d8; --ink:#26231e;
+    --sub:#5f594e; --faint:#a49c8d; --accent:#8a6f4e; --ok:#2f7a55; --warn:#b4552d;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:48px 20px 80px; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;
+    font-size:15px; line-height:1.75; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px; margin:0 auto;}
+  h1{font-size:26px; font-weight:600; margin:0 0 8px; letter-spacing:-.3px;}
+  .lede{color:var(--sub); font-size:14px; margin-bottom:6px;}
+  .stamp{color:var(--faint); font-size:13px; margin-bottom:34px;}
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:26px 28px; margin-bottom:18px;
+  }
+  .card h2{font-size:17px; font-weight:600; margin:0 0 6px; display:flex; align-items:center; gap:10px;}
+  .num{
+    display:inline-flex; width:24px; height:24px; border-radius:8px;
+    background:var(--ink); color:#faf9f4; font-size:13px; font-weight:600;
+    align-items:center; justify-content:center; flex:0 0 auto;
+  }
+  .num.ok{background:var(--ok);}
+  .num.warn{background:var(--warn);}
+  .card p{margin:10px 0; color:var(--sub); font-size:14px;}
+  .card p.tight{margin:6px 0;}
+  ul{margin:10px 0 0; padding-left:0; list-style:none;}
+  li{position:relative; padding-left:20px; margin:9px 0; color:var(--sub); font-size:14px;}
+  li::before{
+    content:""; position:absolute; left:4px; top:10px;
+    width:6px; height:6px; border-radius:2px; background:var(--accent); opacity:.65;
+  }
+  li b, p b{color:var(--ink); font-weight:600;}
+  code{
+    background:#f2efe6; border:1px solid var(--line); border-radius:6px;
+    padding:1px 6px; font-size:13px; font-family:ui-monospace,Consolas,monospace; color:var(--ink);
+  }
+  .path{
+    display:block; background:#f2efe6; border:1px solid var(--line); border-radius:10px;
+    padding:12px 14px; margin:10px 0; font-size:13px;
+    font-family:ui-monospace,Consolas,monospace; color:var(--ink); word-break:break-all;
+  }
+  .steps{counter-reset:s; margin:14px 0 0; padding:0; list-style:none;}
+  .steps li{padding-left:34px; margin:12px 0;}
+  .steps li::before{
+    counter-increment:s; content:counter(s);
+    position:absolute; left:0; top:1px; width:22px; height:22px;
+    border-radius:50%; background:#f2efe6; border:1px solid var(--line);
+    color:var(--accent); font-size:12px; display:flex; align-items:center; justify-content:center;
+  }
+  .steps li{position:relative;}
+  .note{
+    background:#f6f3ea; border:1px solid var(--line); border-radius:12px;
+    padding:14px 16px; margin-top:14px; font-size:13.5px; color:var(--sub); line-height:1.7;
+  }
+  .note b{color:var(--ink);}
+  .grid{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px;}
+  .pill{
+    background:#f6f3ea; border:1px solid var(--line); border-radius:10px;
+    padding:8px 12px; font-size:13px; color:var(--sub);
+  }
+  .pill b{color:var(--ink);}
+  table{width:100%; border-collapse:collapse; margin-top:12px; font-size:13.5px;}
+  th,td{text-align:left; padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top;}
+  th{color:var(--faint); font-weight:500; font-size:12.5px; text-transform:none;}
+  td{color:var(--sub);}
+  td.ok{color:var(--ok); font-weight:600; white-space:nowrap;}
+  .foot{text-align:center; color:var(--faint); font-size:13px; margin-top:36px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>上线三件套已补齐</h1>
+  <div class="lede">断联日记 NOEX · v0.9.11</div>
+  <div class="stamp">2026-09-11 · 全部本地测试通过，可以直接编译体验</div>
+
+  <div class="card">
+    <h2><span class="num ok">1</span>用户服务协议</h2>
+    <p class="tight">入口：<b>我 → 用户服务协议</b>（在「关于断联日记」卡片里，隐私指引上面一条）</p>
+    <p class="tight">八节，全是大白话：这是什么 / 你的数据存在哪里 / 关于小白和影子 / 你需要遵守的 / 免责 / 遇到危机时 / 内容与版权 / 协议变更与联系。</p>
+    <p>里面特意写清了三件容易被挑的事：</p>
+    <ul>
+      <li><b>不提供医疗服务，也不是咨询服务</b>——避免被当成医疗行为</li>
+      <li><b>对话内容会经云服务转发给第三方大模型</b>（DeepSeek）用于生成回复，并提醒别发身份证号、银行卡号这类信息</li>
+      <li><b>影子的回复不代表那个人</b>，别把它当成对方的回应</li>
+    </ul>
+    <p class="tight">页面底部还有一个入口，可以直接打开微信托管的《用户隐私保护指引》。</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="num ok">2</span>意见反馈</h2>
+    <p class="tight">入口：<b>我 → 意见反馈</b>。弹层里两条路：</p>
+    <ul>
+      <li><b>在线留言</b>——直接打开微信客服会话，你在这里能看到并回复用户</li>
+      <li><b>复制反馈模板</b>——不依赖后台的备用路径。自动带上版本号、AI 模式、设备、使用天数、时间，用户贴上就能发</li>
+    </ul>
+    <div class="note">
+      看到那句「登录后才能使用这个功能」了吗——客服是<b>需要你在后台开通一次</b>的，见下面第 4 张卡片。
+      没开通时点「在线留言」会提示未开启客服功能，所以我把「复制反馈模板」做成了兜底。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num ok">3</span>分享（好友 + 朋友圈）</h2>
+    <p class="tight">入口：<b>右上角菜单 → 转发</b>；首页还多了「分享到朋友圈」。小白、影子、留白瓶页也都能转发给好友。</p>
+    <p><b>文案是刻意做素的：</b></p>
+    <ul>
+      <li>标题只从「把时间留给自己 / 今天也要好好过 / 慢一点，也没关系」里随机取，<b>不出现断联、前任、失恋、天数</b></li>
+      <li>配图用不带字的白狐狸，不是小程序截图——截图会把标题栏「断联日记」一起带出去</li>
+      <li>落地页是引导页：老用户会被自动送进首页，新用户看到完整介绍</li>
+    </ul>
+    <div class="note">
+      这是断联日记，卡片上写着「我在用断联日记」等于替用户向所有好友公开私事，没人敢转。
+      所以分享出去的东西<b>和情绪、感情完全不挂钩</b>——别人看不出这是什么产品。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num warn">4</span>你要做的一步：开通客服</h2>
+    <p class="tight">mp 后台 → <b>功能 → 客服</b> → 添加客服人员（填你自己的微信号，用微信扫一下绑定）。</p>
+    <ul class="steps">
+      <li>登录 mp.weixin.qq.com，左侧「功能」里找「客服」</li>
+      <li>点「添加客服人员」，填你常用的微信号，让对方扫二维码确认</li>
+      <li>回到小程序，点「我 → 意见反馈 → 在线留言」，能打开会话就成功了</li>
+    </ul>
+    <div class="note">
+      没配也能上线，只是用户点「在线留言」时会看到「该小程序未开启客服功能」。
+      建议配一下——用户遇到问题无处可说，最后都会变成应用商店里的一星评价。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">5</span>顺手修的两个真问题</h2>
+    <ul>
+      <li><b>留白瓶写完一条，输入框不清空</b>——和小白、影子是同一个坑（原生 textarea 在聚焦时忽略 value 更新），上次修那两页时漏了留白瓶，今天补上了</li>
+      <li><b>「所有数据仅保存在本机，不上传服务器」表述不实</b>——接了 AI 之后，对话内容确实会发给大模型，这句话站不住。已改成：「断联记录、留白瓶只存在你的手机里；只有你在对话里主动发送的内容，会用于生成回复」。隐私弹窗里同款表述也一起改了</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">6</span>执照下来后可以补一行</h2>
+    <p class="tight">协议里「运营者」现在写的是泛指：</p>
+    <span class="path">运营者：本小程序的开发者（已登记个体工商户）。</span>
+    <p class="tight">执照到手后把具体名称替换进去更规范，改这一行就行：</p>
+    <span class="path">pages/agreement/agreement.js</span>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">7</span>测试结果</h2>
+    <p class="tight">新增第 10 个测试套件 <code>launch-kit-test.js</code>（117 项：协议合规、反馈入口、分享文案中性、留白瓶清空、数据表述准确性）。全量回归：</p>
+    <table>
+      <tr><th>套件</th><th>结果</th></tr>
+      <tr><td>平台审核扫描</td><td class="ok">15 ✓</td></tr>
+      <tr><td>静态审计</td><td class="ok">150 ✓</td></tr>
+      <tr><td>E2E</td><td class="ok">135 ✓</td></tr>
+      <tr><td>集成测试</td><td class="ok">26 ✓</td></tr>
+      <tr><td>微信 API 模拟</td><td class="ok">94 ✓</td></tr>
+      <tr><td>AI 链路</td><td class="ok">128 ✓</td></tr>
+      <tr><td>去重 / 复读</td><td class="ok">48 ✓</td></tr>
+      <tr><td>不串台 / 钩子层</td><td class="ok">130 ✓</td></tr>
+      <tr><td>隐私校验</td><td class="ok">30 ✓</td></tr>
+      <tr><td>上线三件套</td><td class="ok">117 ✓</td></tr>
+      <tr><td><b>合计</b></td><td class="ok">873 项 · 0 失败</td></tr>
+    </table>
+    <div class="note">
+      扫描还抓出一处绝对化用语：协议里原来写了「永久消失」，被判为审核红线词，已改成「会消失，而且没办法找回」。
+      连带把「最重要」也换成了「请优先看」。
+    </div>
+  </div>
+
+  <div class="foot">愿你断得干净，把时间留给自己</div>
+
+</div>
+</body>
+</html>

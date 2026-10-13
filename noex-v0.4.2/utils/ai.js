@@ -76,6 +76,11 @@ const SHADOW_SYSTEM =
   '不称呼对方是最安全的选择。\n' +
   '1. 严格按上面的说话习惯回复：句子长度、句末标点、语气词、emoji、口头禅，全都要像。' +
   '写「几乎不问问题」你就别问；写「句末什么都不加」你就别加句号；写「不用 emoji」你就一个都别用。\n' +
+  '1b. **语气词默认一个都不加。** 上面【TA 的说话习惯】里如果明确写了' +
+  '「高频语气词：X」，你就只用那几个；**没写 = 一个都不许加**。' +
+  '「啊」「呀」「啦」「呢」「吧」「哦」「嘛」「嘿」「诶」「喔」「～」这些，' +
+  '哪怕加上去会让句子显得更"自然、更亲切、更像在聊天"，也不许出现——' +
+  '大多数人打字根本不带这些，硬加立刻露出"在演"的痕迹，比干巴巴更假。\n' +
   '2. 上面给了 TA 真说过的话当样本。你要学的是**那个味儿**——用词的颗粒度、句子的长短、' +
   '话说到哪儿就停。不要照搬内容，也不要通篇都是语气词（那不叫像，那叫装）。\n' +
   '3. 你不是心理医生，不是知心姐姐。不要安慰、不要建议、不要总结、不要说「我理解你的感受」。' +
@@ -229,11 +234,13 @@ function classifyCloudErr(err) {
   return 'network';
 }
 
+/* v0.9.15：文字对话默认 15 秒超时；图片转写要 45 秒（模型读图明显慢），
+   所以 opts.timeout 可以单独覆盖。opts.action / opts.imageUrl 是给云函数的附加字段。 */
 function call(messages, opts, cb) {
   const m = mode();
   if (m === 'off') { cb(fail('off'), null); return; }
 
-  const timeout = (cfg && cfg.timeout) || 15000;
+  const timeout = (opts && opts.timeout) || (cfg && cfg.timeout) || 15000;
   let done = false;
   const finish = function (err, text) {
     if (done) return;
@@ -250,6 +257,8 @@ function call(messages, opts, cb) {
     maxTokens: (opts && opts.maxTokens) || 220,
     temperature: (opts && opts.temperature) == null ? 0.85 : opts.temperature
   };
+  if (opts && opts.action) payload.action = opts.action;
+  if (opts && opts.imageUrl) payload.imageUrl = opts.imageUrl;
 
   if (m === 'cloud') {
     if (!cloudInit()) { clearTimeout(timer); finish(fail('cloud_unavailable'), null); return; }
@@ -261,8 +270,14 @@ function call(messages, opts, cb) {
         clearTimeout(timer);
         const r = res && res.result;
         if (!r || r.ok === false) {
-          /* 云函数存在但内部报错（多半是没配 NOEX_AI_KEY） */
-          finish(fail('cloud_error', new Error((r && r.error) || 'cloud failed')), null);
+          /* 云函数存在但内部报错。三种要分开说，否则用户不知道该去改哪里：
+             没配 Key / 文字模型被换成了不认图的 / 其他上游报错 */
+          const emsg = String((r && r.error) || 'cloud failed');
+          let code = (r && r.code) || 'cloud_error';
+          if (code === 'not_vision_model') code = 'vision_model_bad';
+          else if (/api key|api_key|unauthor|invalid.*key/i.test(emsg)) code = 'key_bad';
+          else if (/NOEX_AI_KEY|未配置/.test(emsg)) code = 'ai_key_missing';
+          finish(fail(code, new Error(emsg)), null);
           return;
         }
         finish(null, r.text || '');
@@ -362,8 +377,12 @@ function describeProfile(profile) {
     else if (avg < 30) lines.push('· 句子中等长度，偶尔会说两句。');
     else lines.push('· 说话比较长，信息量大，会一口气说一段。');
   }
-  if (p.emojiLove) lines.push('· 常用 emoji 和语气词（比如「～」「啦」「呀」「嗯」）。');
+  if (p.emojiLove) lines.push('· 会用 emoji 收尾。');
   else lines.push('· 几乎不用 emoji，标点也很朴素。');
+  /* v0.9.16：老画像里没有语气词频率，一律按"不用"处理并写死一句禁令。
+     只写"没有语气词"是不够的——模型会默认"聊天就该带个呀/啦"，照样往上加。
+     必须明确告诉它：不加才对。 */
+  lines.push('· 不用语气词。「啊」「呀」「啦」「呢」「吧」「哦」「嘛」「嘿」「诶」「～」一个都不要加。');
   if (typeof p.qRate === 'number' && p.qRate > 0.2) lines.push('· 经常反问、追问，爱用问句。');
   const top = p.top || [];
   const words = top.filter(function (w) { return w && String(w).trim(); }).slice(0, 6);
@@ -435,12 +454,68 @@ function shadowChat(o, cb) {
   });
 }
 
+/* ────────────────────────────────────────────────────────
+   v0.9.15 · 聊天截图转文字
+   ──────────────────────────────────────────────────────── */
+
+/* 图片转写在云函数里要 20-40 秒，比聊天慢得多，所以单独给 45 秒超时。
+   注意微信云函数本身也有超时时间（默认 3 秒！）—— 必须去
+   云函数「配置 → 超时时间」改成 60 秒，否则这里等多久都没用。 */
+const VISION_TIMEOUT = 45000;
+
+/**
+ * 把一张聊天截图转成文字。
+ * @param {string} imageUrl 云存储临时链接（https）
+ * @param {function} cb (err, text|null)
+ */
+function ocrImage(imageUrl, cb) {
+  const url = String(imageUrl || '').trim();
+  if (!/^https:\/\//i.test(url)) { cb(fail('bad_url'), null); return; }
+  if (!isEnabled()) { cb(fail(mode() === 'off' ? 'off' : 'cloud_unavailable'), null); return; }
+  call(null, { action: 'vision', imageUrl: url, maxTokens: 1600, temperature: 0.1, timeout: VISION_TIMEOUT }, function (err, text) {
+    if (err) { cb(err, null); return; }
+    const t = String(text || '').trim();
+    if (!t) { cb(fail('empty'), null); return; }
+    cb(null, t);
+  });
+}
+
+/* 图片转写失败时给用户看的话。必须说清楚「下一步该去哪儿改」，
+   否则用户只会看到「失败了」然后放弃这个功能。 */
+const VISION_ERR_TEXT = {
+  off: '图片识别需要先开启 AI。当前是「纯本地」，联网能力是关的。',
+  cloud_unavailable: '云开发没初始化好，图片识别用不了。可以先用「粘贴聊天记录」这条路。',
+  not_deployed: '云函数还没部署，图片识别用不了。可以在开发者工具里右键 cloudfunctions/noex-ai 上传部署。',
+  env_bad: '云环境 ID 不对，云函数调不到。先检查 utils/ai-config.js 里的 env。',
+  ai_key_missing: '云函数里还没配 NOEX_AI_KEY，图片识别用不了。',
+  key_bad: '模型 Key 无效（可能已过期或被删除）。去服务商后台看一眼。',
+  vision_model_bad:
+    '现在配的模型不支持读图。要去云函数环境变量加一条 NOEX_AI_VISION_MODEL，' +
+    '值填视觉模型名（如 deepseek-v4-flash-vision-exp），然后重新部署。',
+  vision_failed: '模型读图失败了。可能是截图太大或格式特殊，换一张试试，或者手动把文字粘进来。',
+  timeout: '识别超时了。多半是云函数「超时时间」还停在默认的 3 秒——去云函数配置里改成 60 秒。',
+  network: '网络不通，图片识别用不了。可以先用「粘贴聊天记录」这条路。',
+  upload_failed: '截图没传上去。云开发的「云存储」可能没开通，或者当时网络不好。',
+  bad_format: '有图片格式不支持。只认 jpg / png / webp / gif 这四种，换一张试试。',
+  no_content: '这张图里没读到聊天文字。可能是截图太模糊，或者截的不是聊天界面。',
+  bad_url: '图片链接不对，请重新选一次图片。',
+  empty: '这张图里没读到聊天文字。可能是截图太模糊，或者截的不是聊天界面。'
+};
+
+function describeVisionErr(err) {
+  const code = (err && err.code) || 'vision_failed';
+  return VISION_ERR_TEXT[code] || VISION_ERR_TEXT.vision_failed;
+}
+
 module.exports = {
   mode,
   isEnabled,
   cloudInit,
   chat,
   shadowChat,
+  ocrImage,
+  describeVisionErr,
+  VISION_TIMEOUT,
   /* 导出给单元测试用 */
   _internal: {
     clean,
@@ -453,6 +528,7 @@ module.exports = {
     dropDupTail,
     PERSONA_DESC,
     XIAOBAI_SYSTEM,
-    SHADOW_SYSTEM
+    SHADOW_SYSTEM,
+    VISION_ERR_TEXT
   }
 };

@@ -2,10 +2,14 @@
   <view class="bottle-intro">
     <view class="bottle-h">留白瓶</view>
     <view class="bottle-sub">想说没说的话，都可以放进来——它们永远不会被发送。</view>
+    <view class="bottle-stat" wx:if="{{total > 0}}">
+      瓶子里 {{total}} 句{{sealedCount > 0 ? ' · 封着 ' + sealedCount + ' 句' : ''}}
+    </view>
   </view>
 
   <view class="bottle-new">
     <textarea
+      wx:if="{{taAlive}}"
       class="field-textarea"
       value="{{text}}"
       placeholder="想对ta说、但不会发出去的话…"
@@ -14,18 +18,51 @@
       maxlength="-1"
       bindinput="onInput"
     ></textarea>
-    <button class="btn btn-primary" bindtap="onSave" style="margin-top:24rpx;">存进留白瓶</button>
+
+    <!-- v0.9.13 · 仪式：写的时候就能决定「封起来」 -->
+    <view class="seal-row" bindtap="onToggleSeal">
+      <view class="seal-box {{sealOn ? 'on' : ''}}">{{sealOn ? '✓' : ''}}</view>
+      <view class="seal-label">
+        封存起来，{{sealHint}} 再打开
+        <text class="seal-tip">（封上就先不给自己看）</text>
+      </view>
+    </view>
+
+    <button class="btn btn-primary" bindtap="onSave" style="margin-top:24rpx;">
+      {{sealOn ? '封 进 留 白 瓶' : '存 进 留 白 瓶'}}
+    </button>
   </view>
+
+  <view class="bottle-hint" wx:if="{{total > 0}}">长按一条，可以封存或销毁</view>
 
   <view class="bottle-list">
     <block wx:if="{{items.length === 0}}">
       <view class="bottle-empty">瓶子里还是空的。</view>
     </block>
     <block wx:else>
-      <view class="bottle-item" wx:for="{{items}}" wx:key="_k">
-        <view class="bi-t">{{item.t}}</view>
-        <view class="bi-text">{{item.text}}</view>
+      <view
+        class="bottle-item {{item.locked ? 'locked' : ''}} {{item.sealed ? 'sealed' : ''}}"
+        wx:for="{{items}}"
+        wx:key="_k"
+        data-k="{{item._k}}"
+        bindtap="onItemTap"
+        bindlongpress="onItemAction"
+      >
+        <view class="bi-t">
+          <text>{{item.t}}</text>
+          <text class="bi-seal" wx:if="{{item.sealed}}">封</text>
+        </view>
+        <view class="bi-text" wx:if="{{!item.locked}}">{{item.text}}</view>
+        <view class="bi-locked" wx:else>封着。{{item.state}}</view>
+        <view class="bi-state" wx:if="{{item.canOpen}}">{{item.state}}</view>
       </view>
     </block>
+  </view>
+
+  <view class="bottle-foot">这些话没有被寄出去，也没有消失。</view>
+
+  <!-- v0.9.13 · 流量主广告位：utils/config.js 里的 AD_UNIT_ID 配了才出现 -->
+  <view class="ad-wrap" wx:if="{{adShow}}">
+    <ad unit-id="{{adUnitId}}" binderror="onAdError"></ad>
   </view>
 </view>

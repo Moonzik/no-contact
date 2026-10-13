@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NOEX v0.9.14 · 稳定性与上手</title>
+<style>
+  :root {
+    --bg: #faf9f4;
+    --card: #ffffff;
+    --ink: #26231e;
+    --sub: #8f887b;
+    --faint: #b8b1a4;
+    --line: #e9e4d8;
+    --accent: #b5623c;
+    --accent-soft: #f5ece6;
+    --serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 48px 20px 80px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    line-height: 1.85;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; }
+  h1 {
+    font-family: var(--serif);
+    font-size: 30px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    margin: 0 0 8px;
+  }
+  .sub { color: var(--faint); font-size: 14px; letter-spacing: 1px; margin-bottom: 40px; }
+  h2 {
+    font-family: var(--serif);
+    font-size: 21px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    margin: 48px 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  h3 { font-size: 16px; font-weight: 600; margin: 28px 0 10px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 26px 28px;
+    margin-bottom: 16px;
+  }
+  .hero {
+    background: var(--accent-soft);
+    border-color: var(--accent-soft);
+  }
+  p { margin: 10px 0; }
+  ul, ol { margin: 10px 0; padding-left: 22px; }
+  li { margin: 6px 0; }
+  code {
+    background: #f2efe7;
+    border-radius: 5px;
+    padding: 2px 7px;
+    font-family: ui-monospace, Consolas, monospace;
+    font-size: 14px;
+  }
+  .k { font-family: ui-monospace, Consolas, monospace; font-size: 14px; color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 15px; }
+  th, td { text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--line); }
+  th { color: var(--sub); font-weight: 500; font-size: 14px; letter-spacing: 1px; }
+  .green { color: #3f7a4d; font-weight: 600; }
+  .muted { color: var(--sub); font-size: 15px; }
+  .note {
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+    padding: 16px 20px;
+    margin: 18px 0;
+    font-size: 15px;
+  }
+  .foot { margin-top: 56px; text-align: center; color: var(--faint); font-size: 14px; letter-spacing: 2px; }
+  .mock {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  .mock-line {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 0;
+    border-bottom: 1px dashed var(--line);
+  }
+  .mock-line:last-child { border-bottom: none; }
+  .mock-go { color: var(--faint); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>稳定性与上手</h1>
+  <div class="sub">v0.9.14 · 2026-09-11 · 两处收口：出错了看得见，第一次进来知道怎么用</div>
+
+  <div class="card hero">
+    <p><strong>这次不需要你做任何后台配置。</strong>全是端上代码，云函数不用动，开发者工具点「编译」就能看到。</p>
+  </div>
+
+  <h2>一、运行记录：终于能知道「用户说用不了」是怎么坏的</h2>
+
+  <div class="card">
+    <h3>之前的问题</h3>
+    <p>小程序上线后，用户在手机上白屏了、闪退了、点了没反应——<strong>你收不到任何通知</strong>。
+       他要么直接卸载，要么只丢给你一句「用不了」。没有堆栈、没有机型、没有是哪个页面出的事，
+       根本无从下手。这是上线后最难受的一种状态：知道有问题，但不知道问题是什么。</p>
+  </div>
+
+  <div class="card">
+    <h3>现在怎么做</h3>
+    <p>App 一启动（第一件事，早于其他所有初始化），就挂上四类监听：</p>
+    <table>
+      <tr><th>监听</th><th>管什么</th></tr>
+      <tr><td>脚本错误</td><td>代码里抛出的异常（最常见）</td></tr>
+      <tr><td>未处理的异步错误</td><td>Promise 里没人接的失败</td></tr>
+      <tr><td>页面找不到</td><td>跳转到了不存在的页面</td></tr>
+      <tr><td>内存告警</td><td>快被系统杀掉了</td></tr>
+    </table>
+    <p>出事就悄悄记一条到用户手机本地，<strong>最多留 20 条</strong>。
+       同一条错误 5 秒内重复出现只累加次数，不会刷屏。</p>
+    <p class="muted">每条只存：时间、类型、错误摘要（截断到 300 字）、出错时在哪个页面、版本号。
+       设备信息在用户点「复制」时才现取。</p>
+  </div>
+
+  <div class="card">
+    <h3>在哪儿看</h3>
+    <p><strong>「我」页 → 运行记录</strong></p>
+    <div class="mock">
+      <div class="mock-line"><span>运行记录<br><span class="muted" style="font-size:13px">记下了 3 次异常，复制发我能帮我定位</span></span><span class="mock-go">查看</span></div>
+    </div>
+    <p class="note"><strong>一切都正常的时候，这一整块是不存在的。</strong>
+       它不是常驻功能，是「出过事」的信号。正常用户永远看不到，
+       所以措辞也刻意不吓人——不写「错误」「崩溃」，写「运行记录」。</p>
+    <p>点进去是一个弹层：显示可长按选中的完整记录，下面三个按钮——<strong>复制全部</strong> /
+       <strong>清掉这些记录</strong>（会先问一句）/ 关闭。</p>
+  </div>
+
+  <div class="card">
+    <h3>怎么验收</h3>
+    <p>想看它长什么样，在开发者工具的控制台里随便敲一句会报错的代码，比如：</p>
+    <p><code>throw new Error('测试一下')</code></p>
+    <p>然后切到「我」页，运行记录就会出现了。</p>
+  </div>
+
+  <div class="note">
+    <strong>三件事要说清楚：</strong>
+    <ul>
+      <li>记录<strong>只存在用户手机里，不上传</strong>。所以用户不主动复制给你，你还是看不到——这是当前架构（没有云端用户表）的必然，不是 bug。</li>
+      <li>点「<strong>清空所有数据</strong>」时会连运行记录一起清掉，名副其实。</li>
+      <li>用户看到错误内容会有点心理负担，所以弹层里第一句话是「这些都是小程序自己出的小毛病，已经记在你手机里了，没有上传到任何地方」。</li>
+    </ul>
+  </div>
+
+  <h2>二、小白页加了「怎么用」</h2>
+
+  <div class="card">
+    <p>影子页一直有个可折叠的「怎么把聊天记录弄进来」，小白页没有。新用户点进小白页，
+       面对一个输入框和四个看不懂的语气标签，不知道能说什么。</p>
+    <p>现在补上了，<strong>第一次进来会自动展开一次</strong>，看完点「收起」，以后就不再自动弹。
+       四段内容：</p>
+    <table>
+      <tr><td><strong>我是谁</strong></td><td>一只白狐狸。你手痒想联系 TA 的时候，我坐你旁边。</td></tr>
+      <tr><td><strong>上面那排是语气</strong></td><td>想被哄就选「宠溺」，想被骂醒就选「毒舌」。随时能换，聊过的不会丢。</td></tr>
+      <tr><td><strong>跟我说什么都行</strong></td><td>想 TA 了、睡不着、今天差点又点开那个对话框，或者纯粹想找个人废话两句。不用组织语言，也不用讲道理。</td></tr>
+      <tr><td><strong>我不会做的</strong></td><td>不劝你「该放下了」，不教你怎么挽回，你没问我就不给建议。</td></tr>
+    </table>
+    <p class="muted">最后一行交待隐私：你说的话只存在你自己的手机里；开了 AI 模式时，对话内容会用来生成回复。
+       ——和「我」页的口径一致，不打架。</p>
+    <p class="note">「我不会做的」这一段是有意写的。<strong>敢先说清自己不做什么，用户才敢开口。</strong>
+       对这款产品的用户来说，「不劝我放下」比「我能陪你」更让人放心。</p>
+    <p class="muted">放在聊天头下面、消息流上面，不用多点一次。展开时最多占 46% 屏高，超了内部可滚，不会把聊天区挤没。</p>
+  </div>
+
+  <h2>三、顺手修掉的一个真问题</h2>
+  <div class="card">
+    <p>写测试的时候抓到的：时间格式化函数碰到非法时间戳（比如存储被改坏、或是老版本留下的脏数据）
+       会输出 <code>aN-aN aN:aN</code> 这种东西——因为 <code>new Date(undefined)</code> 是 Invalid Date，
+       <code>getMonth()</code> 返回 NaN，字符串拼接就成了「aN」。</p>
+    <p>用户在「运行记录」里看到这行会以为是自己手机出问题了。已经修掉：非法值一律显示 <code>--</code>。</p>
+    <p class="muted">这个 bug 只有在测试里构造脏数据才会暴露，真机上很难碰上——但碰上了就是莫名其妙的一行乱码。</p>
+  </div>
+
+  <h2>四、验证结果</h2>
+  <div class="card">
+    <p>新增第 13 个测试套件 <code>robust-test.js</code>（113 项），覆盖：</p>
+    <ul>
+      <li>日志写入 / 超长截断 / 20 条封顶 / 5 秒去重累加次数 / 多类型分开计数</li>
+      <li>健壮性：传 <code>null</code>、<code>undefined</code>、空串、数字、循环引用对象都不抛异常；存储写满时整条链路也不抛</li>
+      <li>四类全局监听真的挂上了，低版本基础库缺这些 API 时也不报错</li>
+      <li>「我」页：无记录时不显示入口、有记录时计数正确、复制走系统剪贴板、清空前会问一句、「清空所有数据」一并清掉</li>
+      <li>小白说明：首次自动展开、点收起后记住、以后不再自动弹、手动仍可打开、storage 坏了页面也不崩</li>
+      <li>新增文案不碰审核红线词，两个 wxml 标签配平</li>
+    </ul>
+    <table>
+      <tr><th>套件</th><th>项数</th><th>结果</th></tr>
+      <tr><td>平台审核扫描</td><td>15</td><td class="green">全通过</td></tr>
+      <tr><td>静态审计</td><td>193</td><td class="green">全通过</td></tr>
+      <tr><td>端到端</td><td>135</td><td class="green">全通过</td></tr>
+      <tr><td>集成</td><td>26</td><td class="green">全通过</td></tr>
+      <tr><td>微信 API 模拟</td><td>94</td><td class="green">全通过</td></tr>
+      <tr><td>AI 链路</td><td>128</td><td class="green">全通过</td></tr>
+      <tr><td>去重 / 复读</td><td>48</td><td class="green">全通过</td></tr>
+      <tr><td>不串台 / 钩子层</td><td>130</td><td class="green">全通过</td></tr>
+      <tr><td>隐私校验</td><td>30</td><td class="green">全通过</td></tr>
+      <tr><td>上线三件套</td><td>117</td><td class="green">全通过</td></tr>
+      <tr><td>打卡日历</td><td>57</td><td class="green">全通过</td></tr>
+      <tr><td>体验与留存</td><td>168</td><td class="green">全通过</td></tr>
+      <tr><td>稳定性与上手（新）</td><td>113</td><td class="green">全通过</td></tr>
+      <tr><td><strong>合计</strong></td><td><strong>1254</strong></td><td class="green">0 失败</td></tr>
+    </table>
+    <p class="muted">已同步到 <code>miniprogram</code> 源码和 <code>Desktop\noex</code> 两份目录。
+       交付版 <code>ai-config.js</code> 仍是 <code>cloud</code>，没被源码版本覆盖。</p>
+  </div>
+
+  <h2>五、你要做什么</h2>
+  <div class="card">
+    <p><strong>没有。</strong>开发者工具点「编译」就能看到这两处改动，云函数不用重新部署，后台也不用新增配置。</p>
+    <p class="muted">原先列的三项剩余工作，情形是这样的：
+      本次补掉了①异常兜底和②小白说明；
+      原先的第③项「打卡提醒的云端推送」经查证<strong>性价比太低，建议不做</strong>——
+      要做必须新建云端用户表存 openid（等于新增一项数据收集，隐私指引得改），
+      而工具类目基本只给一次性订阅模板，也做不成真正的「每日提醒」。
+      登录云函数、隐私指引过审这两项仍然是上线前的关键路径。</p>
+  </div>
+
+  <div class="foot">愿你断得干净，把时间留给自己</div>
+</div>
+</body>
+</html>

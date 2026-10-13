@@ -13,6 +13,7 @@
  *   8. new Date('YYYY-MM-DD') 老 iOS JSCore 解析风险
  *   9. 审核红线词扫描（医疗承诺 / 绝对化 / 诱导分享 / 虚拟支付 / 涉政）
  *  10. 必要条件：sitemap / 页面注册 / 类目相关
+ *  11. 开发文档（.html/.md）与辅助目录（_test / cloudfunctions）必须排除出上传包
  *
  * 用法: node _test/audit-platform.js
  */
@@ -164,14 +165,18 @@ console.log('\n========== 4. 图片资源 ==========');
   if (!hit) ok('所有图片体积在阈值内');
 }
 
-console.log('\n========== 5. 主包体积 ==========');
+console.log('\n========== 5. 主包体积（按 packOptions.ignore 真实口径）==========');
 {
+  const cfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'project.config.json'), 'utf8'));
+  const ign = ((cfg.packOptions || {}).ignore || []).map(x => x.value);
+  const skip = rel => ign.some(v => rel === v || rel.startsWith(v.replace(/\/$/, '') + '/'));
   let total = 0;
   function size(dir) {
     if (!fs.existsSync(dir)) return;
     for (const f of fs.readdirSync(dir)) {
-      if (f === '_test' || f === '_orig_backup' || f === 'node_modules') continue;
       const p = path.join(dir, f);
+      const rel = path.relative(ROOT, p).split(path.sep).join('/');
+      if (skip(rel) || f === 'node_modules' || f === '.git') continue;
       const st = fs.statSync(p);
       if (st.isDirectory()) size(p);
       else total += st.size;
@@ -184,7 +189,7 @@ console.log('\n========== 5. 主包体积 ==========');
   } else if (mb > 1.5) {
     bad(`主包 ${mb.toFixed(2)} MB 接近 2MB 上限（余量 <0.5MB）`, '建议继续瘦身，避免后续迭代超限');
   } else {
-    ok(`主包 ${(total / 1024).toFixed(0)} KB（${mb.toFixed(2)} MB），距 2MB 上限余量充足`);
+    ok(`主包 ${(total / 1024).toFixed(0)} KB（${mb.toFixed(2)} MB），忽略清单 ${ign.length} 条已生效，距 2MB 上限余量充足`);
   }
 }
 
@@ -326,6 +331,27 @@ console.log('\n========== 10. 基础配置 ==========');
   const appJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'app.json'), 'utf8'));
   if (appJson.pages && appJson.pages.length) ok(`已注册 ${appJson.pages.length} 个页面`);
   else bad('app.json 无 pages', '注册页面');
+}
+
+console.log('\n========== 11. 开发文档不进上传包 ==========');
+{
+  const cfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'project.config.json'), 'utf8'));
+  const ign = new Set(((cfg.packOptions || {}).ignore || []).map(x => x.value));
+  const docs = fs.readdirSync(ROOT)
+    .filter(f => /\.(html|md)$/i.test(f) && fs.statSync(path.join(ROOT, f)).isFile());
+  const leaked = docs.filter(f => !ign.has(f));
+  if (leaked.length) {
+    bad(`有 ${leaked.length} 份开发文档会随包提交给审核员：${leaked.join('、')}`,
+        '在 project.config.json → packOptions.ignore 里逐个登记说明文档（内含内部策略/合规口径，审核员解包即可见）');
+  } else {
+    ok(`根目录 ${docs.length} 份 .html/.md 全部已排除，不会进上传包`);
+  }
+  // 说明文档与代码混排时也要防漏：_test / cloudfunctions 必须始终排除
+  for (const must of ['_test', 'cloudfunctions']) {
+    if (!fs.existsSync(path.join(ROOT, must))) continue;
+    if (!ign.has(must)) bad(`${must}/ 未加入 packOptions.ignore`, `加上 { "value": "${must}", "type": "folder" }`);
+    else ok(`${must}/ 已排除`);
+  }
 }
 
 console.log('\n========================================');

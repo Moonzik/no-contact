@@ -6,7 +6,8 @@
     "pages/yingzi/yingzi",
     "pages/me/me",
     "pages/bottle/bottle",
-    "pages/privacy/privacy"
+    "pages/privacy/privacy",
+    "pages/agreement/agreement"
   ],
   "window": {
     "backgroundTextStyle": "light",

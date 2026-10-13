@@ -273,3 +273,249 @@
   margin-bottom: 40rpx;
   white-space: pre-wrap;
 }
+
+/* ───────── v0.9.12 · 打卡日历 ─────────
+   7 列网格（14.2857%），格子用色块表达状态：
+   撑住 = 实心墨色；断过 = 暖砖底（不刺眼，避免"红=危险"的医疗感）；今天 = 描边 */
+.cal-card {
+  padding-bottom: 32rpx;
+}
+.cal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+.cal-card .cap {
+  margin-bottom: 0;
+}
+.cal-nav {
+  display: flex;
+  align-items: center;
+}
+.cal-arrow {
+  width: 56rpx;
+  height: 56rpx;
+  line-height: 52rpx;
+  text-align: center;
+  border-radius: 50%;
+  font-size: 36rpx;
+  color: var(--sub);
+  background: var(--accent-soft);
+}
+.cal-arrow.off {
+  color: var(--line);
+  background: transparent;
+}
+.cal-ym {
+  min-width: 170rpx;
+  text-align: center;
+  font-size: 25rpx;
+  color: var(--sub);
+  letter-spacing: 2rpx;
+}
+.cal-week {
+  display: flex;
+  margin-top: 12rpx;
+}
+.cal-wd {
+  width: 14.2857%;
+  text-align: center;
+  font-size: 23rpx;
+  color: var(--faint);
+}
+.cal-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 10rpx;
+}
+.cal-cell {
+  width: 14.2857%;
+  box-sizing: border-box;
+  padding: 6rpx 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cal-d {
+  width: 60rpx;
+  height: 60rpx;
+  box-sizing: border-box;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 25rpx;
+  color: var(--faint);
+}
+.cal-cell.on .cal-d {
+  background: var(--ink);
+  color: var(--bg);
+}
+.cal-cell.rel .cal-d {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.cal-cell.future .cal-d {
+  color: var(--line);
+}
+.cal-cell.today .cal-d {
+  border: 2rpx solid var(--accent);
+}
+.cal-legend {
+  display: flex;
+  margin-top: 22rpx;
+  padding-left: 4rpx;
+}
+.lg {
+  display: flex;
+  align-items: center;
+  margin-right: 32rpx;
+  font-size: 23rpx;
+  color: var(--faint);
+}
+.lg-dot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 6rpx;
+  margin-right: 10rpx;
+  box-sizing: border-box;
+}
+.lg-dot.on {
+  background: var(--ink);
+}
+.lg-dot.rel {
+  background: var(--accent-soft);
+}
+.lg-dot.today {
+  border: 2rpx solid var(--accent);
+}
+.cal-foot {
+  margin-top: 18rpx;
+  padding-left: 4rpx;
+  font-size: 24rpx;
+  color: var(--sub);
+}
+
+/* ───────── v0.9.13 缺口二 · 文字日记 ─────────
+   日记是「只有自己看」的东西，视觉上也别做成打卡任务的样式：
+   不显示天数徽章、不做进度条，只给一个安静的输入框和一句「已经写了 N 天」。 */
+.diary-card {
+  padding-bottom: 32rpx;
+}
+.diary-tip {
+  font-size: 25rpx;
+  color: var(--faint);
+  line-height: 1.7;
+  margin-bottom: 20rpx;
+}
+.diary-ta {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--bg);
+  border: 1rpx solid var(--line);
+  border-radius: 20rpx;
+  padding: 22rpx 24rpx;
+  font-size: 29rpx;
+  line-height: 46rpx;
+  min-height: 96rpx;
+  max-height: 400rpx;
+  margin-bottom: 24rpx;
+}
+.diary-save {
+  padding: 22rpx;
+  font-size: 29rpx;
+}
+.diary-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 22rpx;
+}
+.diary-count {
+  font-size: 23rpx;
+  color: var(--faint);
+}
+.diary-acts {
+  display: flex;
+  align-items: center;
+}
+.diary-link {
+  font-size: 23rpx;
+  color: var(--sub);
+  margin-left: 28rpx;
+  padding: 6rpx 0;
+  text-decoration: underline;
+  text-underline-offset: 6rpx;
+}
+.diary-list {
+  margin-top: 24rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx dashed var(--line);
+}
+.diary-item {
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid var(--line);
+}
+.diary-item:last-child {
+  border-bottom: none;
+}
+.di-d {
+  font-size: 22rpx;
+  color: var(--faint);
+  letter-spacing: 1rpx;
+  margin-bottom: 6rpx;
+}
+.di-text {
+  font-size: 28rpx;
+  color: var(--ink);
+  line-height: 1.7;
+  word-break: break-all;
+}
+
+/* 日历上「写过日记」的小点：不是状态，是痕迹 */
+.cal-cell.note .cal-d {
+  position: relative;
+}
+.cal-cell.note .cal-d::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 5rpx;
+  width: 8rpx;
+  height: 8rpx;
+  margin-left: -4rpx;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.cal-cell.note.on .cal-d::after {
+  background: var(--bg);
+}
+.lg-dot.note {
+  background: transparent;
+  position: relative;
+  border: none;
+}
+.lg-dot.note::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 3rpx;
+  width: 8rpx;
+  height: 8rpx;
+  margin-left: -4rpx;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.cal-hint {
+  margin-top: 8rpx;
+  padding-left: 4rpx;
+  font-size: 22rpx;
+  color: var(--faint);
+}
+
+/* ───────── v0.9.13 · 流量主广告位 ─────────
+   空着的时候整块不存在（wx:if 控），配了 AD_UNIT_ID 才占位。 */
+.ad-wrap {
+  margin: 8rpx 0 32rpx;
+}

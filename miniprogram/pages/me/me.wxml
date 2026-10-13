@@ -35,6 +35,27 @@
              placeholder-style="color:#b8b1a4"
              bindblur="onExInput" />
     </view>
+    <view class="row" bindtap="onReminder" hover-class="row-hover">
+      <view class="l">
+        每日提醒
+        <small>{{reminderOn ? '已订阅，微信会叫你回来打卡' : '到点提醒你回来打卡'}}</small>
+      </view>
+      <view class="row-go">{{reminderOn ? '已开' : '去开'}}</view>
+    </view>
+    <view class="row" bindtap="onNewSegment" hover-class="row-hover">
+      <view class="l">
+        开始新的一段
+        <small>换一个人，或干净地重新开始</small>
+      </view>
+      <view class="row-go">开始</view>
+    </view>
+    <view class="row" wx:if="{{segCount > 0}}" bindtap="onShowSegs" hover-class="row-hover">
+      <view class="l">
+        过往记录
+        <small>{{segCount}} 段走过的路</small>
+      </view>
+      <view class="row-go">查看</view>
+    </view>
   </view>
 
   <!-- 数据 -->
@@ -45,6 +66,20 @@
         <small>复制为 JSON 备份</small>
       </view>
       <view class="row-go">导出</view>
+    </view>
+    <view class="row" bindtap="onImportBackup" hover-class="row-hover">
+      <view class="l">
+        导入备份
+        <small>换手机 / 重装后恢复</small>
+      </view>
+      <view class="row-go">导入</view>
+    </view>
+    <view class="row" wx:if="{{prevExists}}" bindtap="onImportUndo" hover-class="row-hover">
+      <view class="l">
+        撤销上次导入
+        <small>回到导入之前的那份数据</small>
+      </view>
+      <view class="row-go">撤销</view>
     </view>
     <view class="row" bindtap="onClear" hover-class="row-hover">
       <view class="l">
@@ -60,13 +95,42 @@
     <view class="about-head">关于断联日记</view>
     <view class="about-line">断联日记 NOEX · v{{version}}</view>
     <view class="about-line ai-line-card">{{aiText}}</view>
-    <view class="about-line">所有数据仅保存在本机，不上传服务器。</view>
-    <view class="about-line">本产品不替代专业心理治疗。</view>
+    <view class="about-line">断联记录、留白瓶只存在你的手机里。只有你在对话里主动发送的内容，会用于生成回复。</view>
+    <view class="about-line">本产品不替代专业帮助，也不提供任何服务性质的陪伴。</view>
+
+    <view class="row row-sep" bindtap="onOpenAgreement" hover-class="row-hover">
+      <view class="l">
+        用户服务协议
+        <small>我们各自的责任边界</small>
+      </view>
+      <view class="row-go">查看</view>
+    </view>
+
+    <view class="row row-sep" bindtap="onOpenFeedback" hover-class="row-hover">
+      <view class="l">
+        意见反馈
+        <small>遇到问题 · 想加功能</small>
+      </view>
+      <view class="row-go">反馈</view>
+    </view>
 
     <view class="row row-sep" bindtap="onOpenPrivacy" hover-class="row-hover">
       <view class="l">
         用户隐私保护指引
         <small>你的数据怎么存 · 是否共享给 AI</small>
+      </view>
+      <view class="row-go">查看</view>
+    </view>
+  </view>
+
+  <!-- v0.9.14 · 运行记录：只在真的有异常记录时才渲染。
+       一切正常的用户永远看不到这一块——它出现的本身就是"出过事"的信号，
+       所以文案刻意不吓人：不写「错误」「崩溃」，写「运行记录」。 -->
+  <view class="me-card" wx:if="{{errCount > 0}}">
+    <view class="row" bindtap="onShowErrs" hover-class="row-hover">
+      <view class="l">
+        运行记录
+        <small>记下了 {{errCount}} 次异常，复制发我能帮我定位</small>
       </view>
       <view class="row-go">查看</view>
     </view>
@@ -171,6 +235,129 @@
       </view>
       <button class="btn btn-primary" style="background:var(--danger);margin-bottom:20rpx;" bindtap="onClearConfirm">确认清空</button>
       <button class="btn btn-ghost" bindtap="onClearCancel">取消</button>
+    </view>
+  </view>
+
+  <!-- v0.9.13 导入备份：先校验并展示摘要，用户确认后才真的覆盖 -->
+  <view class="mask" wx:if="{{showImport}}" bindtap="onCloseImport">
+    <view class="sheet" catchtap="noop">
+      <view class="h">导入备份</view>
+      <view class="sheet-p">
+        备份是一段文字（导出时复制过）。先把来源选一下，我会先核对内容，
+        确认是你自己的备份才会覆盖当前数据。
+      </view>
+
+      <button class="btn btn-primary" bindtap="onImportFromClipboard">从剪贴板导入</button>
+      <button class="btn btn-ghost" style="margin-top:16rpx;" bindtap="onImportFromFile">从聊天选文件</button>
+
+      <!-- 校验失败 -->
+      <view class="imp-err" wx:if="{{importErr}}">{{importErr}}</view>
+
+      <!-- 校验通过：先让用户看清楚要覆盖进来的是什么 -->
+      <view class="imp-sum" wx:if="{{importSummary}}">
+        <view class="imp-t">核对一下这份备份</view>
+        <view class="imp-line">开始于 {{importSummary.startDate}}</view>
+        <view class="imp-line">打卡 {{importSummary.checkCount}} 次 · 断过 {{importSummary.relapseCount}} 次</view>
+        <view class="imp-line">对话 {{importSummary.msgCount}} 条 · 留白瓶 {{importSummary.bottleCount}} 句 · 日记 {{importSummary.diaryCount}} 天</view>
+        <view class="imp-line" wx:if="{{importSummary.segmentCount > 0}}">过往 {{importSummary.segmentCount}} 段</view>
+        <view class="imp-line" wx:if="{{importSummary.hasUser}}">含登录信息（头像 / 昵称）</view>
+        <view class="imp-warn">导入会覆盖你现在的数据。导入前我会自动存一份快照，事后可以「撤销上次导入」。</view>
+        <button class="btn btn-primary" style="margin-top:24rpx;" bindtap="onImportConfirm">确认导入</button>
+      </view>
+
+      <button class="btn btn-ghost" style="margin-top:16rpx;" bindtap="onCloseImport">关闭</button>
+    </view>
+  </view>
+
+  <!-- v0.9.13 开始新的一段 -->
+  <view class="mask" wx:if="{{showNewSeg}}" bindtap="onCloseNewSeg">
+    <view class="sheet" catchtap="noop">
+      <view class="h">开始新的一段？</view>
+      <view class="sheet-p">
+        打卡天数、打卡次数、断联日历都从今天从零开始，TA 的代号清空，
+        影子的模仿也要重新导入聊天记录（他认的是人）。
+      </view>
+      <view class="sheet-p">
+        日记、留白瓶、和小白的对话都保留——那些是你自己的东西，不属于某一个人。
+        现在这一段会存进「过往记录」，随时能回看。
+      </view>
+      <button class="btn btn-primary" bindtap="onNewSegmentConfirm">开始新的一段</button>
+      <button class="btn btn-ghost" style="margin-top:16rpx;" bindtap="onCloseNewSeg">先不了</button>
+    </view>
+  </view>
+
+  <!-- v0.9.13 过往记录 -->
+  <view class="mask" wx:if="{{showSegs}}" bindtap="onCloseSegs">
+    <view class="sheet" catchtap="noop">
+      <view class="h">过往记录</view>
+      <view class="seg-list">
+        <view class="seg-item" wx:for="{{segList}}" wx:key="range">
+          <view class="seg-name">{{item.name}}</view>
+          <view class="seg-range">{{item.range}} · 共 {{item.days}} 天</view>
+          <view class="seg-note">{{item.note}}</view>
+        </view>
+      </view>
+      <view class="seg-foot">这些是走过的路，不是要抹掉的东西。</view>
+      <button class="btn btn-ghost" bindtap="onCloseSegs">关闭</button>
+    </view>
+  </view>
+
+  <!-- v0.9.13 提醒未配置时的说明（不假装功能可用） -->
+  <view class="mask" wx:if="{{showReminder}}" bindtap="onCloseReminder">
+    <view class="sheet" catchtap="noop">
+      <view class="h">提醒还开不了</view>
+      <view class="sheet-p">
+        微信不允许小程序自己弹通知，唯一的办法是「订阅消息」——
+        需要先在微信后台申请一个提醒模板，把模板 ID 填进小程序配置。这个还没做。
+      </view>
+      <view class="sheet-p">
+        在那之前，有个土办法很管用：把这个小程序「添加到我的小程序」，
+        每天顺手往下拉一下就看到了。
+      </view>
+      <button class="btn btn-ghost" bindtap="onCloseReminder">知道了</button>
+    </view>
+  </view>
+
+  <!-- 意见反馈：主入口是微信客服会话（open-type="contact"）。
+       需要先在 mp 后台「功能 → 客服」添加客服人员，否则点击会提示未开启客服功能，
+       所以下面同时给了「复制反馈模板」这条不依赖后台的备用路径。 -->
+  <view class="mask" wx:if="{{showFeedback}}" bindtap="onCloseFeedback">
+    <view class="sheet" catchtap="noop">
+      <view class="h">意见反馈</view>
+      <view class="sheet-p">
+        遇到问题、想加功能，或者只是想骂两句，都可以。我们会看。
+      </view>
+
+      <button class="btn btn-primary" open-type="contact" hover-class="none">在线留言</button>
+
+      <button class="btn btn-ghost" style="margin-top:16rpx;" bindtap="onCopyFeedback">复制反馈模板</button>
+
+      <view class="fb-note">
+        「在线留言」会打开微信客服会话，我们能在这里回复你。
+        如果点了没反应，说明客服还没在微信后台配好——那就先「复制反馈模板」，
+        粘贴到会话里再发，信息更全。
+      </view>
+
+      <button class="btn btn-ghost" style="margin-top:8rpx;" bindtap="onCloseFeedback">关闭</button>
+    </view>
+  </view>
+
+  <!-- v0.9.14 运行记录 -->
+  <view class="mask" wx:if="{{showErrs}}" bindtap="onCloseErrs">
+    <view class="sheet" catchtap="noop">
+      <view class="h">运行记录</view>
+      <view class="sheet-p">
+        这些都是小程序自己出的小毛病，已经记在你手机里了，没有上传到任何地方。
+        复制一份发给我，我就能知道是怎么坏的。
+      </view>
+
+      <view class="err-box">
+        <text user-select="true" class="err-text">{{errText}}</text>
+      </view>
+
+      <button class="btn btn-primary" style="margin-top:28rpx;" bindtap="onCopyErrs">复制全部</button>
+      <button class="btn btn-ghost" style="margin-top:16rpx;" bindtap="onClearErrs">清掉这些记录</button>
+      <button class="btn btn-ghost" style="margin-top:8rpx;" bindtap="onCloseErrs">关闭</button>
     </view>
   </view>
 

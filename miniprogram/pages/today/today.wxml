@@ -37,6 +37,45 @@
     </button>
   </view>
 
+  <!-- v0.9.13 缺口二 · 文字日记：不发给任何人，只写给自己的痕迹 -->
+  <view class="card diary-card">
+    <view class="cap">写 给 自 己</view>
+    <view class="diary-tip">{{diarySaved ? '今天已经写过了。想补两句就接着写。' : '今天想留一句什么？不用给任何人看。'}}</view>
+
+    <textarea
+      wx:if="{{taAlive}}"
+      class="diary-ta"
+      value="{{diaryText}}"
+      placeholder="比如：今天路过那家店，没停下来。"
+      placeholder-style="color:#b8b1a4"
+      auto-height
+      maxlength="200"
+      bindinput="onDiaryInput"
+      bindblur="onDiaryBlur"
+    ></textarea>
+
+    <button class="btn btn-primary diary-save" bindtap="onDiarySave">
+      {{diarySaved ? '更 新 今 天 这 一 句' : '存 下 今 天 这 一 句'}}
+    </button>
+
+    <view class="diary-foot">
+      <view class="diary-count">{{diaryCount > 0 ? '已经写了 ' + diaryCount + ' 天' : '写完就会留在这里'}}</view>
+      <view class="diary-acts">
+        <view class="diary-link" wx:if="{{diarySaved}}" bindtap="onDiaryDeleteToday">删掉今天这一句</view>
+        <view class="diary-link" wx:if="{{diaryList.length > 0}}" bindtap="onToggleDiary">
+          {{diaryOpen ? '收起往期' : '往期 ' + diaryList.length + ' 天'}}
+        </view>
+      </view>
+    </view>
+
+    <view class="diary-list" wx:if="{{diaryOpen}}">
+      <view class="diary-item" wx:for="{{diaryList}}" wx:key="d" data-d="{{item.d}}" bindtap="onCalTap">
+        <view class="di-d">{{item.label}}</view>
+        <view class="di-text">{{item.text}}</view>
+      </view>
+    </view>
+  </view>
+
   <view class="card">
     <view class="cap">戒断刻度</view>
     <view class="ms-track">
@@ -51,6 +90,38 @@
     <view class="ms-next">{{nextNote}}</view>
   </view>
 
+  <!-- v0.9.12 · 打卡日历：把「坚持」变成看得见的东西 -->
+  <view class="card cal-card">
+    <view class="cal-head">
+      <view class="cap">打卡日历</view>
+      <view class="cal-nav">
+        <view class="cal-arrow {{canPrev ? '' : 'off'}}" bindtap="onCalPrev">‹</view>
+        <view class="cal-ym">{{calLabel}}</view>
+        <view class="cal-arrow {{canNext ? '' : 'off'}}" bindtap="onCalNext">›</view>
+      </view>
+    </view>
+
+    <view class="cal-week">
+      <view class="cal-wd" wx:for="{{weekNames}}" wx:key="*this">{{item}}</view>
+    </view>
+
+    <view class="cal-grid">
+      <view class="{{item.cls}}" wx:for="{{calCells}}" wx:key="k" data-d="{{item.d}}" bindtap="onCalTap">
+        <view class="cal-d" wx:if="{{!item.blank}}">{{item.d}}</view>
+      </view>
+    </view>
+
+    <view class="cal-legend">
+      <view class="lg"><view class="lg-dot on"></view>撑住</view>
+      <view class="lg"><view class="lg-dot rel"></view>断过</view>
+      <view class="lg"><view class="lg-dot today"></view>今天</view>
+      <view class="lg"><view class="lg-dot note"></view>写过日记</view>
+    </view>
+
+    <view class="cal-foot">{{calFoot}}</view>
+    <view class="cal-hint">有日记的日子点一下就能回看</view>
+  </view>
+
   <view class="acts">
     <view class="act" bindtap="onShowBottle">
       <view class="act-t">留白瓶</view>
@@ -60,6 +131,12 @@
       <view class="act-t">找小白聊聊</view>
       <view class="act-d">难过、想ta、睡不着</view>
     </view>
+  </view>
+
+  <!-- v0.9.13 · 流量主广告位：utils/config.js 里的 AD_UNIT_ID 配了才出现。
+       没配时这一整块不存在（不占位、不留白），不会让人以为页面缺了东西。 -->
+  <view class="ad-wrap" wx:if="{{adShow}}">
+    <ad unit-id="{{adUnitId}}" binderror="onAdError"></ad>
   </view>
 
   <!-- 打卡后的肯定弹层 -->

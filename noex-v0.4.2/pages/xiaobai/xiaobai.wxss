@@ -297,3 +297,49 @@
   border-color: transparent transparent transparent #faf9f4;
   margin-left: 4rpx;
 }
+
+/* ───────── v0.9.14 · 小白使用说明 ─────────
+   第一次进来自动展开一次，看完点「收起」就不再弹。
+   放在聊天头下面而不是做成弹层：说明本身就是「了解小白」的一部分，
+   放这儿不用多点一次，也不会像弹层那样打断人。
+   限高 + 可滚是兜底：极端小屏下不把聊天区挤没。 */
+.xb-help {
+  flex-shrink: 0;
+  margin: 0 44rpx 20rpx;
+}
+.xb-help-toggle {
+  font-size: 24rpx;
+  color: var(--accent);
+  padding: 6rpx 0;
+}
+.xb-help-body {
+  margin-top: 12rpx;
+  padding: 26rpx 28rpx;
+  background: #faf7f1;
+  border: 1rpx solid var(--line);
+  border-radius: 20rpx;
+  box-sizing: border-box;
+  max-height: 46vh;
+  overflow-y: auto;
+}
+.xh-sec {
+  margin-bottom: 22rpx;
+}
+.xh-t {
+  font-size: 25rpx;
+  color: var(--ink);
+  font-weight: 500;
+  margin-bottom: 6rpx;
+}
+.xh-line {
+  font-size: 25rpx;
+  color: var(--sub);
+  line-height: 1.8;
+}
+.xh-foot {
+  padding-top: 20rpx;
+  border-top: 1rpx dashed var(--line);
+  font-size: 23rpx;
+  color: var(--faint);
+  line-height: 1.7;
+}

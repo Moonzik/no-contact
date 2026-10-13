@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NOEX 自测报告 · 交付包体检</title>
+<style>
+  :root {
+    --bg: #faf9f4;
+    --card: #ffffff;
+    --ink: #26231e;
+    --sub: #8f887b;
+    --faint: #b8b1a4;
+    --line: #e9e4d8;
+    --accent: #b5623c;
+    --accent-soft: #f5ece6;
+    --serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 48px 20px 80px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    line-height: 1.85;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; }
+  h1 { font-family: var(--serif); font-size: 30px; font-weight: 500; letter-spacing: 3px; margin: 0 0 8px; }
+  .sub { color: var(--faint); font-size: 14px; letter-spacing: 1px; margin-bottom: 40px; }
+  h2 { font-family: var(--serif); font-size: 21px; font-weight: 500; letter-spacing: 2px; margin: 48px 0 16px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 16px; font-weight: 600; margin: 28px 0 10px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 26px 28px; margin-bottom: 16px; }
+  .hero { background: var(--accent-soft); border-color: var(--accent-soft); }
+  p { margin: 10px 0; }
+  ul, ol { margin: 10px 0; padding-left: 22px; }
+  li { margin: 6px 0; }
+  code { background: #f2efe7; border-radius: 5px; padding: 2px 7px; font-family: ui-monospace, Consolas, monospace; font-size: 14px; }
+  .k { font-family: ui-monospace, Consolas, monospace; font-size: 14px; color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 15px; }
+  th, td { text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--line); }
+  th { color: var(--sub); font-weight: 500; font-size: 14px; letter-spacing: 1px; }
+  .green { color: #3f7a4d; font-weight: 600; }
+  .red { color: #a8402f; font-weight: 600; }
+  .muted { color: var(--sub); font-size: 15px; }
+  .tag { display: inline-block; font-size: 12px; letter-spacing: 1px; padding: 2px 9px; border-radius: 999px; background: #eef3ec; color: #3f7a4d; vertical-align: middle; }
+  .tag.warn { background: #f7ede8; color: #a8402f; }
+  .stamp { color: var(--faint); font-size: 13px; letter-spacing: 1px; margin-bottom: 28px; }
+  .big { font-family: var(--serif); font-size: 34px; letter-spacing: 1px; }
+  .big.g { color: #3f7a4d; }
+  hr { border: none; border-top: 1px solid var(--line); margin: 40px 0; }
+  .foot { color: var(--faint); font-size: 13px; text-align: center; margin-top: 56px; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>交付包体检</h1>
+  <div class="sub">NOEX 自测报告 · 14 个测试套件 · 1264 项</div>
+  <div class="stamp">2026-09-11 · 结论：代码逻辑全绿，交付包卫生查出 3 个真问题，已全部修掉</div>
+
+  <div class="card hero">
+    <p style="margin-top:0"><b>一句话：小程序本身没有逻辑问题，问题都在「交付包里混进了不该给审核员看的东西」。</b></p>
+    <p style="margin-bottom:0">其中最要紧的一条——有 <b>9 份开发说明文档会被打进上传包</b>，里面包含《提审合规说明》《个体户主体适配说明》这类内部口径。你要是没发现就直接提审，审核员解包就能看到。现在已经全部排除。</p>
+  </div>
+
+  <div class="card">
+    <div class="big g">1264 / 1264</div>
+    <p class="muted" style="margin-top:0">14 个套件全部通过。原来的 1254 项 + 新增检查 3 项 + 新增套件 7 项。</p>
+    <table>
+      <tr><th>套件</th><th>管什么</th><th>项数</th></tr>
+      <tr><td>audit-platform</td><td>真机兼容 / 审核视角 / 主包体积</td><td>18 <span class="tag">新增3项</span></td></tr>
+      <tr><td>audit-static</td><td>路径、事件绑定、资源引用</td><td>193</td></tr>
+      <tr><td>e2e-test</td><td>页面流程真跑一遍</td><td>135</td></tr>
+      <tr><td>integration-test</td><td>发消息链路 / 打卡链路</td><td>26</td></tr>
+      <tr><td>wx-test</td><td>微信 API 与工具函数</td><td>94</td></tr>
+      <tr><td>ai-test</td><td>AI 链路与错误分类</td><td>128</td></tr>
+      <tr><td>repeat-test</td><td>连续对话不重复</td><td>48</td></tr>
+      <tr><td>nodrama-test</td><td>不强行煽情 / 不串台</td><td>130</td></tr>
+      <tr><td>privacy-test</td><td>隐私授权弹窗</td><td>30</td></tr>
+      <tr><td>launch-kit-test</td><td>协议 / 反馈 / 分享中性</td><td>117</td></tr>
+      <tr><td>calendar-test</td><td>打卡日历算法</td><td>57</td></tr>
+      <tr><td>gap2-test</td><td>日记 / 备份 / 换段 / 提醒</td><td>168</td></tr>
+      <tr><td>robust-test</td><td>异常兜底 / 小白说明</td><td>113</td></tr>
+      <tr><td>sync-check</td><td>三目录同步一致性</td><td>7 <span class="tag">新套件</span></td></tr>
+    </table>
+  </div>
+
+  <h2>查出的三个问题</h2>
+
+  <div class="card">
+    <h3>1 · 九份开发文档会随上传包交给审核员 <span class="tag warn">已修 · 影响提审</span></h3>
+    <p>微信上传小程序的打包规则，是由 <code>project.config.json</code> 里的 <code>packOptions.ignore</code> 清单决定的。<b>问题在于这份清单只登记到 v0.9.5 的文档</b>——那之后陆续新增的说明文档一份都没登记，等于全部默认进包。</p>
+    <p>漏掉的九份：</p>
+    <ul>
+      <li>NOEX操作指南 · v0.9.6提审合规说明 · 个体户主体适配说明</li>
+      <li>开启影子智能体 · 上线三件套说明 · 打卡日历效果预览</li>
+      <li>缺口二说明 · 稳定与上手说明 · 隐私指引填写指南</li>
+      <li>外加 README.md</li>
+    </ul>
+    <p class="muted">这份文档本身不会让审核被拒，但会把你的合规思路、主体变更策略、内部约定一并摊开给审核员看。属于「没必要冒的风险」。</p>
+    <p><b>修法：</b>忽略清单从 12 条补到 23 条，根目录 18 份 .html / .md 现在全部排除。</p>
+    <p style="margin-bottom:0"><b>附带收益：</b>真实打包体积 <span class="k">612 KB → 437 KB</span>，省下 175 KB。</p>
+  </div>
+
+  <div class="card">
+    <h3>2 · 两个临时调试脚本残留 <span class="tag warn">已修</span></h3>
+    <p>开发过程中留下的一次性小脚本，其中 <code>_test/_chk.js</code> 还带着语法错误（正则转义写错），任何"检查全部 js 语法"的动作都会在这里报假警。</p>
+    <ul>
+      <li><code>miniprogram/_tmp_check.js</code></li>
+      <li><code>noex-v0.4.2/_test/_chk.js</code></li>
+    </ul>
+    <p style="margin-bottom:0">已删除，原件留在临时目录 <code>/tmp/noex_trash</code> 以防万一。</p>
+  </div>
+
+  <div class="card">
+    <h3>3 · 说明文档被编辑器注入了大量冗余属性 <span class="tag warn">已清</span></h3>
+    <p>部分 HTML 被编辑器打开保存时，每个标签上都被塞了一个 <code>data-page-node-id="…"</code>。不影响渲染，但单份文件能膨胀一半以上。</p>
+    <table>
+      <tr><th>文件</th><th>清理前</th><th>清理后</th></tr>
+      <tr><td>NOEX操作指南.html</td><td>40 KB</td><td>30 KB</td></tr>
+      <tr><td>开启影子智能体.html</td><td>15.6 KB</td><td>11.1 KB</td></tr>
+      <tr><td>AI接入指南.html</td><td>36 KB</td><td>21 KB</td></tr>
+      <tr><td>小红书账号简介.html</td><td>9.4 KB</td><td>7.7 KB</td></tr>
+    </table>
+    <p style="margin-bottom:0">三个项目目录 + 桌面上的说明文档，一共清掉约 <b>2800 处</b>。清理只删属性、不动正文一个字。</p>
+  </div>
+
+  <h2>顺带修好的一个测试缺陷</h2>
+  <div class="card">
+    <p style="margin-top:0">原来的「主包体积」检查是把项目里<b>所有文件</b>统统加起来算的，包括被忽略的文档、云函数、测试目录。结果是：数字偏大，而且正好<b>把"文档会进包"这个问题掩盖掉了</b>——因为它压根没看忽略清单。</p>
+    <p>现在改成按 <code>packOptions.ignore</code> 的真实口径计算，并新增第 11 项检查：</p>
+    <ul>
+      <li>根目录任何 <code>.html</code> / <code>.md</code> 未被忽略 → 直接报错，列出文件名</li>
+      <li><code>_test/</code> 与 <code>cloudfunctions/</code> 必须始终排除</li>
+    </ul>
+    <p style="margin-bottom:0" class="muted">以后再加说明文档，忘了登记就会被测试拦下来，不会再悄悄进包。</p>
+  </div>
+
+  <h2>新增第 14 个套件：同步一致性</h2>
+  <div class="card">
+    <p style="margin-top:0">项目有三份目录（源码 / 交付版 / 工具导入副本），过去反复栽在「改了源码忘了同步交付版」上。所以单独立一个套件盯着：</p>
+    <ol>
+      <li><b>文件集合</b>：源码里有的文件，交付版必须都有</li>
+      <li><b>逐字节内容</b>：除豁免清单外必须完全一致</li>
+      <li><b>AI 开关</b>⚠️ 交付版的 <code>ai-config.js</code> 必须是 <code>provider:'cloud'</code>。源码那份是 <code>'off'</code>——同步时一旦把源码的覆盖过去，<b>AI 会被静默关掉</b>，小白退化成固定话术，而且表面上不报任何错。这是最危险的一种失误，现在有断言兜着。</li>
+      <li><b>无残留</b>：交付包里不许有一次性调试脚本</li>
+    </ol>
+    <p style="margin-bottom:0" class="muted">当前结果：三目录除了 <code>ai-config.js</code> 与两个配置文件（按设计就该不同）之外，全部逐字节一致。</p>
+  </div>
+
+  <hr>
+
+  <h2>你需要做什么</h2>
+  <div class="card hero">
+    <p style="margin-top:0"><b>什么都不用做。</b></p>
+    <p style="margin-bottom:0">这次改的全是交付包侧的东西：打包忽略清单、说明文档、测试脚本。<b>小程序代码一行没动，云函数不用重新部署</b>。你在开发者工具里重新编译一次，看到的效果和之前一样。</p>
+  </div>
+
+  <div class="foot">NOEX · 自测报告 · 2026-09-11</div>
+
+</div>
+</body>
+</html>

@@ -3,6 +3,8 @@ const storage = require('../../utils/storage.js');
 const util = require('../../utils/util.js');
 const user = require('../../utils/user.js');
 const ai = require('../../utils/ai.js');
+const notify = require('../../utils/notify.js');
+const errlog = require('../../utils/errlog.js');
 
 Page({
   data: {
@@ -23,6 +25,27 @@ Page({
     nickSupported: true,
     showLogout: false,
     showClear: false,
+    showFeedback: false,
+    /* v0.9.13 缺口二 · 备份还原 */
+    showImport: false,
+    importSummary: null,     // 校验通过后的数据摘要
+    importRaw: '',           // 校验通过后的原始 JSON 串（确认时才落盘）
+    importErr: '',           // 校验失败的说明文案
+    prevExists: false,       // 是否存在「导入前快照」（可撤销）
+    /* v0.9.13 缺口二 · 换断联对象 */
+    showNewSeg: false,
+    showSegs: false,
+    segCount: 0,
+    segList: [],
+    /* v0.9.13 缺口二 · 打卡提醒 */
+    showReminder: false,
+    reminderOn: false,
+    reminderReady: false,    // utils/config.js 里有没有填模板 ID
+    /* v0.9.14 · 运行记录（本地异常日志）
+       刻意只在「有记录」时才出现——没出过错的时候，普通用户不该看到"错误日志"这种东西 */
+    errCount: 0,
+    showErrs: false,
+    errText: '',
     devtools: false,
     version: ''
   },
@@ -91,7 +114,14 @@ Page({
       exName: S.exName,
       avatar: avatar,
       nick: nick || '断联中',
-      logged: !!(nick || avatar)
+      logged: !!(nick || avatar),
+      /* v0.9.13：导入备份的撤销入口只在有快照时出现 */
+      prevExists: !!storage.loadPrev(),
+      segCount: Array.isArray(S.segments) ? S.segments.length : 0,
+      reminderOn: !!(S.reminder && S.reminder.on),
+      reminderReady: notify.configured(),
+      /* v0.9.14：有异常记录时才显示入口（入口本身就是「坏了」的信号） */
+      errCount: errlog.count()
     });
   },
 
@@ -325,6 +355,8 @@ Page({
     S.onboarded = false;
     S.user = null;
     storage.save(S);
+    /* v0.9.14：「清空所有数据」要名副其实——运行记录也是数据，一并清掉 */
+    errlog.clear();
     this.setData({ showClear: false });
     wx.showToast({ title: '已清空，重新开始', icon: 'none' });
     /* 退出后回 onboard */
@@ -346,6 +378,317 @@ Page({
     } else {
       wx.showToast({ title: '当前基础库版本不支持', icon: 'none' });
     }
+  },
+
+  /* 用户服务协议（我们自己的条款，写在代码里；和微信托管的隐私指引是两份东西） */
+  onOpenAgreement() {
+    wx.navigateTo({ url: '/pages/agreement/agreement' });
+  },
+
+  onOpenFeedback() {
+    this.setData({ showFeedback: true });
+  },
+
+  onCloseFeedback() {
+    this.setData({ showFeedback: false });
+  },
+
+  /* 备用反馈路径：把「版本 / AI 模式 / 机型」这些定位必需的信息拼成模板复制走。
+     这样即使客服会话还没在后台配好，用户手上也有一份完整的问题信息可以发出来。 */
+  onCopyFeedback() {
+    let sys = '';
+    try {
+      const info = wx.getSystemInfoSync();
+      sys = [info.platform, info.system, info.model].filter(Boolean).join(' / ');
+    } catch (e) { /* 模拟器可能取不到 */ }
+
+    let day = 1;
+    try { day = util.dayNum(storage.load().startDate); } catch (e) { /* ignore */ }
+
+    const data = [
+      '【问题描述】（简单说说发生了什么）',
+      '',
+      '【怎么出现的】1.  2.  3.',
+      '',
+      '【希望它变成什么样】',
+      '',
+      '--- 以下信息自动生成，方便定位 ---',
+      '版本：v' + (this.readVersion() || '未知'),
+      'AI 模式：' + ai.mode(),
+      '使用天数：第 ' + day + ' 天',
+      '设备：' + (sys || '未知'),
+      '时间：' + util.todayStr()
+    ].join('\n');
+
+    /* setClipboardData 属于隐私接口，隐私指引没过审时会 fail —— 不能让它静默失败 */
+    wx.setClipboardData({
+      data: data,
+      success: () => {
+        wx.showToast({ title: '已复制，粘贴到留言里就行', icon: 'none', duration: 2200 });
+      },
+      fail: () => {
+        wx.showToast({ title: '复制失败，可以截图发给我们', icon: 'none', duration: 2200 });
+      }
+    });
+  },
+
+  /* ───────── v0.9.13 缺口二 · 备份还原 ─────────
+     导入这件事最大的风险是「把现有数据覆盖掉」，所以流程刻意做成三步：
+     读来源 → 校验 + 展示摘要（此时还没写任何东西）→ 用户确认才落盘。
+     落盘前再自动快照一份当前数据，事后能一键撤销。 */
+
+  onImportBackup() {
+    this.setData({ showImport: true, importSummary: null, importErr: '', importRaw: '' });
+  },
+
+  onCloseImport() {
+    this.setData({ showImport: false, importSummary: null, importErr: '', importRaw: '' });
+  },
+
+  onImportFromClipboard() {
+    if (typeof wx.getClipboardData !== 'function') {
+      this._importFail('当前微信版本读不了剪贴板');
+      return;
+    }
+    wx.getClipboardData({
+      success: (r) => this._checkImport((r && r.data) || ''),
+      /* 剪贴板属隐私接口：隐私指引没过审时会直接 fail，得说清楚 */
+      fail: () => this._importFail('读不到剪贴板。可先从「导出数据」把备份存成文件，再用「从聊天选文件」。')
+    });
+  },
+
+  onImportFromFile() {
+    if (typeof wx.chooseMessageFile !== 'function') {
+      this._importFail('当前微信版本不支持选文件');
+      return;
+    }
+    wx.chooseMessageFile({
+      count: 1,
+      type: 'file',
+      extension: ['json', 'txt'],
+      success: (r) => {
+        const f = r && r.tempFiles && r.tempFiles[0];
+        if (!f || !f.path) { this._importFail('没选到文件'); return; }
+        try {
+          wx.getFileSystemManager().readFile({
+            filePath: f.path,
+            encoding: 'utf8',
+            success: (res) => this._checkImport(res && res.data),
+            fail: () => this._importFail('这个文件读不出来')
+          });
+        } catch (e) {
+          this._importFail('这个文件读不出来');
+        }
+      },
+      fail: () => { /* 用户取消，不提示 */ }
+    });
+  },
+
+  _importFail(msg) {
+    this.setData({ importErr: msg, importSummary: null, importRaw: '' });
+  },
+
+  /* 校验 + 生成摘要。这一步不写 storage，所以用户看到摘要时数据还是原来的 */
+  _checkImport(raw) {
+    const v = storage.validateBackup(raw);
+    if (!v.ok) {
+      const map = {
+        empty: '剪贴板是空的，先把备份复制进来',
+        parse: '这段内容不是有效的备份（JSON 解析失败），可能复制少了字符',
+        shape: '备份结构不对，可能不是本小程序的备份',
+        not_backup: '看起来不是本小程序的备份文件'
+      };
+      this._importFail(map[v.reason] || '这份备份认不出来');
+      return;
+    }
+    this.setData({
+      importErr: '',
+      importRaw: typeof raw === 'string' ? raw : JSON.stringify(raw),
+      importSummary: v.summary
+    });
+  },
+
+  onImportConfirm() {
+    const v = storage.validateBackup(this.data.importRaw);
+    if (!v.ok) { this._importFail('这份备份认不出来'); return; }
+    /* 落盘前先把当前数据整体快照一份，导入后悔了还能退回来 */
+    storage.snapshotPrev(storage.load());
+    storage.applyBackup(v.data);
+    this.setData({ showImport: false, importSummary: null, importRaw: '' });
+    wx.showToast({ title: '已恢复。想反悔可以「撤销」', icon: 'none', duration: 2400 });
+    this.refresh();
+  },
+
+  onImportUndo() {
+    const raw = storage.loadPrev();
+    const v = storage.validateBackup(raw);
+    if (!v.ok) {
+      storage.clearPrev();
+      wx.showToast({ title: '没有可撤销的备份', icon: 'none' });
+      this.refresh();
+      return;
+    }
+    wx.showModal({
+      title: '撤销上次导入？',
+      content: '会回到导入之前那份数据，导入进来的那份会被换掉。',
+      confirmText: '撤销',
+      success: (r) => {
+        if (!r.confirm) return;
+        storage.applyBackup(v.data);
+        storage.clearPrev();
+        wx.showToast({ title: '已回到导入前的数据', icon: 'none' });
+        this.refresh();
+      }
+    });
+  },
+
+  /* ───────── v0.9.13 缺口二 · 换断联对象 ─────────
+     计数要归零、影子和代号要跟着换人走，但日记、留白瓶、小白对话是「你自己」的东西，
+     不属于某一个 TA，所以一个都不动。上一段整段归档进 segments，能回看。 */
+
+  onNewSegment() {
+    this.setData({ showNewSeg: true });
+  },
+
+  onCloseNewSeg() {
+    this.setData({ showNewSeg: false });
+  },
+
+  onNewSegmentConfirm() {
+    const S = storage.load();
+    const day = util.dayNum(S.startDate);
+    if (!Array.isArray(S.segments)) S.segments = [];
+    /* 归档：只存摘要 + 日期列表，不存对话内容（避免 storage 膨胀） */
+    S.segments.push({
+      exName: S.exName || '',
+      startDate: S.startDate,
+      endDate: util.todayStr(),
+      days: day,
+      checkCount: S.checkCount || 0,
+      relapses: S.relapses || 0,
+      checkLog: (S.checkLog || []).slice(),
+      relapseLog: (S.relapseLog || []).slice(),
+      archivedAt: Date.now()
+    });
+
+    S.exName = '';
+    S.startDate = util.todayStr();
+    S.lastCheckIn = '';
+    S.checkCount = 0;
+    S.relapses = 0;
+    S.checkLog = [];
+    S.relapseLog = [];
+    /* 影子模仿的是上一个人：换段必须清掉，让他重新导入聊天记录（不清会认错人） */
+    S.shadow = storage.defaultState().shadow;
+    storage.save(S);
+
+    this.setData({ showNewSeg: false });
+    wx.showToast({ title: '新的一段，从今天开始', icon: 'none', duration: 2200 });
+    this.refresh();
+  },
+
+  onShowSegs() {
+    const S = storage.load();
+    const list = (S.segments || [])
+      .slice()
+      .reverse()
+      .map((g) => ({
+        name: g.exName || '（没有代号）',
+        range: util.mdd(g.startDate) + ' – ' + util.mdd(g.endDate),
+        days: g.days || 0,
+        note: '撑住 ' + (g.checkCount || 0) + ' 次' +
+          ((g.relapses || 0) > 0 ? ' · 断过 ' + g.relapses + ' 次' : ' · 一次没断')
+      }));
+    this.setData({ showSegs: true, segList: list });
+  },
+
+  onCloseSegs() {
+    this.setData({ showSegs: false });
+  },
+
+  /* ───────── v0.9.13 缺口二 · 打卡提醒 ─────────
+     小程序没有本地定时通知，只能走微信订阅消息（用户授权 → 云函数按模板发）。
+     模板 ID 要先去 mp 后台申请，放在 utils/config.js；没配就如实说明，不假装订阅成功。 */
+
+  onReminder() {
+    if (!notify.configured()) {
+      this.setData({ showReminder: true });
+      return;
+    }
+    if (!notify.supported()) {
+      wx.showToast({ title: '当前微信版本不支持提醒', icon: 'none' });
+      return;
+    }
+    notify.request((ok, reason) => {
+      if (ok) {
+        const S = storage.load();
+        S.reminder = { on: true, at: Date.now() };
+        storage.save(S);
+        wx.showToast({ title: '好了，明天会提醒你', icon: 'none', duration: 2200 });
+        this.refresh();
+        return;
+      }
+      if (reason === 'deny') {
+        wx.showToast({ title: '没关系，想开的时候再来', icon: 'none', duration: 2200 });
+        return;
+      }
+      wx.showToast({ title: '提醒没开成，回头再试', icon: 'none', duration: 2200 });
+    });
+  },
+
+  onCloseReminder() {
+    this.setData({ showReminder: false });
+  },
+
+  /* ── v0.9.14 · 运行记录（本地异常日志）─────────────
+     它是一个「出问题才会出现」的入口：errCount 为 0 时，整块在 wxml 里就不渲染。
+     文案刻意不吓人——不写「错误」「崩溃」，写「运行记录」。用户看到这个，
+     第一反应应该是"哦，帮我记着呢"，而不是"我的手机是不是中毒了"。 */
+
+  onShowErrs() {
+    this.setData({ showErrs: true, errText: errlog.text() });
+  },
+
+  onCloseErrs() {
+    this.setData({ showErrs: false });
+  },
+
+  onCopyErrs() {
+    const data = this.data.errText || errlog.text();
+    wx.setClipboardData({
+      data: data,
+      success: () => {
+        /* setClipboardData 成功后微信自己会弹「内容已复制」，等它显示完再补一句去哪儿发 */
+        setTimeout(() => {
+          wx.showToast({ title: '去「意见反馈」粘贴发给我就行', icon: 'none', duration: 2600 });
+        }, 1200);
+      },
+      fail: () => {
+        /* 隐私指引未过审时剪贴板接口会被拦，这时让用户手动长按选 */
+        wx.showModal({
+          title: '复制没成功',
+          content: '可以长按上面的文字，手动选中复制。',
+          showCancel: false,
+          confirmText: '知道了'
+        });
+      }
+    });
+  },
+
+  onClearErrs() {
+    wx.showModal({
+      title: '清掉这些记录？',
+      content: '清了之后就看不到之前出的问题是怎么发生的了。如果小程序一直正常，清掉没影响。',
+      confirmText: '清掉',
+      cancelText: '先留着',
+      success: (r) => {
+        if (!r.confirm) return;
+        errlog.clear();
+        this.setData({ showErrs: false });
+        this.refresh();
+        wx.showToast({ title: '已清掉', icon: 'none' });
+      }
+    });
   },
 
   /* wxml 里 catchtap="noop" 的空处理器（弹窗内层阻止冒泡用） */
